@@ -470,11 +470,11 @@
                 </div>
 
                 <div class="hero-cta">
-                    <button class="play-btn" type="button" onclick="openDonate()" aria-label="Donate">
+                    <button class="play-btn" type="button" onclick="startDonateDirect()" aria-label="Donate">
                         <span class="material-symbols-outlined">play_arrow</span>
                     </button>
                     <span class="cta-line" aria-hidden="true"></span>
-                    <a class="cta-text" href="javascript:void(0)" onclick="openDonate()">Donate <small>now</small></a>
+                    <a class="cta-text" href="javascript:void(0)" onclick="startDonateDirect()">Donate <small>now</small></a>
                 </div>
             </div>
 
@@ -887,28 +887,20 @@
             m.setAttribute('aria-hidden', 'true');
         }
 
-        async function startDonate() {
-            const btn = document.getElementById('don-btn');
-            const err = document.getElementById('don-err');
-            err.classList.remove('show');
-
-            const name = document.getElementById('don-name').value.trim();
-            const phone = document.getElementById('don-phone').value.trim();
-            const email = document.getElementById('don-email').value.trim();
-            const amountInput = document.getElementById('don-amount').value;
-            const amount = amountInput ? parseInt(amountInput, 10) : null;
-
-            // Name and Amount are now optional to allow direct Snippe custom amount entry
-            // but we still validate if they ARE provided.
-            if (amount && amount < 1000) {
-                err.textContent = 'Minimum donation amount is TZS 1,000.';
-                err.classList.add('show');
-                return;
+        async function startDonateDirect() {
+            // This function is called directly when "Donate" is clicked
+            // It bypasses the local modal and goes straight to Snippe
+            const btn = document.querySelector('.play-btn');
+            const ctaText = document.querySelector('.cta-text');
+            
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span>';
             }
-
-            btn.disabled = true;
-            btn.style.opacity = '0.75';
-            btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
+            if (ctaText) {
+                ctaText.innerHTML = 'Processing...';
+                ctaText.style.pointerEvents = 'none';
+            }
 
             try {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -920,30 +912,38 @@
                         'X-CSRF-TOKEN': token,
                     },
                     body: JSON.stringify({
-                        name: name || null,
-                        phone: phone || null,
-                        email: email || null,
-                        amount: amount || null,
+                        name: null,
+                        phone: null,
+                        email: null,
+                        amount: null, // Snippe will handle custom amount entry
                     }),
                 });
 
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.checkout_url) {
-                    err.textContent = data.message || 'Unable to start donation. Please try again.';
-                    err.classList.add('show');
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                    btn.innerHTML = '<span class="material-symbols-outlined">lock</span> Continue';
+                    alert(data.message || 'Unable to start donation. Please try again.');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
+                    }
+                    if (ctaText) {
+                        ctaText.innerHTML = 'Donate <small>now</small>';
+                        ctaText.style.pointerEvents = 'auto';
+                    }
                     return;
                 }
 
                 window.location.href = data.checkout_url;
             } catch (e) {
-                err.textContent = 'Unable to start donation. Please try again.';
-                err.classList.add('show');
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.innerHTML = '<span class="material-symbols-outlined">lock</span> Continue';
+                alert('Unable to start donation. Please try again.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
+                }
+                if (ctaText) {
+                    ctaText.innerHTML = 'Donate <small>now</small>';
+                    ctaText.style.pointerEvents = 'auto';
+                }
             }
         }
 
