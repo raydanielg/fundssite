@@ -53,12 +53,15 @@ class DonationController extends Controller
             'max_amount' => $maxAmount,
             'customer' => [
                 'name' => $data['name'] ?: 'Donor',
+                'phone' => $data['phone'] ?: null,
+                'email' => $data['email'] ?: null,
             ],
             'redirect_url' => url('/donate/return?session_id={session_id}'),
             'webhook_url' => $webhookUrl,
             'description' => 'Donation for Cliff',
             'metadata' => [
                 'source' => 'landing',
+                'customer_name' => $data['name'] ?: 'Donor',
             ],
             'expires_in' => 3600,
             'display' => [
@@ -75,7 +78,7 @@ class DonationController extends Controller
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
             ])
-            ->post('https://api.snippe.sh/v1/sessions', $payload);
+            ->post(rtrim($baseUrl, '/') . '/v1/sessions', $payload);
 
         if (!$res->ok()) {
             \Log::error('Snippe Session Creation Failed', [
@@ -104,9 +107,9 @@ class DonationController extends Controller
             'status' => $sess['status'] ?? 'pending',
             'amount' => (int) ($sess['amount'] ?? ($data['amount'] ?? 0)),
             'currency' => $sess['currency'] ?? 'TZS',
-            'customer_name' => $data['name'] ?? 'Donor',
-            'customer_phone' => $data['phone'] ?? null,
-            'customer_email' => $data['email'] ?? null,
+            'customer_name' => $data['name'] ?: 'Donor',
+            'customer_phone' => $data['phone'] ?: null,
+            'customer_email' => $data['email'] ?: null,
             'checkout_url' => $sess['checkout_url'] ?? null,
             'payment_link_url' => $sess['payment_link_url'] ?? null,
             'raw_payload' => $sess,
