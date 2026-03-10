@@ -23,11 +23,13 @@ class SnippeWebhookController extends Controller
             return response()->json(['message' => 'Invalid signature.'], 401);
         }
 
-        $event = (string) $request->header('X-Webhook-Event', '');
         $data = $request->json()->all();
-
+        $event = (string) $request->header('X-Webhook-Event', '');
+        
+        // Snippe webhooks usually have a type or event name
         $type = $data['type'] ?? $event;
-        $ref = $data['data']['reference'] ?? null;
+        $sessionData = $data['data'] ?? [];
+        $ref = $sessionData['reference'] ?? null;
 
         if (!$ref) {
             return response()->json(['message' => 'Missing reference.'], 422);
@@ -35,24 +37,26 @@ class SnippeWebhookController extends Controller
 
         $tx = DonationTransaction::where('reference', $ref)->first();
         if ($tx) {
-            $status = $data['data']['status'] ?? $tx->status;
-            $paidAt = null;
-            if ($status === 'completed') {
-                $completedAt = $data['data']['completed_at'] ?? null;
+            $status = $sessionData['status'] ?? $tx->status;
+            $paidAt = $tx->paid_at;
+            
+            if ($status === 'completed' && !$tx->paid_at) {
+                $completedAt = $sessionData['completed_at'] ?? null;
                 $paidAt = $completedAt ? Carbon::parse($completedAt) : now();
             }
 
-            $amountValue = $data['data']['amount']['value'] ?? null;
-            $amountCurrency = $data['data']['amount']['currency'] ?? null;
+            $amountData = $sessionData['amount'] ?? [];
+            $amountValue = $amountData['value'] ?? null;
+            $amountCurrency = $amountData['currency'] ?? null;
 
             $tx->update([
                 'status' => $status,
-                'paid_at' => $paidAt ?? $tx->paid_at,
+                'paid_at' => $paidAt,
                 'amount' => is_numeric($amountValue) ? (int) $amountValue : $tx->amount,
                 'currency' => $amountCurrency ?: $tx->currency,
-                'external_reference' => $data['data']['external_reference'] ?? $tx->external_reference,
+                'external_reference' => $sessionData['external_reference'] ?? $tx->external_reference,
                 'webhook_event' => $type ?: $tx->webhook_event,
-                'failure_reason' => $data['data']['failure_reason'] ?? $tx->failure_reason,
+                'failure_reason' => $sessionData['failure_reason'] ?? $tx->failure_reason,
                 'raw_payload' => $data,
             ]);
         }

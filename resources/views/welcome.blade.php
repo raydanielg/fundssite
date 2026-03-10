@@ -374,6 +374,11 @@
         .tbl tr:hover td { background: rgba(46,158,114,0.03); }
         .tbl-wrap { max-height: 420px; overflow-y: auto; }
 
+        .modal-success { margin-top: 14px; padding: 18px; background: rgba(46,158,114,0.08); border: 1px solid rgba(46,158,114,0.2); border-radius: 14px; text-align: center; display: none; }
+        .modal-success.show { display: block; animation: fadeUp 0.4s ease both; }
+        .modal-success .icon { font-size: 2.5rem; color: var(--emerald); margin-bottom: 10px; }
+        .modal-success h4 { font-family: var(--serif); color: var(--deep); margin-bottom: 6px; }
+        .modal-success p { font-size: 0.85rem; color: var(--muted); margin-bottom: 0; }
         .hidden { display: none; }
         .spin { animation: fa-spin 2s infinite linear; display: inline-block; }
         @keyframes fa-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -495,41 +500,50 @@
                     <span class="material-symbols-outlined">close</span>
                 </button>
                 <div class="modal-title"><span class="material-symbols-outlined">volunteer_activism</span>Donate securely</div>
-                <div class="modal-sub">You will be redirected to Snippe checkout to complete your donation.</div>
+                <div class="modal-sub" id="modal-subtitle">You will be redirected to Snippe checkout to complete your donation.</div>
             </div>
             <div class="modal-body">
-                <div class="mgrid">
-                    <div class="mgrp">
-                        <label>Full name</label>
-                        <input class="minput" id="don-name" type="text" placeholder="e.g. Jane Mwangi" autocomplete="name" />
+                <div id="donate-form">
+                    <div class="mgrid">
+                        <div class="mgrp">
+                            <label>Full name</label>
+                            <input class="minput" id="don-name" type="text" placeholder="e.g. Jane Mwangi" autocomplete="name" />
+                        </div>
+                        <div class="mgrp">
+                            <label>Phone (optional)</label>
+                            <input class="minput" id="don-phone" type="text" placeholder="e.g. +2557XXXXXXXX" autocomplete="tel" />
+                        </div>
                     </div>
-                    <div class="mgrp">
-                        <label>Phone (optional)</label>
-                        <input class="minput" id="don-phone" type="text" placeholder="e.g. +2557XXXXXXXX" autocomplete="tel" />
+                    <div class="mgrid" style="margin-top:12px">
+                        <div class="mgrp">
+                            <label>Amount (TZS)</label>
+                            <input class="minput" id="don-amount" type="number" min="1000" step="1" placeholder="e.g. 50000" />
+                        </div>
+                        <div class="mgrp">
+                            <label>Email (optional)</label>
+                            <input class="minput" id="don-email" type="email" placeholder="e.g. name@example.com" autocomplete="email" />
+                        </div>
                     </div>
-                </div>
-                <div class="mgrid" style="margin-top:12px">
-                    <div class="mgrp">
-                        <label>Amount (TZS)</label>
-                        <input class="minput" id="don-amount" type="number" min="1000" step="1" placeholder="e.g. 50000" />
+
+                    <div class="modal-error" id="don-err">Something went wrong.</div>
+
+                    <div class="modal-actions">
+                        <button class="btn modal secondary" type="button" onclick="closeDonate()">Cancel</button>
+                        <button class="btn modal" type="button" id="don-btn" onclick="startDonate()">
+                            <span class="material-symbols-outlined" style="font-size:1.15rem">lock</span>
+                            Continue
+                        </button>
                     </div>
-                    <div class="mgrp">
-                        <label>Email (optional)</label>
-                        <input class="minput" id="don-email" type="email" placeholder="e.g. name@example.com" autocomplete="email" />
-                    </div>
+
+                    <div class="modal-note">If you use mobile money, you may receive a prompt on your phone to authorize the payment.</div>
                 </div>
 
-                <div class="modal-error" id="don-err">Something went wrong.</div>
-
-                <div class="modal-actions">
-                    <button class="btn modal secondary" type="button" onclick="closeDonate()">Cancel</button>
-                    <button class="btn modal" type="button" id="don-btn" onclick="startDonate()">
-                        <span class="material-symbols-outlined" style="font-size:1.15rem">lock</span>
-                        Continue
-                    </button>
+                <div class="modal-success" id="don-success">
+                    <div class="icon"><span class="material-symbols-outlined">check_circle</span></div>
+                    <h4>Thank you so much!</h4>
+                    <p id="success-msg">Your donation has been received successfully. Every shilling counts in Cliff's journey.</p>
+                    <button class="btn modal primary" style="margin-top:18px; width:100%" onclick="closeDonate()">Close</button>
                 </div>
-
-                <div class="modal-note">If you use mobile money, you may receive a prompt on your phone to authorize the payment.</div>
             </div>
         </div>
     </div>
@@ -847,7 +861,24 @@
             m.classList.add('open');
             m.setAttribute('aria-hidden', 'false');
             document.getElementById('don-err').classList.remove('show');
+            document.getElementById('don-success').classList.remove('show');
+            document.getElementById('donate-form').style.display = 'block';
+            document.getElementById('modal-subtitle').style.display = 'block';
             setTimeout(() => document.getElementById('don-name')?.focus(), 50);
+        }
+
+        function checkStatus() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('status') === 'success') {
+                const m = document.getElementById('donateModal');
+                m.classList.add('open');
+                document.getElementById('donate-form').style.display = 'none';
+                document.getElementById('modal-subtitle').style.display = 'none';
+                document.getElementById('don-success').classList.add('show');
+                
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+            }
         }
 
         function closeDonate() {

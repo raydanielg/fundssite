@@ -53,11 +53,12 @@ class DonationController extends Controller
                 'phone' => $data['phone'] ?? null,
                 'email' => $data['email'] ?? null,
             ],
-            'redirect_url' => url('/donate/return'),
+            'redirect_url' => url('/donate/return?session_id={session_id}'),
             'webhook_url' => url('/webhooks/snippe'),
             'description' => 'Donation for Cliff',
             'metadata' => [
                 'source' => 'landing',
+                'customer_name' => $data['name'] ?? 'Donor',
             ],
             'expires_in' => 3600,
         ];
@@ -103,8 +104,9 @@ class DonationController extends Controller
         ]);
     }
 
-    public function returnPage()
+    public function returnPage(Request $request)
     {
-        return redirect('/#main');
+        $sessionId = $request->query('session_id');
+        return redirect('/?status=success&session_id=' . $sessionId . '#main');
     }
 }
