@@ -49,9 +49,9 @@ class DonationController extends Controller
             'min_amount' => $minAmount,
             'max_amount' => $maxAmount,
             'customer' => [
-                'name' => $data['name'] ?? 'Donor',
-                'phone' => $data['phone'] ?? null,
-                'email' => $data['email'] ?? null,
+                'name' => $data['name'] ?: 'Donor',
+                'phone' => $data['phone'] ?: null,
+                'email' => $data['email'] ?: null,
             ],
             'redirect_url' => url('/donate/return?session_id={session_id}'),
             'webhook_url' => url('/webhooks/snippe'),
@@ -72,9 +72,14 @@ class DonationController extends Controller
         $res = Http::withToken($apiKey)
             ->withHeaders(['Idempotency-Key' => $idempotencyKey])
             ->acceptJson()
-            ->post('https://api.snippe.sh/v1/sessions', $payload);
+            ->post('https://api.snippe.sh/api/v1/sessions', $payload);
 
         if (!$res->ok()) {
+            \Log::error('Snippe Session Creation Failed', [
+                'status' => $res->status(),
+                'payload' => $payload,
+                'response' => $res->json(),
+            ]);
             return response()->json([
                 'message' => 'Failed to create donation session.',
                 'details' => $res->json(),
