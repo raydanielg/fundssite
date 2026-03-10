@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stand With Cliff — Medical Fund</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f7f4;
+    --surface: #ffffff;
+    --border: #d4eae2;
+    --deep: #0d3d2e;
+    --forest: #1a5c45;
+    --emerald: #2e9e72;
+    --mint: #6fcfad;
+    --gold: #f4a225;
+    --amber: #e8852a;
+    --sky: #3b9fd4;
+    --coral: #e8604c;
+    --text: #0d2e22;
+    --muted: #6b8f7e;
+    --light: #a8c9bc;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:var(--sans); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(46,158,114,0.07) 0%, transparent 50%),
+      radial-gradient(circle at 85% 80%, rgba(59,159,212,0.05) 0%, transparent 50%);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--deep) 0%, #1d6b50 60%, #1a5c45 100%);
+    position:relative; overflow:hidden;
+  }
+  .hero::after {
+    content:''; position:absolute; bottom:0; left:0; right:0; height:56px;
+    background:var(--bg); clip-path:ellipse(55% 100% at 50% 100%);
+  }
+  .hero-deco {
+    position:absolute; top:-100px; right:-100px;
+    width:450px; height:450px; border-radius:50%;
+    background:radial-gradient(circle, rgba(111,207,173,0.1) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .hero-deco2 {
+    position:absolute; bottom:-50px; left:-60px;
+    width:300px; height:300px; border-radius:50%;
+    background:radial-gradient(circle, rgba(244,162,37,0.06) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .hero-inner {
+    display:grid; grid-template-columns:1fr auto; gap:36px; align-items:center;
+    padding:52px 40px 82px; max-width:1100px; margin:0 auto; position:relative; z-index:1;
+  }
+  @media(max-width:700px){
+    .hero-inner{grid-template-columns:1fr; padding:36px 24px 76px; text-align:center;}
+    .photo-ring{margin:0 auto;}
+    .hero-tags{justify-content:center;}
+  }
+
+  .hero-eyebrow {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(111,207,173,0.15); border:1px solid rgba(111,207,173,0.3);
+    color:var(--mint); padding:5px 14px; border-radius:20px;
+    font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em;
+    margin-bottom:18px;
+  }
+  .pulse-dot{width:7px;height:7px;background:var(--mint);border-radius:50%;animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
+
+  .hero h1 {
+    font-family:var(--serif); font-size:clamp(2rem,4vw,3.2rem); font-weight:900;
+    color:#fff; line-height:1.1; margin-bottom:14px;
+  }
+  .hero h1 span{color:var(--mint);}
+
+  .hero-bio {
+    color:rgba(255,255,255,0.72); font-size:0.93rem; line-height:1.8;
+    max-width:500px; margin-bottom:24px;
+  }
+  .hero-bio strong{color:rgba(111,207,173,0.9);}
+  .hero-bio em{color:rgba(255,255,255,0.45); font-size:0.85em;}
+
+  .hero-tags{display:flex;gap:8px;flex-wrap:wrap;}
+  .hero-tag {
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
+    color:rgba(255,255,255,0.8); padding:5px 13px; border-radius:12px;
+    font-size:0.72rem; font-weight:500;
+  }
+
+  /* Photo */
+  .photo-ring {
+    width:190px; height:190px; border-radius:50%; padding:4px;
+    background:linear-gradient(135deg, var(--mint), var(--gold));
+    box-shadow:0 0 50px rgba(111,207,173,0.25); flex-shrink:0;
+  }
+  .photo-inner {
+    width:100%; height:100%; border-radius:50%; overflow:hidden;
+    background:linear-gradient(135deg,#1a5c45,#0d3d2e);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:outline 0.2s;
+  }
+  .photo-inner:hover{outline:2px dashed rgba(111,207,173,0.5);outline-offset:2px;}
+  .photo-inner img{width:100%;height:100%;object-fit:cover;display:none;}
+  .photo-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;color:rgba(255,255,255,0.45);font-size:0.68rem;text-align:center;padding:16px;}
+  .photo-placeholder .icon{font-size:2rem;}
+  #photo-input{display:none;}
+
+  /* ── LIVE BALANCE BANNER ── */
+  .balance-banner {
+    background:linear-gradient(90deg, #f4a225 0%, #e8852a 100%);
+    display:flex; align-items:center; flex-wrap:wrap; gap:0;
+    overflow:hidden;
+  }
+  .bb-item {
+    flex:1; min-width:160px; padding:16px 28px;
+    border-right:1px solid rgba(0,0,0,0.1);
+  }
+  .bb-item:last-child{border-right:none;}
+  .bb-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(0,0,0,0.5);margin-bottom:4px;}
+  .bb-value{font-family:var(--mono);font-size:1.4rem;font-weight:600;color:#1a1a1a;line-height:1;}
+  .bb-sub{font-size:0.7rem;color:rgba(0,0,0,0.5);margin-top:3px;}
+
+  /* ── MAIN ── */
+  .main-wrap{padding:36px 0 0;}
+  .container{max-width:1100px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+
+  /* Stats */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin-bottom:24px;}
+  .stat-card {
+    background:var(--surface); border:1.5px solid var(--border); border-radius:16px;
+    padding:20px; position:relative; overflow:hidden;
+    box-shadow:0 2px 14px rgba(13,62,46,0.07);
+    transition:transform 0.2s,box-shadow 0.2s;
+    animation:fadeUp 0.5s ease both;
+  }
+  .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,62,46,0.12);}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--ac,var(--emerald));border-radius:4px 4px 0 0;}
+  .sc-green{--ac:var(--emerald);}
+  .sc-gold{--ac:var(--gold);}
+  .sc-coral{--ac:var(--coral);}
+  .sc-sky{--ac:var(--sky);}
+  .sc-deep{--ac:var(--deep);}
+  .stat-icon{font-size:1.4rem;margin-bottom:10px;}
+  .stat-label{font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--muted);margin-bottom:8px;}
+  .stat-value{font-family:var(--mono);font-size:1.25rem;font-weight:600;color:var(--text);line-height:1;}
+  .stat-sub{font-size:0.7rem;color:var(--muted);margin-top:6px;}
+
+  /* Progress */
+  .progress-card {
+    background:var(--surface); border:1.5px solid var(--border); border-radius:16px;
+    padding:24px; margin-bottom:24px;
+    box-shadow:0 2px 14px rgba(13,62,46,0.07);
+    animation:fadeUp 0.5s 0.1s ease both;
+  }
+  .prog-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;}
+  .prog-title{font-family:var(--serif);font-size:1.15rem;font-weight:700;}
+  .prog-subtitle{font-size:0.75rem;color:var(--muted);margin-top:3px;}
+  .prog-pct{font-family:var(--mono);font-size:2.2rem;font-weight:600;color:var(--emerald);line-height:1;}
+  .prog-track{height:16px;background:var(--bg);border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+  .prog-fill {
+    height:100%; border-radius:8px;
+    background:linear-gradient(90deg, var(--emerald), var(--mint) 60%, var(--gold));
+    transition:width 1.4s cubic-bezier(0.22,1,0.36,1); position:relative;
+  }
+  .prog-fill::after{
+    content:''; position:absolute; top:0; right:0; bottom:0; width:30px;
+    background:rgba(255,255,255,0.25); animation:sh 2s infinite;
+  }
+  @keyframes sh{0%,100%{opacity:0}50%{opacity:1}}
+  .prog-labels{display:flex;justify-content:space-between;margin-top:10px;font-size:0.7rem;font-family:var(--mono);color:var(--muted);}
+  .milestones{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap;}
+  .ms{font-size:0.68rem;padding:4px 10px;border-radius:10px;font-weight:600;}
+  .ms.done{background:rgba(46,158,114,0.12);color:var(--forest);border:1px solid rgba(46,158,114,0.3);}
+  .ms.todo{background:var(--bg);color:var(--light);border:1px solid var(--border);}
+
+  /* Two-col */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;}
+  @media(max-width:700px){.two-col{grid-template-columns:1fr;}}
+
+  .section-card {
+    background:var(--surface); border:1.5px solid var(--border); border-radius:16px;
+    overflow:hidden; box-shadow:0 2px 14px rgba(13,62,46,0.07);
+    animation:fadeUp 0.5s 0.15s ease both;
+  }
+  .sec-header {
+    padding:13px 20px; border-bottom:1.5px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(240,247,244,0.6);
+  }
+  .sec-title{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--muted);}
+  .sec-badge{font-size:0.67rem;font-family:var(--mono);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:2px 8px;color:var(--emerald);}
+
+  /* Contrib items */
+  .clist{max-height:300px;overflow-y:auto;}
+  .clist::-webkit-scrollbar{width:3px;}
+  .clist::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+  .citem{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid rgba(212,234,226,0.5);transition:background 0.15s;}
+  .citem:hover{background:rgba(46,158,114,0.04);}
+  .citem:last-child{border-bottom:none;}
+  .cavatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--emerald),var(--mint));display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:white;flex-shrink:0;margin-right:10px;}
+  .cavatar.pav{background:linear-gradient(135deg,#d0d0d0,#b8b8b8);}
+  .cname{font-size:0.875rem;font-weight:600;color:var(--text);}
+  .cgrp{font-size:0.63rem;color:var(--light);margin-top:1px;}
+  .cright{display:flex;align-items:center;gap:8px;}
+  .camt{font-family:var(--mono);font-size:0.78rem;font-weight:600;color:var(--forest);}
+  .bdg{font-size:0.57rem;padding:2px 7px;border-radius:5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;}
+  .bdg.paid{background:rgba(46,158,114,0.12);color:var(--forest);border:1px solid rgba(46,158,114,0.25);}
+  .bdg.pending{background:rgba(244,162,37,0.12);color:var(--amber);border:1px solid rgba(244,162,37,0.3);}
+
+  /* Tabs */
+  .tab-nav{display:flex;gap:2px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:4px;margin-bottom:20px;width:fit-content;}
+  .tab-btn{padding:8px 18px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-family:var(--sans);font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.15s;}
+  .tab-btn.active{background:var(--deep);color:white;}
+  .tab-btn:not(.active):hover{background:var(--bg);color:var(--text);}
+
+  /* Bar chart */
+  .bar-chart{padding:16px 20px;}
+  .brow{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:0.72rem;}
+  .blabel{width:100px;text-align:right;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}
+  .btrack{flex:1;height:16px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+  .bfill{height:100%;background:linear-gradient(90deg,var(--emerald),var(--mint));border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:0.6rem;font-family:var(--mono);color:white;font-weight:600;transition:width 1s ease;}
+
+  /* Tables */
+  .tbl{width:100%;border-collapse:collapse;font-size:0.8rem;}
+  .tbl th{text-align:left;padding:9px 16px;font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);border-bottom:1.5px solid var(--border);background:rgba(240,247,244,0.5);}
+  .tbl td{padding:9px 16px;border-bottom:1px solid rgba(212,234,226,0.4);}
+  .tbl tr:last-child td{border-bottom:none;}
+  .tbl tr:hover td{background:rgba(46,158,114,0.03);}
+  .tbl-wrap{max-height:420px;overflow-y:auto;}
+
+  /* Add form */
+  .add-section{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:22px;margin-bottom:24px;box-shadow:0 2px 14px rgba(13,62,46,0.07);}
+  .add-title{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--muted);margin-bottom:16px;}
+  .frow{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;}
+  @media(max-width:600px){.frow{grid-template-columns:1fr;}}
+  .fgrp label{font-size:0.67rem;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;}
+  .fgrp input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--sans);font-size:0.875rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+  .fgrp input:focus{border-color:var(--emerald);box-shadow:0 0 0 3px rgba(46,158,114,0.1);}
+  .btn{background:var(--deep);color:white;border:none;padding:11px 22px;border-radius:10px;font-family:var(--sans);font-size:0.875rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  .btn:hover{background:var(--forest);transform:translateY(-1px);box-shadow:0 4px 14px rgba(13,62,46,0.2);}
+  .btn.ghost{background:transparent;border:1.5px solid var(--border);color:var(--muted);}
+  .btn.ghost:hover{background:var(--bg);color:var(--text);}
+  .btn.gold{background:var(--gold);color:#1a1a1a;}
+  .btn.gold:hover{background:var(--amber);}
+
+  /* AI section */
+  .ai-section{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:22px;margin-bottom:40px;box-shadow:0 2px 14px rgba(13,62,46,0.07);}
+  .ai-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .ai-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--deep),var(--forest));color:var(--mint);padding:6px 14px;border-radius:8px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;}
+  .ai-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .qprompts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .qbtn{font-size:0.7rem;background:var(--bg);border:1.5px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:20px;cursor:pointer;transition:all 0.15s;font-family:var(--sans);font-weight:500;}
+  .qbtn:hover{border-color:var(--emerald);color:var(--forest);background:rgba(46,158,114,0.05);}
+  .prow{display:flex;gap:10px;margin-bottom:14px;}
+  .pinput{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--sans);font-size:0.875rem;outline:none;transition:border-color 0.2s;}
+  .pinput:focus{border-color:var(--emerald);}
+  .ai-out{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:18px;min-height:100px;font-size:0.875rem;line-height:1.8;color:var(--text);white-space:pre-wrap;}
+  .ai-out.loading{color:var(--light);animation:breathe 1.5s infinite;}
+  @keyframes breathe{0%,100%{opacity:1}50%{opacity:0.35}}
+  .ai-out.empty{color:var(--light);display:flex;align-items:center;justify-content:center;font-size:0.82rem;min-height:80px;}
+
+  .hidden{display:none;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  footer{text-align:center;padding:28px;color:var(--light);font-size:0.72rem;border-top:1px solid var(--border);background:var(--surface);margin-top:0;}
+  footer strong{color:var(--emerald);}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-deco"></div>
+  <div class="hero-deco2"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow"><span class="pulse-dot"></span> Live Medical Fundraiser</div>
+      <h1>Stand With <span>Cliff</span></h1>
+      <p class="hero-bio">
+        Clifford is a devoted <strong>husband</strong>, a proud <strong>father of two beautiful children</strong>, and a man absolutely full of life. His laughter fills every room he walks into — the kind of person who makes everyone feel seen, valued, and loved. He has been diagnosed with <strong>Chronic Kidney Disease (CKD)</strong> and urgently needs lifetime dialysis or a kidney transplant to survive.
+        <br><br>
+        His family, his friends, his community — all of us — have come together because some things are worth fighting for.
+        <br><br>
+        <em>Together, we are stronger than any diagnosis. 💚</em>
+      </p>
+      <div class="hero-tags">
+        <span class="hero-tag">💛 Husband</span>
+        <span class="hero-tag">👨‍👧‍👦 Father of 2</span>
+        <span class="hero-tag">🇹🇿 Dar es Salaam</span>
+        <span class="hero-tag">💪 Fighter</span>
+        <span class="hero-tag">❤️ Full of Life</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="photo-ring">
+        <div class="photo-inner" onclick="document.getElementById('photo-input').click()" title="Click to upload Cliff's photo">
+          <img id="cliff-photo" src="" alt="Cliff" />
+          <div class="photo-placeholder" id="photo-ph">
+            <span class="icon">📷</span>
+            <span>Add Cliff's photo</span>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" onchange="loadPhoto(event)">
+    </div>
+  </div>
+</div>
+
+<!-- LIVE BALANCE BANNER -->
+<div class="balance-banner">
+  <div class="bb-item">
+    <div class="bb-label">⚡ Live Net Balance</div>
+    <div class="bb-value" id="bb-balance">—</div>
+    <div class="bb-sub" id="bb-status">vs. expenses so far</div>
+  </div>
+  <div class="bb-item">
+    <div class="bb-label">💰 Total Raised</div>
+    <div class="bb-value" id="bb-raised">—</div>
+    <div class="bb-sub" id="bb-contributors">— contributors</div>
+  </div>
+  <div class="bb-item">
+    <div class="bb-label">🎯 Campaign Target</div>
+    <div class="bb-value">TZS 150,000,000</div>
+    <div class="bb-sub" id="bb-remaining">— remaining</div>
+  </div>
+  <div class="bb-item">
+    <div class="bb-label">🏥 Medical Expenses</div>
+    <div class="bb-value">TZS 2,289,225</div>
+    <div class="bb-sub">13 entries recorded</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card sc-green">
+      <div class="stat-icon">💰</div>
+      <div class="stat-label">Total Collected</div>
+      <div class="stat-value" id="s-collected">TZS —</div>
+      <div class="stat-sub" id="s-paid-n">— paid</div>
+    </div>
+    <div class="stat-card sc-gold">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-label">Fundraising Target</div>
+      <div class="stat-value">TZS 150,000,000</div>
+      <div class="stat-sub" id="s-remaining">— remaining</div>
+    </div>
+    <div class="stat-card sc-coral">
+      <div class="stat-icon">🏥</div>
+      <div class="stat-label">Medical Expenses</div>
+      <div class="stat-value">TZS 2,289,225</div>
+      <div class="stat-sub">13 expense entries</div>
+    </div>
+    <div class="stat-card sc-sky">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-label">Pending Contributors</div>
+      <div class="stat-value" id="s-pending">—</div>
+      <div class="stat-sub">yet to contribute</div>
+    </div>
+    <div class="stat-card sc-deep">
+      <div class="stat-icon">📊</div>
+      <div class="stat-label">Campaign Progress</div>
+      <div class="stat-value" id="s-pct">0%</div>
+      <div class="stat-sub">of TZS 150M target</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-card">
+    <div class="prog-top">
+      <div>
+        <div class="prog-title">Journey to TZS 150,000,000</div>
+        <div class="prog-subtitle">Every shilling brings Cliff closer to life 💚</div>
+      </div>
+      <div class="prog-pct" id="p-pct">0%</div>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill" id="prog-bar" style="width:0%"></div>
+    </div>
+    <div class="prog-labels">
+      <span>TZS 0</span>
+      <span id="p-mid">—</span>
+      <span>TZS 150M</span>
+    </div>
+    <div class="milestones" id="milestones"></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
+    <button class="tab-btn" onclick="showTab('contributors')">All Contributors</button>
+    <button class="tab-btn" onclick="showTab('expenses')">Expenses</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div id="tab-overview">
+    <div class="two-col">
+      <div class="section-card">
+        <div class="sec-header">
+          <span class="sec-title">✅ Paid Contributors</span>
+          <span class="sec-badge" id="paid-bdg">—</span>
+        </div>
+        <div class="clist" id="paid-list"></div>
+      </div>
+      <div class="section-card">
+        <div class="sec-header">
+          <span class="sec-title">⏳ Pending Contributors</span>
+          <span class="sec-badge" id="pend-bdg">—</span>
+        </div>
+        <div class="clist" id="pend-list"></div>
+      </div>
+    </div>
+    <div class="section-card" style="margin-bottom:24px">
+      <div class="sec-header"><span class="sec-title">Top Contributions</span></div>
+      <div class="bar-chart" id="bar-chart"></div>
+    </div>
+  </div>
+
+  <!-- ALL CONTRIBUTORS -->
+  <div id="tab-contributors" class="hidden">
+    <div class="section-card" style="margin-bottom:24px">
+      <div class="sec-header">
+        <span class="sec-title">All Contributors</span>
+        <span class="sec-badge" id="all-bdg">—</span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Name</th><th>Group</th><th>Amount (TZS)</th><th>Status</th></tr></thead>
+          <tbody id="all-tbl"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPENSES -->
+  <div id="tab-expenses" class="hidden">
+    <div class="section-card" style="margin-bottom:24px">
+      <div class="sec-header">
+        <span class="sec-title">Medical Expenses Log</span>
+        <span class="sec-badge">TZS 2,289,225</span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Date</th><th>Description</th><th>Amount (TZS)</th></tr></thead>
+          <tbody id="exp-tbl"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" style="padding:11px 16px;font-weight:700;color:var(--coral);font-size:0.78rem">TOTAL</td>
+              <td style="padding:11px 16px;font-family:var(--mono);font-weight:700;color:var(--coral)">2,289,225</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD CONTRIBUTION -->
+  <div class="add-section">
+    <div class="add-title">➕ Add / Update Contribution</div>
+    <div class="frow">
+      <div class="fgrp">
+        <label>Contributor Name</label>
+        <input type="text" id="new-name" placeholder="e.g. Jane Mwangi" />
+      </div>
+      <div class="fgrp">
+        <label>Amount (TZS)</label>
+        <input type="number" id="new-amt" placeholder="e.g. 500000" min="0" />
+      </div>
+      <button class="btn" onclick="addContrib()">Add ✓</button>
+    </div>
+  </div>
+
+  <!-- AI SECTION -->
+  <div class="ai-section">
+    <div class="ai-head">
+      <div class="ai-badge">✦ AI Report Generator</div>
+      <div class="ai-btns">
+        <button class="btn ghost" style="font-size:0.75rem;padding:8px 14px" onclick="runReport('summary')">📋 Full Summary</button>
+        <button class="btn gold" style="font-size:0.75rem;padding:8px 14px" onclick="runReport('whatsapp')">📱 WhatsApp Update</button>
+      </div>
+    </div>
+    <div class="qprompts">
+      <button class="qbtn" onclick="setP('Who has not yet contributed and how much are we expecting from them?')">Who hasn't paid?</button>
+      <button class="qbtn" onclick="setP('How much more do we need to reach the TZS 150,000,000 target?')">Gap to target?</button>
+      <button class="qbtn" onclick="setP('Write a heartfelt thank you message to everyone who has contributed so far')">Thank you message</button>
+      <button class="qbtn" onclick="setP('Toa ripoti ya hali ya mfuko kwa Kiswahili na ujumuishe ni kiasi gani kimesalia kufikia lengo la TZS 150M')">Ripoti ya Kiswahili</button>
+      <button class="qbtn" onclick="setP('If current pace of contributions continues, how long will it take to reach TZS 150M?')">Timeline estimate</button>
+      <button class="qbtn" onclick="setP('Draft an urgent but warm appeal message for those who have not yet contributed')">Urgent appeal</button>
+    </div>
+    <div class="prow">
+      <input class="pinput" id="ai-prompt" placeholder="Ask anything... e.g. 'How many months of dialysis can we cover with what we have?'" />
+      <button class="btn" onclick="askAI()">Ask ✦</button>
+    </div>
+    <div class="ai-out empty" id="ai-out">Click a quick prompt or type a question to generate an AI-powered report.</div>
+  </div>
+
+</div>
+</div>
+
+<footer>Made with ❤️ for <strong>Cliff</strong> — by his people, for his life · Dar es Salaam, Tanzania</footer>
+
+<script>
+const TARGET = 150000000;
+const EXPENSES = 2289225;
+
+let contributors = [
+  {n:"PJ",a:500000,g:"Friends of Cliff"},
+  {n:"Ste Law",a:500000,g:"Friends of Cliff"},
+  {n:"Kaitani",a:500000,g:"Friends of Cliff"},
+  {n:"Chaps",a:500000,g:"Friends of Cliff"},
+  {n:"Rajabu",a:500000,g:"Friends of Cliff"},
+  {n:"Ben Mahuna",a:500000,g:"Friends of Cliff"},
+  {n:"Nurdin",a:500000,g:"Friends of Cliff"},
+  {n:"Sadick",a:500000,g:"Friends of Cliff"},
+  {n:"Joseph",a:500000,g:"Friends of Cliff"},
+  {n:"Ibrahim",a:500000,g:"Friends of Cliff"},
+  {n:"Hillary",a:500000,g:"Friends of Cliff"},
+  {n:"Nick Shine",a:500000,g:"Friends of Cliff"},
+  {n:"Amani Lymo",a:200000,g:"Friends of Cliff"},
+  {n:"Haji",a:0,g:"Friends of Cliff"},
+  {n:"Ngosha",a:0,g:"Friends of Cliff"},
+  {n:"Saidi Juma",a:0,g:"Friends of Cliff"},
+  {n:"Herman",a:500000,g:"Friends of Cliff"},
+  {n:"Frank Chaps",a:300000,g:"Friends of Cliff"},
+  {n:"Frank Dokta",a:0,g:"Friends of Cliff"},
+  {n:"Kiruwale",a:0,g:"Friends of Cliff"},
+  {n:"Deo Mambwa",a:0,g:"Friends of Cliff"},
+  {n:"Chellah",a:0,g:"Friends of Cliff"},
+  {n:"Nuran",a:0,g:"Friends of Cliff"},
+  {n:"Cholo",a:0,g:"Friends of Cliff"},
+  {n:"Fortu",a:0,g:"Friends of Cliff"},
+  {n:"Ally Adnani",a:500000,g:"Friends of Cliff"},
+  {n:"Kapinga TMDA",a:0,g:"Friends of Cliff"},
+  {n:"Tembo",a:0,g:"Friends of Cliff"},
+  {n:"Koka",a:0,g:"Friends of Cliff"},
+  {n:"Nabiry",a:0,g:"Friends of Cliff"},
+  {n:"Chris Bwemo",a:500000,g:"Friends of Cliff"},
+  {n:"Amani Martins",a:300000,g:"Friends of Cliff"},
+  {n:"Barlow",a:0,g:"Friends of Cliff"},
+  {n:"Kumkum",a:0,g:"Friends of Cliff"},
+  {n:"Konisaga",a:0,g:"Friends of Cliff"},
+  {n:"Yassin Mahonda",a:0,g:"Friends of Cliff"},
+  {n:"Martin TRA",a:0,g:"Friends of Cliff"},
+  {n:"Samuel outlander",a:0,g:"Friends of Cliff"},
+  {n:"Jarufu",a:0,g:"Friends of Cliff"},
+  {n:"Kings saidi",a:0,g:"Friends of Cliff"},
+  {n:"Mark Bwemo",a:0,g:"Friends of Cliff"},
+  {n:"DEO Ujenzi",a:0,g:"Friends of Cliff"},
+  {n:"Gerald CCM",a:0,g:"Friends of Cliff"},
+  {n:"Don Kwayu",a:0,g:"Friends of Cliff"},
+  {n:"Boss Riviera",a:100000,g:"Cliff Other Friends"},
+  {n:"Mzee Shayo",a:0,g:"Cliff Other Friends"},
+  {n:"Dr Toyota",a:0,g:"Cliff Other Friends"},
+  {n:"Lumumba",a:0,g:"Cliff Other Friends"},
+  {n:"Fundi Kinondoni",a:0,g:"Cliff Other Friends"},
+  {n:"NGAIZA",a:0,g:"Cliff Other Friends"},
+  {n:"Glory Lymo",a:0,g:"Cliff Other Friends"},
+  {n:"Ludovick",a:0,g:"Cliff Other Friends"},
+  {n:"Midwife Kiki",a:0,g:"Others"},
+  {n:"Mary Chips",a:100000,g:"Others"},
+];
+
+const expenses = [
+  {d:"2026-03-09",desc:"Muhimbili Dialysis",a:400000},
+  {d:"2026-03-07",desc:"Muhimbili Tests",a:25000},
+  {d:"2026-03-07",desc:"Muhimbili Tests",a:164000},
+  {d:"2026-03-07",desc:"Private Ward",a:585000},
+  {d:"2026-03-07",desc:"Muhimbili Tests",a:130500},
+  {d:"2026-03-09",desc:"Muhimbili Dialysis",a:300000},
+  {d:"2026-03-09",desc:"Rahinja Kuli Mixx Dialysis",a:130000},
+  {d:"2026-03-10",desc:"Muhimbili Dialysis",a:300000},
+  {d:"2026-03-07",desc:"Muhimbili Hospital Consultation",a:15000},
+  {d:"2026-03-07",desc:"M/Nyamala Hospital Consultation",a:15000},
+  {d:"2026-03-07",desc:"Rabinsia Memorial Hospital",a:186300},
+  {d:"2026-03-09",desc:"Muhimbili Bandage",a:34300},
+  {d:"2026-03-09",desc:"Muhimbili Bandage",a:4125},
+];
+
+const f = n => Math.round(n).toLocaleString('en-TZ');
+const ini = name => name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+
+function render() {
+  const paid = contributors.filter(c => c.a > 0);
+  const pend = contributors.filter(c => c.a === 0);
+  const total = contributors.reduce((s,c) => s+c.a, 0);
+  const balance = total - EXPENSES;
+  const remaining = TARGET - total;
+  const pct = Math.min(100, total/TARGET*100);
+  const pctStr = pct < 1 ? pct.toFixed(3) : pct.toFixed(2);
+
+  // Banner
+  document.getElementById('bb-balance').textContent = (balance>=0?'+':'') + 'TZS ' + f(balance);
+  document.getElementById('bb-status').textContent = balance >= 0 ? '✅ Expenses fully covered' : '⚠️ Shortfall of TZS '+f(Math.abs(balance));
+  document.getElementById('bb-raised').textContent = 'TZS ' + f(total);
+  document.getElementById('bb-contributors').textContent = paid.length + ' contributors paid';
+  document.getElementById('bb-remaining').textContent = 'TZS ' + f(Math.max(0,remaining)) + ' remaining';
+
+  // Stats
+  document.getElementById('s-collected').textContent = 'TZS ' + f(total);
+  document.getElementById('s-paid-n').textContent = paid.length + ' contributors paid';
+  document.getElementById('s-remaining').textContent = 'TZS ' + f(Math.max(0,remaining)) + ' to go';
+  document.getElementById('s-pending').textContent = pend.length;
+  document.getElementById('s-pct').textContent = pctStr + '%';
+
+  // Progress
+  document.getElementById('p-pct').textContent = pctStr + '%';
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('p-mid').textContent = 'TZS ' + f(total) + ' raised';
+
+  const marks = [
+    {l:'TZS 10M',v:10000000},{l:'TZS 25M',v:25000000},
+    {l:'TZS 50M',v:50000000},{l:'TZS 100M',v:100000000},{l:'TZS 150M 🎯',v:150000000}
+  ];
+  document.getElementById('milestones').innerHTML = marks.map(m =>
+    `<span class="ms ${total>=m.v?'done':'todo'}">${total>=m.v?'✓ ':''}${m.l}</span>`).join('');
+
+  // Paid list
+  const sp = [...paid].sort((a,b)=>b.a-a.a);
+  document.getElementById('paid-bdg').textContent = paid.length + ' paid';
+  document.getElementById('paid-list').innerHTML = sp.map(c=>`
+    <div class="citem">
+      <div style="display:flex;align-items:center">
+        <div class="cavatar">${ini(c.n)}</div>
+        <div><div class="cname">${c.n}</div><div class="cgrp">${c.g}</div></div>
+      </div>
+      <div class="cright">
+        <span class="camt">TZS ${f(c.a)}</span>
+        <span class="bdg paid">paid</span>
+      </div>
+    </div>`).join('');
+
+  // Pending list
+  document.getElementById('pend-bdg').textContent = pend.length + ' pending';
+  document.getElementById('pend-list').innerHTML = pend.map(c=>`
+    <div class="citem">
+      <div style="display:flex;align-items:center">
+        <div class="cavatar pav">${ini(c.n)}</div>
+        <div><div class="cname">${c.n}</div><div class="cgrp">${c.g}</div></div>
+      </div>
+      <span class="bdg pending">pending</span>
+    </div>`).join('');
+
+  // All contributors table
+  document.getElementById('all-bdg').textContent = contributors.length + ' total';
+  document.getElementById('all-tbl').innerHTML = contributors.map((c,i)=>`
+    <tr>
+      <td style="color:var(--light);font-family:var(--mono);font-size:0.7rem">${i+1}</td>
+      <td style="font-weight:600">${c.n}</td>
+      <td style="color:var(--muted);font-size:0.73rem">${c.g}</td>
+      <td style="font-family:var(--mono);color:${c.a>0?'var(--forest)':'var(--light)'}">${c.a>0?'TZS '+f(c.a):'—'}</td>
+      <td><span class="bdg ${c.a>0?'paid':'pending'}">${c.a>0?'paid':'pending'}</span></td>
+    </tr>`).join('');
+
+  // Expenses table
+  document.getElementById('exp-tbl').innerHTML = expenses.map(e=>`
+    <tr>
+      <td style="font-family:var(--mono);font-size:0.7rem;color:var(--muted)">${e.d}</td>
+      <td style="font-weight:500">${e.desc}</td>
+      <td style="font-family:var(--mono);color:var(--coral)">TZS ${f(e.a)}</td>
+    </tr>`).join('');
+
+  // Bar chart
+  const top10 = sp.slice(0,10);
+  const max = top10[0]?.a || 1;
+  document.getElementById('bar-chart').innerHTML = top10.map(c=>{
+    const w = Math.round(c.a/max*100);
+    return `<div class="brow">
+      <div class="blabel">${c.n}</div>
+      <div class="btrack"><div class="bfill" style="width:${w}%">${w>28?'TZS '+f(c.a):''}</div></div>
+      ${w<=28?`<span style="font-family:var(--mono);font-size:0.63rem;color:var(--forest);margin-left:4px">TZS ${f(c.a)}</span>`:''}
+    </div>`;}).join('');
+}
+
+function showTab(tab) {
+  ['overview','contributors','expenses'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['overview','contributors','expenses'][i]===tab);
+  });
+}
+
+function addContrib() {
+  const name = document.getElementById('new-name').value.trim();
+  const amt = parseFloat(document.getElementById('new-amt').value)||0;
+  if(!name){alert('Please enter a name');return;}
+  const ex = contributors.find(c=>c.n.toLowerCase()===name.toLowerCase());
+  if(ex){ex.a=amt;} else {contributors.push({n:name,a:amt,g:'Others'});}
+  document.getElementById('new-name').value='';
+  document.getElementById('new-amt').value='';
+  render();
+}
+
+function loadPhoto(e) {
+  const file = e.target.files[0];
+  if(!file)return;
+  const r = new FileReader();
+  r.onload = ev => {
+    const img = document.getElementById('cliff-photo');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    document.getElementById('photo-ph').style.display = 'none';
+  };
+  r.readAsDataURL(file);
+}
+
+function snap() {
+  const paid = contributors.filter(c=>c.a>0);
+  const pend = contributors.filter(c=>c.a===0);
+  const total = contributors.reduce((s,c)=>s+c.a,0);
+  return `FRIENDS OF CLIFF MEDICAL FUND — ${new Date().toDateString()}
+Patient: Clifford — CKD, needs dialysis/transplant — Dar es Salaam, Tanzania
+Target: TZS 150,000,000
+
+FUNDS:
+- Raised: TZS ${f(total)} (${(total/TARGET*100).toFixed(2)}% of target)
+- Remaining to target: TZS ${f(Math.max(0,TARGET-total))}
+- vs. Expenses: ${total>=EXPENSES?'Surplus':'Shortfall'} of TZS ${f(Math.abs(total-EXPENSES))}
+
+PAID (${paid.length}): ${paid.map(c=>c.n+' TZS '+f(c.a)).join(', ')}
+PENDING (${pend.length}): ${pend.map(c=>c.n).join(', ')}
+
+EXPENSES (Total TZS ${f(EXPENSES)}):
+${expenses.map(e=>`- ${e.desc}: TZS ${f(e.a)} (${e.d})`).join('\n')}`;
+}
+
+function setP(text){document.getElementById('ai-prompt').value=text;askAI();}
+
+async function runReport(type){
+  const p={
+    summary:'Generate a clear, structured financial summary for the Friends of Cliff medical fund. Include: total raised, % of TZS 150M target, remaining gap, how expenses compare to funds, who has paid (list names), who is still pending, and end with a motivational note.',
+    whatsapp:"Write a warm WhatsApp group update for the Friends of Cliff fundraiser. Thank paid contributors by name. Share the total raised and gap to TZS 150M target. Gently appeal to those pending. Keep it under 250 words. Warm Tanzanian community tone."
+  };
+  document.getElementById('ai-prompt').value=p[type];
+  await askAI();
+}
+
+async function askAI(){
+  const prompt=document.getElementById('ai-prompt').value.trim();
+  if(!prompt)return;
+  const out=document.getElementById('ai-out');
+  out.className='ai-out loading';
+  out.textContent='✦ Generating...';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are a compassionate assistant managing a medical fundraiser for Clifford — a husband, father of two, from Dar es Salaam, Tanzania, who has Chronic Kidney Disease (CKD). Help track contributions and generate reports. Be warm, empathetic, and motivating. Format numbers with commas (TZS 500,000). Fundraising target: TZS 150,000,000.`,
+        messages:[{role:'user',content:`Fund data:\n\n${snap()}\n\nRequest: ${prompt}`}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.map(b=>b.text||'').join('')||'No response.';
+    out.className='ai-out';
+    out.textContent=text;
+  }catch(e){
+    out.className='ai-out';
+    out.textContent='Could not reach AI. Please try again.';
+  }
+}
+
+render();
+</script>
+</body>
+</html>
