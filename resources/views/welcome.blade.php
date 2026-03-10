@@ -719,12 +719,6 @@
             created_at: t.created_at,
         }));
 
-        const expenses = [
-            { d: "2026-03-09", desc: "Muhimbili Dialysis", a: 400000 },
-            { d: "2026-03-07", desc: "Muhimbili Tests", a: 25000 },
-            { d: "2026-03-07", desc: "Private Ward", a: 585000 },
-        ];
-
         const f = n => Math.round(n).toLocaleString('en-TZ');
         const ini = name => name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
         const fmtDT = (iso) => {
@@ -803,8 +797,9 @@
             const deg = Math.round((paid.length / Math.max(1, allTotal)) * 360);
             document.getElementById('pie').style.background = `conic-gradient(var(--emerald) 0deg, var(--emerald) ${deg}deg, rgba(13,61,46,0.10) ${deg}deg, rgba(13,61,46,0.10) 360deg)`;
 
-            document.getElementById('all-bdg').textContent = contributors.length + ' total';
-            document.getElementById('all-tbl').innerHTML = contributors.map((c, i) => `
+            // Home page should display paid contributions only
+            document.getElementById('all-bdg').textContent = paid.length + ' paid';
+            document.getElementById('all-tbl').innerHTML = paid.map((c, i) => `
                 <tr>
                     <td style="color:var(--light);font-family:var(--mono);font-size:0.7rem">${i + 1}</td>
                     <td style="font-weight:600">${c.n}</td>
@@ -815,13 +810,13 @@
                 </tr>
             `).join('');
 
-            document.getElementById('exp-tbl').innerHTML = expenses.map(e => `
+            document.getElementById('exp-tbl').innerHTML = `
                 <tr>
-                    <td style="font-family:var(--mono);font-size:0.7rem;color:var(--muted)">${e.d}</td>
-                    <td style="font-weight:500">${e.desc}</td>
-                    <td style="font-family:var(--mono);color:var(--coral)">${CUR} ${f(e.a)}</td>
+                    <td style="font-family:var(--mono);font-size:0.7rem;color:var(--muted)">—</td>
+                    <td style="font-weight:500">Total medical expenses to date</td>
+                    <td style="font-family:var(--mono);color:var(--coral)">${CUR} ${f(EXPENSES)}</td>
                 </tr>
-            `).join('');
+            `;
 
             const top10 = sp.slice(0, 10);
             const max = top10[0]?.a || 1;
