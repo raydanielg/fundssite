@@ -14,10 +14,10 @@ class DonationController extends Controller
     public function createSession(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:32'],
             'email' => ['nullable', 'email', 'max:255'],
-            'amount' => ['required', 'integer', 'min:1000'],
+            'amount' => ['nullable', 'integer', 'min:1000'],
         ]);
 
         $currency = 'TZS';
@@ -43,13 +43,13 @@ class DonationController extends Controller
 
         $payload = [
             'allow_custom_amount' => true,
-            'amount' => (int) $data['amount'],
+            'amount' => (int) ($data['amount'] ?? 0),
             'min_amount' => $minAmount,
             'max_amount' => $maxAmount,
             'currency' => $currency,
             'allowed_methods' => ['mobile_money', 'qr', 'card'],
             'customer' => [
-                'name' => $data['name'],
+                'name' => $data['name'] ?? 'Donor',
                 'phone' => $data['phone'] ?? null,
                 'email' => $data['email'] ?? null,
             ],
@@ -87,9 +87,9 @@ class DonationController extends Controller
         DonationTransaction::create([
             'reference' => $sess['reference'],
             'status' => $sess['status'] ?? 'pending',
-            'amount' => (int) ($sess['amount'] ?? $data['amount']),
+            'amount' => (int) ($sess['amount'] ?? ($data['amount'] ?? 0)),
             'currency' => $sess['currency'] ?? 'TZS',
-            'customer_name' => $data['name'],
+            'customer_name' => $data['name'] ?? 'Donor',
             'customer_phone' => $data['phone'] ?? null,
             'customer_email' => $data['email'] ?? null,
             'checkout_url' => $sess['checkout_url'] ?? null,

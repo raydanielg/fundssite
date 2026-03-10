@@ -272,20 +272,30 @@
         }
         .stat-sub { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
 
-        .progress-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 24px; box-shadow: 0 1px 10px rgba(13,62,46,0.06); animation: fadeUp 0.5s 0.1s ease both; }
-        .prog-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 18px; }
-        .prog-title { font-family: var(--serif); font-size: 1.15rem; font-weight: 700; }
-        .prog-subtitle { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
-        .prog-pct { font-family: var(--sans); font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1, 'liga' 0; font-size: 2.15rem; font-weight: 900; color: var(--emerald); line-height: 1; letter-spacing: -0.02em; }
-        .prog-track { height: 16px; background: var(--bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-        .prog-fill { height: 100%; border-radius: 8px; background: var(--emerald); transition: width 1.4s cubic-bezier(0.22,1,0.36,1); position: relative; }
-        .prog-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent); transform: translateX(-60%); animation: sh 2.6s ease-in-out infinite; }
-        @keyframes sh { 0% { transform: translateX(-60%); opacity: 0 } 30% { opacity: 1 } 100% { transform: translateX(140%); opacity: 0 } }
-        .prog-labels { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.7rem; font-family: var(--mono); color: var(--muted); }
-        .milestones { display: flex; gap: 7px; margin-top: 14px; flex-wrap: wrap; }
-        .ms { font-size: 0.68rem; padding: 4px 10px; border-radius: 10px; font-weight: 600; }
-        .ms.done { background: rgba(46,158,114,0.10); color: var(--forest); border: 1px solid rgba(46,158,114,0.25); }
-        .ms.todo { background: rgba(107,143,126,0.12); color: var(--muted); border: 1px solid rgba(107,143,126,0.2); }
+        .progress-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 32px; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(13,62,46,0.08); animation: fadeUp 0.6s 0.1s ease both; position: relative; overflow: hidden; }
+        .progress-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--emerald); }
+        .prog-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; gap: 20px; }
+        .prog-title { font-family: var(--serif); font-size: 1.4rem; font-weight: 900; color: var(--deep); line-height: 1.2; }
+        .prog-subtitle { font-size: 0.85rem; color: var(--muted); margin-top: 6px; font-weight: 500; }
+        .prog-pct { font-family: var(--sans); font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1, 'liga' 0; font-size: 2.8rem; font-weight: 900; color: var(--emerald); line-height: 1; letter-spacing: -0.03em; display: flex; flex-direction: column; align-items: flex-end; }
+        .prog-pct span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--light); margin-top: 4px; font-weight: 700; }
+        .prog-track { height: 24px; background: #eef5f2; border-radius: 12px; overflow: hidden; border: 1px solid rgba(46,158,114,0.15); box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); position: relative; }
+        .prog-fill { height: 100%; border-radius: 12px; background: linear-gradient(90deg, var(--forest), var(--emerald), var(--mint)); transition: width 1.4s cubic-bezier(0.22,1,0.36,1); position: relative; }
+        .prog-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transform: translateX(-100%); animation: shimmer 2.5s infinite; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        .prog-labels { display: flex; justify-content: space-between; margin-top: 14px; font-size: 0.75rem; font-family: var(--mono); color: var(--muted); font-weight: 600; }
+        .prog-labels .current { color: var(--emerald); font-weight: 700; font-size: 0.85rem; padding: 2px 10px; background: rgba(46,158,114,0.08); border-radius: 6px; }
+        .milestones { display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; }
+        .ms { font-size: 0.7rem; padding: 6px 12px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .ms i { font-size: 0.9rem; }
+        .ms.done { background: var(--emerald); color: white; box-shadow: 0 4px 12px rgba(46,158,114,0.2); }
+        .ms.todo { background: white; color: var(--light); border: 1px solid var(--border); }
+        @media (max-width: 600px) {
+            .progress-card { padding: 20px; }
+            .prog-top { flex-direction: column; align-items: flex-start; }
+            .prog-pct { align-items: flex-start; margin-top: 10px; font-size: 2.2rem; }
+            .prog-title { font-size: 1.2rem; }
+        }
 
         .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
         @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
@@ -365,7 +375,8 @@
         .tbl-wrap { max-height: 420px; overflow-y: auto; }
 
         .hidden { display: none; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: translateY(0) } }
+        .spin { animation: fa-spin 2s infinite linear; display: inline-block; }
+        @keyframes fa-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         footer { border-top: 1px solid rgba(212,234,226,0.9); background: linear-gradient(135deg, var(--deep) 0%, #124b38 60%, var(--forest) 100%); }
         .site-footer {
             max-width: 1100px;
@@ -584,18 +595,18 @@
             <div class="progress-card">
                 <div class="prog-top">
                     <div>
-                        <div class="prog-title">Journey to {{ ($settings['currency'] ?? 'TZS') }} {{ number_format($settings['target_amount'] ?? 150000000) }}</div>
-                        <div class="prog-subtitle">Every shilling brings Cliff closer to life</div>
+                        <div class="prog-title">Funding Journey</div>
+                        <div class="prog-subtitle">Target: {{ ($settings['currency'] ?? 'TZS') }} {{ number_format($settings['target_amount'] ?? 150000000) }} — Every shilling counts.</div>
                     </div>
-                    <div class="prog-pct" id="p-pct">0%</div>
+                    <div class="prog-pct" id="p-pct">0%<span>completed</span></div>
                 </div>
                 <div class="prog-track">
                     <div class="prog-fill" id="prog-bar" style="width:0%"></div>
                 </div>
                 <div class="prog-labels">
-                    <span id="p-min">—</span>
-                    <span id="p-mid">—</span>
-                    <span id="p-max">—</span>
+                    <span id="p-min">TZS 0</span>
+                    <span class="current" id="p-mid">TZS 0 raised</span>
+                    <span id="p-max">TZS {{ number_format($settings['target_amount'] ?? 150000000) }}</span>
                 </div>
                 <div class="milestones" id="milestones"></div>
             </div>
@@ -730,21 +741,24 @@
             document.getElementById('s-pending').textContent = pend.length;
             document.getElementById('s-pct').textContent = pctStr + '%';
 
-            document.getElementById('p-pct').textContent = pctStr + '%';
+            document.getElementById('p-pct').innerHTML = pctStr + '%<span>completed</span>';
             document.getElementById('prog-bar').style.width = pct + '%';
             document.getElementById('p-mid').textContent = CUR + ' ' + f(total) + ' raised';
             document.getElementById('p-min').textContent = CUR + ' 0';
             document.getElementById('p-max').textContent = CUR + ' ' + f(TARGET);
 
             const marks = [
-                { l: CUR + ' 10M', v: 10000000 },
-                { l: CUR + ' 25M', v: 25000000 },
-                { l: CUR + ' 50M', v: 50000000 },
-                { l: CUR + ' 100M', v: 100000000 },
-                { l: CUR + ' ' + (Math.round(TARGET / 1000000)) + 'M', v: TARGET },
+                { l: '10M', v: 10000000 },
+                { l: '25M', v: 25000000 },
+                { l: '50M', v: 50000000 },
+                { l: '100M', v: 100000000 },
+                { l: 'Target', v: TARGET },
             ];
             document.getElementById('milestones').innerHTML = marks.map(m =>
-                `<span class="ms ${total >= m.v ? 'done' : 'todo'}">${total >= m.v ? 'Done: ' : ''}${m.l}</span>`
+                `<span class="ms ${total >= m.v ? 'done' : 'todo'}">
+                    <span class="material-symbols-outlined" style="font-size:1rem">${total >= m.v ? 'check_circle' : 'radio_button_unchecked'}</span>
+                    ${m.l}
+                </span>`
             ).join('');
 
             const sp = [...paid].sort((a, b) => b.a - a.a);
@@ -850,16 +864,20 @@
             const name = document.getElementById('don-name').value.trim();
             const phone = document.getElementById('don-phone').value.trim();
             const email = document.getElementById('don-email').value.trim();
-            const amount = parseInt(document.getElementById('don-amount').value, 10);
+            const amountInput = document.getElementById('don-amount').value;
+            const amount = amountInput ? parseInt(amountInput, 10) : null;
 
-            if (!name || !amount || amount < 1000) {
-                err.textContent = 'Please enter your name and a valid amount (min TZS 1,000).';
+            // Name and Amount are now optional to allow direct Snippe custom amount entry
+            // but we still validate if they ARE provided.
+            if (amount && amount < 1000) {
+                err.textContent = 'Minimum donation amount is TZS 1,000.';
                 err.classList.add('show');
                 return;
             }
 
             btn.disabled = true;
             btn.style.opacity = '0.75';
+            btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
 
             try {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -871,10 +889,10 @@
                         'X-CSRF-TOKEN': token,
                     },
                     body: JSON.stringify({
-                        name,
+                        name: name || null,
                         phone: phone || null,
                         email: email || null,
-                        amount,
+                        amount: amount || null,
                     }),
                 });
 
@@ -884,6 +902,7 @@
                     err.classList.add('show');
                     btn.disabled = false;
                     btn.style.opacity = '1';
+                    btn.innerHTML = '<span class="material-symbols-outlined">lock</span> Continue';
                     return;
                 }
 
@@ -893,6 +912,7 @@
                 err.classList.add('show');
                 btn.disabled = false;
                 btn.style.opacity = '1';
+                btn.innerHTML = '<span class="material-symbols-outlined">lock</span> Continue';
             }
         }
 
