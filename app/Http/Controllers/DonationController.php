@@ -45,7 +45,7 @@ class DonationController extends Controller
         $webhookUrl = config('services.snippe.webhook_url') ?: url('/api/snippe/webhook');
 
         $payload = [
-            'amount' => (int) ($data['amount'] ?? 0),
+            'amount' => (int) ($data['amount'] ?? 1000), // Default to 1000 if not provided
             'currency' => $currency,
             'allowed_methods' => ['mobile_money', 'qr', 'card'],
             'allow_custom_amount' => true,
@@ -53,15 +53,12 @@ class DonationController extends Controller
             'max_amount' => $maxAmount,
             'customer' => [
                 'name' => $data['name'] ?: 'Donor',
-                'phone' => $data['phone'] ?: null,
-                'email' => $data['email'] ?: null,
             ],
             'redirect_url' => url('/donate/return?session_id={session_id}'),
             'webhook_url' => $webhookUrl,
             'description' => 'Donation for Cliff',
             'metadata' => [
                 'source' => 'landing',
-                'customer_name' => $data['name'] ?? 'Donor',
             ],
             'expires_in' => 3600,
             'display' => [
@@ -73,9 +70,12 @@ class DonationController extends Controller
         ];
 
         $res = Http::withToken($apiKey)
-            ->withHeaders(['Idempotency-Key' => $idempotencyKey])
-            ->acceptJson()
-            ->post(rtrim($baseUrl, '/') . '/api/v1/sessions', $payload);
+            ->withHeaders([
+                'Idempotency-Key' => $idempotencyKey,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ])
+            ->post('https://api.snippe.sh/v1/sessions', $payload);
 
         if (!$res->ok()) {
             \Log::error('Snippe Session Creation Failed', [
