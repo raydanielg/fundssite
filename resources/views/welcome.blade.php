@@ -665,7 +665,7 @@
                     <div class="sec-header"><span class="sec-title">All contributions</span><span class="sec-badge" id="all-bdg">—</span></div>
                     <div class="tbl-wrap">
                         <table class="tbl">
-                            <thead><tr><th>#</th><th>Name</th><th>Amount (TZS)</th><th>Paid</th><th>Reference</th></tr></thead>
+                            <thead><tr><th>#</th><th>Name</th><th>Amount</th><th>Status</th><th>Paid</th><th>Reference</th></tr></thead>
                             <tbody id="all-tbl"></tbody>
                         </table>
                     </div>
@@ -808,7 +808,8 @@
                 <tr>
                     <td style="color:var(--light);font-family:var(--mono);font-size:0.7rem">${i + 1}</td>
                     <td style="font-weight:600">${c.n}</td>
-                    <td style="font-family:var(--mono);color:${c.s === 'completed' ? 'var(--forest)' : 'var(--light)'}">${c.s === 'completed' ? 'TZS ' + f(c.a) : 'TZS ' + f(c.a)}</td>
+                    <td style="font-family:var(--mono);color:${c.s === 'completed' ? 'var(--forest)' : 'var(--light)'}">${CUR} ${f(c.a)}</td>
+                    <td><span class="bdg ${c.s === 'completed' ? 'paid' : 'pending'}">${c.s === 'completed' ? 'paid' : 'pending'}</span></td>
                     <td style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)">${c.s === 'completed' ? fmtDT(c.paid_at || c.created_at) : '—'}</td>
                     <td style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)">${c.ref || '—'}</td>
                 </tr>
@@ -818,7 +819,7 @@
                 <tr>
                     <td style="font-family:var(--mono);font-size:0.7rem;color:var(--muted)">${e.d}</td>
                     <td style="font-weight:500">${e.desc}</td>
-                    <td style="font-family:var(--mono);color:var(--coral)">TZS ${f(e.a)}</td>
+                    <td style="font-family:var(--mono);color:var(--coral)">${CUR} ${f(e.a)}</td>
                 </tr>
             `).join('');
 
@@ -828,8 +829,8 @@
                 const w = Math.round(c.a / max * 100);
                 return `<div class="brow">
                     <div class="blabel">${c.n}</div>
-                    <div class="btrack"><div class="bfill" style="width:${w}%">${w > 28 ? 'TZS ' + f(c.a) : ''}</div></div>
-                    ${w <= 28 ? `<span style="font-family:var(--mono);font-size:0.63rem;color:var(--forest);margin-left:4px">TZS ${f(c.a)}</span>` : ''}
+                    <div class="btrack"><div class="bfill" style="width:${w}%">${w > 28 ? CUR + ' ' + f(c.a) : ''}</div></div>
+                    ${w <= 28 ? `<span style="font-family:var(--mono);font-size:0.63rem;color:var(--forest);margin-left:4px">${CUR} ${f(c.a)}</span>` : ''}
                 </div>`;
             }).join('');
         }

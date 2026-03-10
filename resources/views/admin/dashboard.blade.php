@@ -16,6 +16,11 @@
 @endpush
 
 @section('content')
+    @php
+        $cur = (string) (($settings['currency'] ?? null) ?: 'TZS');
+        $raised = (int) ($totalRaised ?? 0);
+        $fmt = fn ($n) => number_format((int) $n, 0, '.', ',');
+    @endphp
     <div class="row g-3 mt-1">
         <!-- All Users (Cyan) -->
         <div class="col-lg-3 col-sm-6">
