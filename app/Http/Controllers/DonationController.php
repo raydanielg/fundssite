@@ -69,8 +69,8 @@ class DonationController extends Controller
             ]
         ];
 
-        $res = Http::withToken($apiKey)
-            ->withHeaders([
+        $res = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
                 'Idempotency-Key' => $idempotencyKey,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
