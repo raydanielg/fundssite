@@ -41,6 +41,9 @@ class DonationController extends Controller
 
         $idempotencyKey = (string) Str::uuid();
 
+        $baseUrl = config('services.snippe.base_url', 'https://api.snippe.sh');
+        $webhookUrl = config('services.snippe.webhook_url') ?: url('/api/snippe/webhook');
+
         $payload = [
             'amount' => (int) ($data['amount'] ?? 0),
             'currency' => $currency,
@@ -54,7 +57,7 @@ class DonationController extends Controller
                 'email' => $data['email'] ?: null,
             ],
             'redirect_url' => url('/donate/return?session_id={session_id}'),
-            'webhook_url' => url('/webhooks/snippe'),
+            'webhook_url' => $webhookUrl,
             'description' => 'Donation for Cliff',
             'metadata' => [
                 'source' => 'landing',
@@ -72,7 +75,7 @@ class DonationController extends Controller
         $res = Http::withToken($apiKey)
             ->withHeaders(['Idempotency-Key' => $idempotencyKey])
             ->acceptJson()
-            ->post('https://api.snippe.sh/api/v1/sessions', $payload);
+            ->post(rtrim($baseUrl, '/') . '/api/v1/sessions', $payload);
 
         if (!$res->ok()) {
             \Log::error('Snippe Session Creation Failed', [
