@@ -42,12 +42,12 @@ class DonationController extends Controller
         $idempotencyKey = (string) Str::uuid();
 
         $payload = [
-            'allow_custom_amount' => true,
             'amount' => (int) ($data['amount'] ?? 0),
-            'min_amount' => $minAmount,
-            'max_amount' => $maxAmount,
             'currency' => $currency,
             'allowed_methods' => ['mobile_money', 'qr', 'card'],
+            'allow_custom_amount' => true,
+            'min_amount' => $minAmount,
+            'max_amount' => $maxAmount,
             'customer' => [
                 'name' => $data['name'] ?? 'Donor',
                 'phone' => $data['phone'] ?? null,
@@ -61,6 +61,12 @@ class DonationController extends Controller
                 'customer_name' => $data['name'] ?? 'Donor',
             ],
             'expires_in' => 3600,
+            'display' => [
+                'show_description' => true,
+                'theme' => 'light',
+                'success_message' => 'Thank you for your donation!',
+                'button_text' => 'Donate Now'
+            ]
         ];
 
         $res = Http::withToken($apiKey)
