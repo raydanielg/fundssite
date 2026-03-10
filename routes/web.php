@@ -71,6 +71,9 @@ Route::get('/', function () {
 });
 
 Route::post('/donate/session', [DonationController::class, 'createSession'])->name('donate.session');
+Route::get('/donate/session', function () {
+    return redirect('/');
+});
 Route::get('/donate/return', [DonationController::class, 'returnPage'])->name('donate.return');
 
 Route::post('/api/snippe/webhook', [SnippeWebhookController::class, 'handle'])->name('webhooks.snippe');

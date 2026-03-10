@@ -78,7 +78,7 @@ class DonationController extends Controller
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
             ])
-            ->post(rtrim($baseUrl, '/') . '/v1/sessions', $payload);
+            ->post(rtrim($baseUrl, '/') . '/api/v1/sessions', $payload);
 
         if (!$res->ok()) {
             \Log::error('Snippe Session Creation Failed', [
