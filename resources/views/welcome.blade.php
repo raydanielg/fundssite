@@ -921,7 +921,16 @@
 
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.checkout_url) {
-                    alert(data.message || 'Unable to start donation. Please try again.');
+                    console.error('Donate session failed', {
+                        status: res.status,
+                        statusText: res.statusText,
+                        body: data,
+                    });
+
+                    const msg = data?.message || 'Unable to start donation. Please try again.';
+                    const details = data?.details ? '\n\nDetails: ' + JSON.stringify(data.details) : '';
+                    const errors = data?.errors ? '\n\nErrors: ' + JSON.stringify(data.errors) : '';
+                    alert(msg + details + errors);
                     if (btn) {
                         btn.disabled = false;
                         btn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
