@@ -920,12 +920,19 @@
                 });
 
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok || !data.checkout_url) {
+                const checkoutUrl = data?.checkout_url || data?.data?.checkout_url || data?.details?.data?.checkout_url;
+                if (!res.ok || !checkoutUrl) {
                     console.error('Donate session failed', {
                         status: res.status,
                         statusText: res.statusText,
                         body: data,
                     });
+
+                    // If backend returns an error status but Snippe response contains a checkout URL, proceed anyway.
+                    if (checkoutUrl) {
+                        window.location.href = checkoutUrl;
+                        return;
+                    }
 
                     const msg = data?.message || 'Unable to start donation. Please try again.';
                     const details = data?.details ? '\n\nDetails: ' + JSON.stringify(data.details) : '';
@@ -942,7 +949,7 @@
                     return;
                 }
 
-                window.location.href = data.checkout_url;
+                window.location.href = checkoutUrl;
             } catch (e) {
                 alert('Unable to start donation. Please try again.');
                 if (btn) {

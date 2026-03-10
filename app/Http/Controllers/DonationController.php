@@ -80,7 +80,7 @@ class DonationController extends Controller
             ])
             ->post(rtrim($baseUrl, '/') . '/api/v1/sessions', $payload);
 
-        if (!$res->ok()) {
+        if (!$res->successful()) {
             \Log::error('Snippe Session Creation Failed', [
                 'status' => $res->status(),
                 'payload' => $payload,
