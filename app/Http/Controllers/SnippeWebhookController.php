@@ -15,11 +15,31 @@ class SnippeWebhookController extends Controller
             return response()->json(['message' => 'Webhook secret not configured.'], 500);
         }
 
+        $secret = trim((string) $secret);
+
         $payload = $request->getContent();
-        $signature = (string) $request->header('X-Webhook-Signature', '');
+        $signature = trim((string) $request->header('X-Webhook-Signature', ''));
+
+        if ($signature === '') {
+            \Log::warning('Snippe webhook missing signature header', [
+                'path' => $request->path(),
+                'headers' => $request->headers->all(),
+            ]);
+            return response()->json(['message' => 'Invalid signature.'], 401);
+        }
+
+        if (str_starts_with($signature, 'sha256=')) {
+            $signature = substr($signature, 7);
+        }
 
         $expected = hash_hmac('sha256', $payload, $secret);
         if (!hash_equals($expected, $signature)) {
+            \Log::warning('Snippe webhook invalid signature', [
+                'path' => $request->path(),
+                'signature_len' => strlen($signature),
+                'expected_prefix' => substr($expected, 0, 12),
+                'signature_prefix' => substr($signature, 0, 12),
+            ]);
             return response()->json(['message' => 'Invalid signature.'], 401);
         }
 
