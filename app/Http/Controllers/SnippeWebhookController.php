@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DonationTransaction;
+use App\Models\SnippeWebhookEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -44,42 +45,65 @@ class SnippeWebhookController extends Controller
         }
 
         $data = $request->json()->all();
-        $event = (string) $request->header('X-Webhook-Event', '');
-        
-        // Snippe webhooks usually have a type or event name
-        $type = $data['type'] ?? $event;
-        $sessionData = $data['data'] ?? [];
-        $ref = $sessionData['reference'] ?? null;
+        $eventHeader = (string) $request->header('X-Webhook-Event', '');
+
+        $eventId = $data['id'] ?? null;
+        $type = (string) ($data['type'] ?? $eventHeader);
+        $sessionData = is_array($data['data'] ?? null) ? $data['data'] : [];
+
+        if ($eventId) {
+            try {
+                SnippeWebhookEvent::firstOrCreate(
+                    ['event_id' => (string) $eventId],
+                    ['type' => $type ?: null, 'received_at' => now()]
+                );
+            } catch (\Throwable $e) {
+                // If unique constraint triggers due to duplicates, treat as already processed.
+                return response()->json(['ok' => true]);
+            }
+        }
+
+        // Snippe webhooks include payment reference AND session_reference
+        // Our DB stores session reference (PAY...) in donation_transactions.reference
+        $sessionRef = $sessionData['session_reference'] ?? null;
+        $ref = $sessionRef ?: ($sessionData['reference'] ?? null);
 
         if (!$ref) {
             return response()->json(['message' => 'Missing reference.'], 422);
         }
 
         $tx = DonationTransaction::where('reference', $ref)->first();
-        if ($tx) {
-            $status = $sessionData['status'] ?? $tx->status;
-            $paidAt = $tx->paid_at;
-            
-            if ($status === 'completed' && !$tx->paid_at) {
-                $completedAt = $sessionData['completed_at'] ?? null;
-                $paidAt = $completedAt ? Carbon::parse($completedAt) : now();
-            }
-
-            $amountData = $sessionData['amount'] ?? [];
-            $amountValue = $amountData['value'] ?? null;
-            $amountCurrency = $amountData['currency'] ?? null;
-
-            $tx->update([
-                'status' => $status,
-                'paid_at' => $paidAt,
-                'amount' => is_numeric($amountValue) ? (int) $amountValue : $tx->amount,
-                'currency' => $amountCurrency ?: $tx->currency,
-                'external_reference' => $sessionData['external_reference'] ?? $tx->external_reference,
-                'webhook_event' => $type ?: $tx->webhook_event,
-                'failure_reason' => $sessionData['failure_reason'] ?? $tx->failure_reason,
-                'raw_payload' => $data,
-            ]);
+        if (!$tx) {
+            // Unknown transaction; acknowledge to prevent retries storm.
+            return response()->json(['ok' => true]);
         }
+
+        $status = (string) ($sessionData['status'] ?? $tx->status);
+        $paidAt = $tx->paid_at;
+
+        if ($status === 'completed' && !$tx->paid_at) {
+            $completedAt = $sessionData['completed_at'] ?? null;
+            $paidAt = $completedAt ? Carbon::parse($completedAt) : now();
+        }
+
+        if (in_array($type, ['payment.failed', 'payment.cancelled'], true) && $status === 'pending') {
+            $status = $type === 'payment.cancelled' ? 'cancelled' : 'failed';
+        }
+
+        $amountData = is_array($sessionData['amount'] ?? null) ? $sessionData['amount'] : [];
+        $amountValue = $amountData['value'] ?? null;
+        $amountCurrency = $amountData['currency'] ?? null;
+
+        $tx->update([
+            'status' => $status,
+            'paid_at' => $paidAt,
+            'amount' => is_numeric($amountValue) ? (int) $amountValue : $tx->amount,
+            'currency' => $amountCurrency ?: $tx->currency,
+            'external_reference' => $sessionData['external_reference'] ?? $tx->external_reference,
+            'webhook_event' => $type ?: $tx->webhook_event,
+            'failure_reason' => $sessionData['failure_reason'] ?? $tx->failure_reason,
+            'raw_payload' => $data,
+        ]);
 
         return response()->json(['ok' => true]);
     }

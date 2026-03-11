@@ -382,6 +382,18 @@
         .hidden { display: none; }
         .spin { animation: fa-spin 2s infinite linear; display: inline-block; }
         @keyframes fa-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .pay-grid { display: grid; gap: 14px; }
+        .pay-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); }
+        .pay-left { display: flex; align-items: center; gap: 12px; }
+        .pay-ic { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); font-size: 1.25rem; }
+        .pay-title { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+        .pay-name { font-family: var(--serif); font-weight: 900; font-size: 1.05rem; color: rgba(255,255,255,0.94); margin-bottom: 3px; }
+        .pay-num { font-family: var(--mono); font-weight: 800; font-size: 1.05rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.88); }
+        .pay-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+        .pay-btn { border: 1px solid rgba(255,255,255,0.18); background: rgba(0,0,0,0.18); color: rgba(255,255,255,0.90); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: transform 0.15s, background 0.15s, border-color 0.15s; }
+        .pay-btn:hover { transform: translateY(-1px); background: rgba(0,0,0,0.28); border-color: rgba(111,207,173,0.45); }
+        .pay-note { font-size: 0.75rem; color: rgba(255,255,255,0.60); line-height: 1.55; margin-top: 10px; }
         footer { border-top: 1px solid rgba(212,234,226,0.9); background: linear-gradient(135deg, var(--deep) 0%, #124b38 60%, var(--forest) 100%); }
         .site-footer {
             max-width: 1100px;
@@ -480,7 +492,7 @@
 
             <div>
                 <div class="photo-ring">
-                    <div class="photo-inner" onclick="document.getElementById('photo-input').click()" title="Click to upload Cliff's photo">
+                    <div class="photo-inner" onclick="openPayInfo()" title="Click to view other payment methods">
                         <img id="cliff-photo" src="{{ asset('WhatsApp Image 2026-03-10 at 17.56.33.jpeg') }}" alt="Cliff" style="display:block" />
                         <div class="photo-placeholder" id="photo-ph" style="display:none">
                             <span class="icon"><span class="material-symbols-outlined">photo_camera</span></span>
@@ -489,6 +501,67 @@
                     </div>
                 </div>
                 <input type="file" id="photo-input" accept="image/*" onchange="loadPhoto(event)">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="payInfoModal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal" style="max-width: 760px;">
+            <div class="modal-head">
+                <button class="modal-x" type="button" onclick="closePayInfo()" aria-label="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+                <div class="modal-title"><span class="material-symbols-outlined">account_balance_wallet</span>Other payment methods</div>
+                <div class="modal-sub">Use any of the options below. Tap <strong>Copy</strong> to copy the number/account.</div>
+            </div>
+            <div class="modal-body">
+                <div class="pay-grid">
+                    <div class="pay-card" style="border-left: 3px solid rgba(46,158,114,0.9);">
+                        <div class="pay-left">
+                            <div class="pay-ic">💚</div>
+                            <div>
+                                <div class="pay-title" style="color: rgba(111,207,173,0.95);">Selcom Microfinance</div>
+                                <div class="pay-name">Joseph Msuya</div>
+                                <div class="pay-num" data-copy="0714172979">0714 172 979</div>
+                            </div>
+                        </div>
+                        <div class="pay-actions">
+                            <button class="pay-btn" type="button" onclick="copyPay('0714172979')">Copy</button>
+                            <button class="pay-btn" type="button" onclick="callPay('0714172979')">Call</button>
+                        </div>
+                    </div>
+
+                    <div class="pay-card" style="border-left: 3px solid rgba(91,156,255,0.9);">
+                        <div class="pay-left">
+                            <div class="pay-ic">💙</div>
+                            <div>
+                                <div class="pay-title" style="color: rgba(91,156,255,0.95);">Tigo Pesa</div>
+                                <div class="pay-name">Joseph Msuya</div>
+                                <div class="pay-num" data-copy="0714172979">0714 172 979</div>
+                            </div>
+                        </div>
+                        <div class="pay-actions">
+                            <button class="pay-btn" type="button" onclick="copyPay('0714172979')">Copy</button>
+                            <button class="pay-btn" type="button" onclick="callPay('0714172979')">Call</button>
+                        </div>
+                    </div>
+
+                    <div class="pay-card" style="border-left: 3px solid rgba(255,106,66,0.9);">
+                        <div class="pay-left">
+                            <div class="pay-ic">🏦</div>
+                            <div>
+                                <div class="pay-title" style="color: rgba(255,106,66,0.95);">CRDB Bank</div>
+                                <div class="pay-name">Joseph Abdallah Msuya</div>
+                                <div class="pay-num" data-copy="0152396008400">0152 396 008 400</div>
+                            </div>
+                        </div>
+                        <div class="pay-actions">
+                            <button class="pay-btn" type="button" onclick="copyPay('0152396008400')">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pay-note">After paying using these methods, you can be recorded in the system via <strong>Admin → Management → Manual Donations</strong>.</div>
             </div>
         </div>
     </div>
@@ -881,6 +954,40 @@
             const m = document.getElementById('donateModal');
             m.classList.remove('open');
             m.setAttribute('aria-hidden', 'true');
+        }
+
+        function openPayInfo() {
+            const m = document.getElementById('payInfoModal');
+            m.classList.add('open');
+            m.setAttribute('aria-hidden', 'false');
+        }
+
+        function closePayInfo() {
+            const m = document.getElementById('payInfoModal');
+            m.classList.remove('open');
+            m.setAttribute('aria-hidden', 'true');
+        }
+
+        async function copyPay(text) {
+            try {
+                if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                alert('Copied: ' + text);
+            } catch (e) {
+                alert('Unable to copy. Please copy manually: ' + text);
+            }
+        }
+
+        function callPay(phone) {
+            window.location.href = 'tel:' + phone;
         }
 
         async function startDonateDirect() {

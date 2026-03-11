@@ -72,6 +72,12 @@
                             <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}">
                                 <i class="bi bi-gear me-2"></i> Fundraiser Settings
                             </a>
+                            <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions/manual') ? 'active' : '' }}" href="{{ url('/admin/transactions/manual') }}">
+                                <i class="bi bi-plus-circle me-2"></i> Manual Donations
+                            </a>
+                            <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/expenses') ? 'active' : '' }}" href="{{ url('/admin/expenses') }}">
+                                <i class="bi bi-receipt me-2"></i> Expenses
+                            </a>
                         </div>
                     </div>
 
@@ -154,6 +160,8 @@
                 <div class="collapse show" id="mgmtMenuMobile">
                     <div class="side-sub">
                         <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}"><i class="bi bi-gear me-2"></i>Fundraiser Settings</a>
+                        <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions/manual') ? 'active' : '' }}" href="{{ url('/admin/transactions/manual') }}"><i class="bi bi-plus-circle me-2"></i>Manual Donations</a>
+                        <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/expenses') ? 'active' : '' }}" href="{{ url('/admin/expenses') }}"><i class="bi bi-receipt me-2"></i>Expenses</a>
                     </div>
                 </div>
 

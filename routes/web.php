@@ -4,9 +4,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\SnippeWebhookController;
 use App\Models\DonationTransaction;
+use App\Models\FundraiserExpense;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Str;
 
 Route::get('/', function () {
     $settings = [
@@ -175,6 +179,88 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('admin.transactions');
 
+    Route::post('/admin/transactions/sync', function (Request $request) {
+        $data = $request->validate([
+            'limit' => ['nullable', 'integer', 'min:1', 'max:500'],
+        ]);
+
+        $limit = (int) ($data['limit'] ?? 50);
+        Artisan::call('snippe:sync-pending', [
+            '--limit' => $limit,
+        ]);
+
+        return redirect()->route('admin.transactions')->with('status', 'synced');
+    })->name('admin.transactions.sync');
+
+    Route::get('/admin/transactions/manual', function () {
+        $currency = 'TZS';
+        if (Schema::hasTable('fundraiser_settings')) {
+            $row = DB::table('fundraiser_settings')->orderBy('id')->first();
+            if ($row && $row->currency) {
+                $currency = (string) $row->currency;
+            }
+        }
+
+        $recent = DonationTransaction::query()
+            ->where('webhook_event', 'manual')
+            ->orderByDesc('paid_at')
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get([
+                'reference',
+                'paid_at',
+                'amount',
+                'currency',
+                'customer_name',
+                'customer_phone',
+                'created_at',
+            ]);
+
+        return view('admin.manual-donations', [
+            'currency' => $currency,
+            'recent' => $recent,
+        ]);
+    })->name('admin.transactions.manual');
+
+    Route::post('/admin/transactions/manual', function (Request $request) {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:32'],
+            'amount' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $currency = 'TZS';
+        if (Schema::hasTable('fundraiser_settings')) {
+            $row = DB::table('fundraiser_settings')->orderBy('id')->first();
+            if ($row && $row->currency) {
+                $currency = (string) $row->currency;
+            }
+        }
+
+        $ref = 'MAN' . now()->format('YmdHis') . strtoupper(Str::random(6));
+
+        DonationTransaction::create([
+            'reference' => $ref,
+            'status' => 'completed',
+            'paid_at' => now(),
+            'amount' => (int) $data['amount'],
+            'currency' => $currency,
+            'customer_name' => $data['name'],
+            'customer_phone' => $data['phone'],
+            'customer_email' => null,
+            'checkout_url' => null,
+            'payment_link_url' => null,
+            'external_reference' => null,
+            'webhook_event' => 'manual',
+            'failure_reason' => null,
+            'raw_payload' => [
+                'source' => 'manual',
+            ],
+        ]);
+
+        return redirect()->route('admin.transactions.manual')->with('status', 'saved');
+    })->name('admin.transactions.manual.store');
+
     Route::get('/admin/users', function () {
         $currency = 'TZS';
         if (Schema::hasTable('fundraiser_settings')) {
@@ -206,6 +292,73 @@ Route::middleware('auth')->group(function () {
             'currency' => $currency,
         ]);
     })->name('admin.users');
+
+    Route::get('/admin/expenses', function () {
+        $currency = 'TZS';
+        $settingsRow = null;
+        if (Schema::hasTable('fundraiser_settings')) {
+            $settingsRow = DB::table('fundraiser_settings')->orderBy('id')->first();
+            if ($settingsRow && $settingsRow->currency) {
+                $currency = (string) $settingsRow->currency;
+            }
+        }
+
+        $expenses = FundraiserExpense::query()
+            ->orderByDesc('spent_at')
+            ->orderByDesc('created_at')
+            ->limit(300)
+            ->get();
+
+        $total = (int) FundraiserExpense::query()->sum('amount');
+
+        return view('admin.expenses', [
+            'expenses' => $expenses,
+            'currency' => $currency,
+            'total' => $total,
+            'settings' => $settingsRow,
+        ]);
+    })->name('admin.expenses');
+
+    Route::post('/admin/expenses', function (Request $request) {
+        $currency = 'TZS';
+        $settingsRow = null;
+        if (Schema::hasTable('fundraiser_settings')) {
+            $settingsRow = DB::table('fundraiser_settings')->orderBy('id')->first();
+            if ($settingsRow && $settingsRow->currency) {
+                $currency = (string) $settingsRow->currency;
+            }
+        }
+
+        $data = $request->validate([
+            'spent_at' => ['required', 'date'],
+            'description' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'integer', 'min:1'],
+            'receipt' => ['nullable', 'file', 'max:5120'],
+        ]);
+
+        $receiptPath = null;
+        if ($request->hasFile('receipt')) {
+            $receiptPath = $request->file('receipt')->store('receipts', 'public');
+        }
+
+        FundraiserExpense::create([
+            'spent_at' => $data['spent_at'],
+            'description' => $data['description'],
+            'amount' => (int) $data['amount'],
+            'currency' => $currency,
+            'receipt_path' => $receiptPath,
+        ]);
+
+        if ($settingsRow) {
+            $newTotal = (int) FundraiserExpense::query()->sum('amount');
+            DB::table('fundraiser_settings')->where('id', $settingsRow->id)->update([
+                'expenses_amount' => $newTotal,
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('admin.expenses')->with('status', 'saved');
+    })->name('admin.expenses.store');
 
     Route::get('/admin/fundraiser', function () {
         $row = DB::table('fundraiser_settings')->orderBy('id')->first();

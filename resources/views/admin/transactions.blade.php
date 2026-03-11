@@ -19,8 +19,23 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
                     <h5 class="card-title mb-0 fw-bold">Contribution Stream</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <form method="POST" action="{{ route('admin.transactions.sync') }}" class="m-0">
+                            @csrf
+                            <input type="hidden" name="limit" value="100">
+                            <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                <i class="bi bi-arrow-repeat me-1"></i> Sync Pending
+                            </button>
+                        </form>
+                        <a class="btn btn-sm btn-outline-secondary rounded-pill px-3" href="{{ route('admin.transactions.manual') }}">
+                            <i class="bi bi-plus-circle me-1"></i> Manual Donation
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body">
+                    @if (session('status') === 'synced')
+                        <div class="alert alert-success py-2">Synced pending payments.</div>
+                    @endif
                     <div class="table-responsive">
                         <table id="transactionsTable" class="table table-hover align-middle">
                             <thead class="bg-light">
