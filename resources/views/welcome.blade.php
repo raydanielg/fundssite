@@ -6,23 +6,23 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- SEO Meta Tags -->
-    <title>Stand With Cliff — Medical Fundraiser</title>
-    <meta name="description" content="Join us in supporting Cliff's medical journey. Every contribution brings hope and helps cover essential treatment costs.">
+    <title>Help Save Cliff's Life</title>
+    <meta name="description" content="A husband, father of 2, fighting for his life. Track contributions and join hundreds supporting Cliff's kidney treatment.">
     <meta name="keywords" content="Medical Fundraiser, Stand With Cliff, Donation, Help Cliff, Medical Support Tanzania">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url('/') }}">
-    <meta property="og:title" content="Stand With Cliff — Medical Fundraiser">
-    <meta property="og:description" content="Cliff needs our support for his medical treatment. Together we can make a difference. Donate today.">
-    <meta property="og:image" content="{{ asset('WhatsApp Image 2026-03-10 at 17.56.33.jpeg') }}">
+    <meta property="og:title" content="Help Save Cliff's Life">
+    <meta property="og:description" content="A husband, father of 2, fighting for his life. Track contributions and join hundreds supporting Cliff's kidney treatment.">
+    <meta property="og:image" content="{{ asset('WhatsApp Image 2026-03-11 at 10.34.15.jpeg') }}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ url('/') }}">
-    <meta property="twitter:title" content="Stand With Cliff — Medical Fundraiser">
-    <meta property="twitter:description" content="Cliff needs our support for his medical treatment. Together we can make a difference. Donate today.">
-    <meta property="twitter:image" content="{{ asset('WhatsApp Image 2026-03-10 at 17.56.33.jpeg') }}">
+    <meta property="twitter:title" content="Help Save Cliff's Life">
+    <meta property="twitter:description" content="A husband, father of 2, fighting for his life. Track contributions and join hundreds supporting Cliff's kidney treatment.">
+    <meta property="twitter:image" content="{{ asset('WhatsApp Image 2026-03-11 at 10.34.15.jpeg') }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..700,0..1,-50..200" />
