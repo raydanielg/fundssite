@@ -175,6 +175,38 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('admin.transactions');
 
+    Route::get('/admin/users', function () {
+        $currency = 'TZS';
+        if (Schema::hasTable('fundraiser_settings')) {
+            $row = DB::table('fundraiser_settings')->orderBy('id')->first();
+            if ($row && $row->currency) {
+                $currency = (string) $row->currency;
+            }
+        }
+
+        $users = DB::table('donation_transactions')
+            ->select([
+                'customer_name',
+                'customer_phone',
+                'customer_email',
+                DB::raw("SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as total_completed"),
+                DB::raw("SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count"),
+                DB::raw("SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count"),
+                DB::raw("SUM(CASE WHEN status NOT IN ('pending','completed') THEN 1 ELSE 0 END) as failed_count"),
+                DB::raw("MAX(paid_at) as last_paid_at"),
+                DB::raw("MAX(created_at) as last_seen_at"),
+            ])
+            ->groupBy('customer_name', 'customer_phone', 'customer_email')
+            ->orderByDesc('total_completed')
+            ->limit(2000)
+            ->get();
+
+        return view('admin.users', [
+            'users' => $users,
+            'currency' => $currency,
+        ]);
+    })->name('admin.users');
+
     Route::get('/admin/fundraiser', function () {
         $row = DB::table('fundraiser_settings')->orderBy('id')->first();
         return view('admin.fundraiser-settings', [

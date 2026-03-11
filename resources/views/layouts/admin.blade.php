@@ -8,6 +8,8 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+        @stack('styles')
+
         <style>
             :root { --admin-sidebar-w: 260px; }
             body { background: #f2f4f7; }
@@ -19,20 +21,25 @@
             @media (min-width: 992px) {
                 .admin-main { padding: 22px; }
             }
-            .side-link { color: rgba(255,255,255,0.70); }
-            .side-link:hover { color: rgba(255,255,255,0.92); background: rgba(255,255,255,0.06); }
-            .side-link.active { color: #fff; background: rgba(13,110,253,0.95); }
-            .side-section { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-top: 18px; margin-bottom: 8px; padding-left: 10px; }
-            .brand-row { display:flex; align-items:center; gap:10px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-            .brand-badge { width: 34px; height: 34px; border-radius: 10px; background: rgba(13,110,253,0.95); display:flex; align-items:center; justify-content:center; }
-            .brand-text { font-weight: 800; letter-spacing: 0.04em; }
+            .admin-sidebar { background: linear-gradient(180deg, #0f7a38 0%, #0b4f25 100%); }
+            .side-link { color: rgba(255,255,255,0.80); font-weight: 600; }
+            .side-link:hover { color: rgba(255,255,255,0.95); background: rgba(255,255,255,0.08); }
+            .side-link.active { color: #0b2f17; background: #a6f4c5; }
+            .side-section { font-size: 0.70rem; letter-spacing: 0.10em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-top: 16px; margin-bottom: 8px; padding-left: 10px; }
+            .brand-row { display:flex; align-items:center; gap:10px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.14); }
+            .brand-badge { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.14); display:flex; align-items:center; justify-content:center; }
+            .brand-text { font-weight: 900; letter-spacing: 0.10em; }
+            .side-collapse-toggle { display:flex; align-items:center; justify-content: space-between; gap: 10px; }
+            .side-collapse-toggle .chev { opacity: 0.8; }
+            .side-sub { padding-left: 10px; }
+            .side-sub .side-link { font-weight: 600; opacity: 0.92; }
         </style>
     </head>
     <body>
         <div class="admin-shell d-flex">
             <aside class="admin-sidebar d-none d-lg-flex flex-column bg-dark text-white">
                 <div class="brand-row">
-                    <div class="brand-badge"><i class="bi bi-shield-lock-fill text-white"></i></div>
+                    <div class="brand-badge"><i class="bi bi-shield-check text-white"></i></div>
                     <div class="brand-text">ADMIN</div>
                 </div>
 
@@ -48,14 +55,25 @@
                     <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin') ? 'active' : '' }}" href="{{ url('/admin') }}">
                         <i class="bi bi-speedometer2 me-2"></i> Dashboard
                     </a>
+                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/users') ? 'active' : '' }}" href="{{ url('/admin/users') }}">
+                        <i class="bi bi-people me-2"></i> Users
+                    </a>
                     <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions') ? 'active' : '' }}" href="{{ url('/admin/transactions') }}">
                         <i class="bi bi-credit-card-2-front me-2"></i> Payments
                     </a>
 
                     <div class="side-section">Management</div>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}">
-                        <i class="bi bi-gear me-2"></i> Fundraiser Settings
+                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 side-collapse-toggle" data-bs-toggle="collapse" href="#mgmtMenu" role="button" aria-expanded="true" aria-controls="mgmtMenu">
+                        <span><i class="bi bi-sliders me-2"></i> Management</span>
+                        <i class="bi bi-chevron-down chev"></i>
                     </a>
+                    <div class="collapse show" id="mgmtMenu">
+                        <div class="side-sub">
+                            <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}">
+                                <i class="bi bi-gear me-2"></i> Fundraiser Settings
+                            </a>
+                        </div>
+                    </div>
 
                     <div class="side-section">Account</div>
                     <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('profile') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
@@ -127,16 +145,24 @@
                 </div>
 
                 <div class="side-section">Main</div>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin') ? 'active' : '' }}" href="{{ url('/admin') }}">Dashboard</a>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions') ? 'active' : '' }}" href="{{ url('/admin/transactions') }}">Payments</a>
+                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin') ? 'active' : '' }}" href="{{ url('/admin') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/users') ? 'active' : '' }}" href="{{ url('/admin/users') }}"><i class="bi bi-people me-2"></i>Users</a>
+                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions') ? 'active' : '' }}" href="{{ url('/admin/transactions') }}"><i class="bi bi-credit-card-2-front me-2"></i>Payments</a>
 
                 <div class="side-section">Management</div>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}">Fundraiser Settings</a>
+                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1" data-bs-toggle="collapse" href="#mgmtMenuMobile" role="button" aria-expanded="true" aria-controls="mgmtMenuMobile"><i class="bi bi-sliders me-2"></i>Management <span class="float-end"><i class="bi bi-chevron-down"></i></span></a>
+                <div class="collapse show" id="mgmtMenuMobile">
+                    <div class="side-sub">
+                        <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}"><i class="bi bi-gear me-2"></i>Fundraiser Settings</a>
+                    </div>
+                </div>
 
                 <div class="side-section">Account</div>
                 <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('profile') ? 'active' : '' }}" href="{{ route('profile.edit') }}">Profile</a>
                 <a class="nav-link side-link rounded-3 px-3 py-2 mb-1" href="{{ url('/') }}">View Website</a>
             </div>
         </div>
+
+        @stack('scripts')
     </body>
 </html>
