@@ -180,6 +180,24 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('admin.transactions')->with('status', 'deleted');
     })->name('admin.transactions.destroy');
 
+    Route::patch('/admin/transactions/{transaction}', function (Request $request, DonationTransaction $transaction) {
+        $data = $request->validate([
+            'customer_name' => ['required', 'string', 'max:255'],
+            'customer_phone' => ['nullable', 'string', 'max:255'],
+            'amount' => ['required', 'integer', 'min:0'],
+            'paid_at' => ['nullable', 'date'],
+        ]);
+
+        $transaction->update([
+            'customer_name' => $data['customer_name'],
+            'customer_phone' => $data['customer_phone'],
+            'amount' => $data['amount'],
+            'paid_at' => $data['paid_at'] ? \Illuminate\Support\Carbon::parse($data['paid_at']) : $transaction->paid_at,
+        ]);
+
+        return redirect()->route('admin.transactions')->with('status', 'updated');
+    })->name('admin.transactions.update');
+
     Route::post('/admin/transactions/sync', function (Request $request) {
         $data = $request->validate([
             'limit' => ['nullable', 'integer', 'min:1', 'max:500'],

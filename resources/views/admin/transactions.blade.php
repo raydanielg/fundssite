@@ -83,6 +83,11 @@
                             <i class="bi bi-check-circle-fill me-2"></i> Synced pending payments with Snippe.
                         </div>
                     @endif
+                    @if (session('status') === 'updated')
+                        <div class="alert alert-success py-2 border-0 shadow-sm mb-4">
+                            <i class="bi bi-check-circle-fill me-2"></i> Transaction updated successfully.
+                        </div>
+                    @endif
                     @if (session('status') === 'deleted')
                         <div class="alert alert-danger py-2 border-0 shadow-sm mb-4">
                             <i class="bi bi-trash-fill me-2"></i> Transaction has been deleted successfully.
@@ -146,9 +151,50 @@
                                                 <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#modal-{{ $t->id }}" title="View Details">
                                                     <i class="bi bi-eye"></i>
                                                 </button>
+                                                <button class="btn btn-sm btn-outline-primary rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#edit-modal-{{ $t->id }}" title="Edit Transaction">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
                                                 <button class="btn btn-sm btn-outline-danger rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal-{{ $t->id }}" title="Delete Transaction">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
+                                            </div>
+
+                                            <!-- Transaction Edit Modal -->
+                                            <div class="modal fade" id="edit-modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow">
+                                                        <div class="modal-header border-bottom-0 pb-0">
+                                                            <h5 class="modal-title fw-bold">Edit Transaction</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <form action="{{ route('admin.transactions.update', $t->id) }}" method="POST">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <div class="modal-body text-start">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Contributor Name</label>
+                                                                    <input type="text" name="customer_name" class="form-control" value="{{ $t->customer_name }}" required>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Phone Number</label>
+                                                                    <input type="text" name="customer_phone" class="form-control" value="{{ $t->customer_phone }}">
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Amount ({{ $t->currency }})</label>
+                                                                    <input type="number" name="amount" class="form-control" value="{{ (int)$t->amount }}" required>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Date Paid</label>
+                                                                    <input type="date" name="paid_at" class="form-control" value="{{ $t->paid_at ? $t->paid_at->format('Y-m-d') : $t->created_at->format('Y-m-d') }}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer border-top-0 pt-0">
+                                                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Update Transaction</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <!-- Transaction Detail Modal -->
