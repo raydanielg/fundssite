@@ -7,6 +7,36 @@
     <div class="container-fluid">
         <div class="row g-4">
             <div class="col-12 col-lg-5">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold">Import from Excel</h5>
+                        <div class="text-muted small">Bulk upload donations using an Excel file.</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 p-3 bg-light rounded-3 border">
+                            <h6 class="fw-bold small mb-2">Step 1: Download Template</h6>
+                            <p class="x-small text-muted mb-3">Download the Excel template to ensure your data is in the correct format.</p>
+                            <a href="{{ route('admin.transactions.manual.template') }}" class="btn btn-sm btn-outline-primary w-100">
+                                <i class="bi bi-download me-1"></i> Download Template (.xlsx)
+                            </a>
+                        </div>
+
+                        <form method="POST" action="{{ route('admin.transactions.manual.import') }}" enctype="multipart/form-data">
+                            @csrf
+                            <h6 class="fw-bold small mb-2">Step 2: Upload & Review</h6>
+                            <div class="mb-3">
+                                <input type="file" name="excel_file" class="form-control @error('excel_file') is-invalid @enderror" accept=".xlsx,.xls,.csv" required>
+                                @error('excel_file')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-file-earmark-arrow-up me-1"></i> Preview Import
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white py-3">
                         <h5 class="mb-0 fw-bold">Add Manual Donation</h5>
@@ -14,7 +44,13 @@
                     </div>
                     <div class="card-body">
                         @if (session('status') === 'saved')
-                            <div class="alert alert-success py-2">Saved.</div>
+                            <div class="alert alert-success py-2">Transaction saved successfully.</div>
+                        @endif
+                        @if (session('status') === 'imported')
+                            <div class="alert alert-success py-2">Bulk donations imported successfully!</div>
+                        @endif
+                        @if (session('error'))
+                            <div class="alert alert-danger py-2">{{ session('error') }}</div>
                         @endif
 
                         <form method="POST" action="{{ route('admin.transactions.manual.store') }}" class="row g-3">

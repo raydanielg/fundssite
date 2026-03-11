@@ -196,7 +196,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/transactions/manual', function () {
         $currency = 'TZS';
         if (Schema::hasTable('fundraiser_settings')) {
-            $row = DB::table('fundraiser_settings')->orderBy('id')->first();
+            $row = DB::table('fundraiser_settings')->orderBy('id', 'asc')->first();
             if ($row && $row->currency) {
                 $currency = (string) $row->currency;
             }
@@ -207,21 +207,109 @@ Route::middleware('auth')->group(function () {
             ->orderByDesc('paid_at')
             ->orderByDesc('created_at')
             ->limit(50)
-            ->get([
-                'reference',
-                'paid_at',
-                'amount',
-                'currency',
-                'customer_name',
-                'customer_phone',
-                'created_at',
-            ]);
+            ->get();
 
         return view('admin.manual-donations', [
             'currency' => $currency,
             'recent' => $recent,
         ]);
     })->name('admin.transactions.manual');
+
+    Route::get('/admin/transactions/manual/template', function () {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Header
+        $sheet->setCellValue('A1', 'Full Name');
+        $sheet->setCellValue('B1', 'Phone Number');
+        $sheet->setCellValue('C1', 'Amount');
+        $sheet->setCellValue('D1', 'Date (YYYY-MM-DD)');
+        
+        // Style header
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+        $sheet->getColumnDimension('A')->setWidth(30);
+        $sheet->getColumnDimension('B')->setWidth(20);
+        $sheet->getColumnDimension('C')->setWidth(15);
+        $sheet->getColumnDimension('D')->setWidth(20);
+
+        // Example row
+        $sheet->setCellValue('A2', 'John Doe');
+        $sheet->setCellValue('B2', '0700000000');
+        $sheet->setCellValue('C2', '50000');
+        $sheet->setCellValue('D2', now()->format('Y-m-d'));
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="manual_donations_template.xlsx"');
+        $writer->save('php://output');
+        exit;
+    })->name('admin.transactions.manual.template');
+
+    Route::post('/admin/transactions/manual/import', function (Request $request) {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        $file = $request->file('excel_file');
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        $importData = [];
+        // Skip header row
+        for ($i = 1; $i < count($rows); $i++) {
+            if (empty($rows[$i][0]) || empty($rows[$i][2])) continue;
+
+            $importData[] = [
+                'name' => $rows[$i][0],
+                'phone' => $rows[$i][1] ?? '-',
+                'amount' => (int) str_replace(',', '', $rows[$i][2]),
+                'date' => $rows[$i][3] ?? now()->format('Y-m-d'),
+            ];
+        }
+
+        if (empty($importData)) {
+            return back()->withErrors(['excel_file' => 'No valid data found in the file.']);
+        }
+
+        return view('admin.manual-import-review', [
+            'importData' => $importData
+        ]);
+    })->name('admin.transactions.manual.import');
+
+    Route::post('/admin/transactions/manual/import/confirm', function (Request $request) {
+        $data = json_decode($request->input('import_json'), true);
+        
+        if (!$data || !is_array($data)) {
+            return redirect()->route('admin.transactions.manual')->with('error', 'Invalid import data.');
+        }
+
+        $currency = 'TZS';
+        if (Schema::hasTable('fundraiser_settings')) {
+            $row = DB::table('fundraiser_settings')->orderBy('id', 'asc')->first();
+            if ($row && $row->currency) {
+                $currency = (string) $row->currency;
+            }
+        }
+
+        foreach ($data as $item) {
+            $ref = 'MAN' . now()->format('YmdHis') . strtoupper(Str::random(6));
+            DonationTransaction::create([
+                'reference' => $ref,
+                'status' => 'completed',
+                'paid_at' => \Illuminate\Support\Carbon::parse($item['date']),
+                'amount' => (int) $item['amount'],
+                'currency' => $currency,
+                'customer_name' => $item['name'],
+                'customer_phone' => $item['phone'],
+                'webhook_event' => 'manual',
+                'raw_payload' => ['source' => 'bulk_import'],
+            ]);
+        }
+
+        return redirect()->route('admin.transactions.manual')->with('status', 'imported');
+    })->name('admin.transactions.manual.confirm');
 
     Route::post('/admin/transactions/manual', function (Request $request) {
         $data = $request->validate([
