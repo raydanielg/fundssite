@@ -467,6 +467,54 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('admin.expenses')->with('status', 'saved');
     })->name('admin.expenses.store');
 
+    Route::delete('/admin/expenses/{expense}', function (FundraiserExpense $expense) {
+        $expense->delete();
+        
+        // Recalculate total expenses in settings
+        $settingsRow = DB::table('fundraiser_settings')->orderBy('id', 'asc')->first();
+        if ($settingsRow) {
+            $newTotal = (int) FundraiserExpense::query()->sum('amount');
+            DB::table('fundraiser_settings')->where('id', $settingsRow->id)->update([
+                'expenses_amount' => $newTotal,
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('admin.expenses')->with('status', 'deleted');
+    })->name('admin.expenses.destroy');
+
+    Route::patch('/admin/expenses/{expense}', function (Request $request, FundraiserExpense $expense) {
+        $data = $request->validate([
+            'spent_at' => ['required', 'date'],
+            'description' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'integer', 'min:1'],
+            'receipt' => ['nullable', 'file', 'max:5120'],
+        ]);
+
+        if ($request->hasFile('receipt')) {
+            $receiptPath = $request->file('receipt')->store('receipts', 'public');
+            $expense->receipt_path = $receiptPath;
+        }
+
+        $expense->update([
+            'spent_at' => $data['spent_at'],
+            'description' => $data['description'],
+            'amount' => (int) $data['amount'],
+        ]);
+
+        // Recalculate total expenses in settings
+        $settingsRow = DB::table('fundraiser_settings')->orderBy('id', 'asc')->first();
+        if ($settingsRow) {
+            $newTotal = (int) FundraiserExpense::query()->sum('amount');
+            DB::table('fundraiser_settings')->where('id', $settingsRow->id)->update([
+                'expenses_amount' => $newTotal,
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('admin.expenses')->with('status', 'updated');
+    })->name('admin.expenses.update');
+
     Route::get('/admin/fundraiser', function () {
         $row = DB::table('fundraiser_settings')->orderBy('id')->first();
         return view('admin.fundraiser-settings', [
