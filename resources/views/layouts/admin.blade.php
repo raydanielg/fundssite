@@ -7,6 +7,14 @@
         <title>@yield('title', config('app.name'))</title>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <style>
+            .app-main .app-content { padding-top: 0.75rem !important; }
+            .app-main .container-fluid { padding-left: 1rem; padding-right: 1rem; }
+            .app-sidebar .sidebar-wrapper { padding-bottom: 1rem; }
+            .app-sidebar .nav.sidebar-menu .nav-link { padding-top: 0.55rem; padding-bottom: 0.55rem; }
+            .app-sidebar .nav-header { margin-bottom: 0.5rem !important; }
+        </style>
     </head>
     <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
         <div class="wrapper">
@@ -75,17 +83,11 @@
                     </div>
                     <nav class="mt-1 px-2">
                         <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
-                            <li class="nav-header text-white-50 small fw-bold text-uppercase ps-3 mb-2">MAIN NAVIGATION</li>
+                            <li class="nav-header text-white-50 small fw-bold text-uppercase ps-3 mb-2">MAIN</li>
                             <li class="nav-item">
                                 <a href="{{ url('/admin') }}" class="nav-link py-2 rounded-3 mb-1 {{ request()->is('admin') ? 'active bg-primary shadow-sm text-white' : 'text-white-50' }}">
                                     <i class="nav-icon bi bi-speedometer2 me-2"></i>
                                     <p class="fw-medium">Dashboard</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link py-2 rounded-3 mb-1 text-white-50">
-                                    <i class="nav-icon bi bi-people me-2"></i>
-                                    <p class="fw-medium">Users</p>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -94,39 +96,17 @@
                                     <p class="fw-medium">Payments</p>
                                 </a>
                             </li>
+
+                            <li class="nav-header mt-3 mb-2 text-white-50 small fw-bold text-uppercase ps-3">MANAGEMENT</li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link py-2 rounded-3 mb-1 text-white-50">
-                                    <i class="nav-icon bi bi-calendar3 me-2"></i>
-                                    <p class="fw-medium">Statistics</p>
+                                <a href="{{ url('/admin/fundraiser') }}" class="nav-link py-2 rounded-3 mb-1 {{ request()->is('admin/fundraiser') ? 'active bg-primary shadow-sm text-white' : 'text-white-50' }}">
+                                    <i class="nav-icon bi bi-gear me-2"></i>
+                                    <p class="fw-medium">Fundraiser Settings</p>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link py-2 rounded-3 mb-1 text-white-50">
-                                    <i class="nav-icon bi bi-file-earmark-bar-graph me-2"></i>
-                                    <p class="fw-medium">Reports</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link py-2 rounded-3 mb-1 text-white-50">
-                                    <i class="nav-icon bi bi-grid-fill me-2"></i>
-                                    <p class="fw-medium">Categories</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link py-2 rounded-3 mb-1 text-white-50">
-                                    <i class="nav-icon bi bi-megaphone me-2"></i>
-                                    <p class="fw-medium">Advertisements</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link py-2 rounded-3 mb-1 text-white-50">
-                                    <i class="nav-icon bi bi-star me-2"></i>
-                                    <p class="fw-medium">Premium</p>
-                                </a>
-                            </li>
-                            
-                            <li class="nav-header mt-4 mb-2 text-white-50 small fw-bold text-uppercase ps-3">ACCOUNT & SYSTEM</li>
-                            
+
+                            <li class="nav-header mt-3 mb-2 text-white-50 small fw-bold text-uppercase ps-3">ACCOUNT</li>
+
                             <li class="nav-item">
                                 <a href="{{ route('profile.edit') }}" class="nav-link py-2 rounded-3 mb-1 {{ request()->is('profile') ? 'active bg-primary shadow-sm text-white' : 'text-white-50' }}">
                                     <i class="nav-icon bi bi-person me-2"></i>
@@ -134,21 +114,9 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ url('/admin/fundraiser') }}" class="nav-link py-2 rounded-3 mb-1 {{ request()->is('admin/fundraiser') ? 'active bg-primary shadow-sm text-white' : 'text-white-50' }}">
-                                    <i class="nav-icon bi bi-gear me-2"></i>
-                                    <p class="fw-medium">Settings</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
                                 <a href="{{ url('/') }}" class="nav-link py-2 rounded-3 mb-1 text-white-50">
                                     <i class="nav-icon bi bi-house me-2"></i>
-                                    <p class="fw-medium">User Panel</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link py-2 rounded-3 mb-1 text-white-50">
-                                    <i class="nav-icon bi bi-shield-lock me-2"></i>
-                                    <p class="fw-medium">Security</p>
+                                    <p class="fw-medium">View Website</p>
                                 </a>
                             </li>
                         </ul>
@@ -157,7 +125,7 @@
             </aside>
 
             <main class="app-main bg-light">
-                <div class="app-content pt-3">
+                <div class="app-content">
                     <div class="container-fluid">
                         @yield('content')
                     </div>
