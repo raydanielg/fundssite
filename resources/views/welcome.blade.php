@@ -880,24 +880,31 @@
 
             <div id="tab-expenses" class="hidden">
                 <div class="section-card" style="margin-bottom:24px">
-                    <div class="sec-header"><span class="sec-title">Medical Expenses Log</span><span class="sec-badge">{{ ($settings['currency'] ?? 'TZS') }} {{ number_format($settings['expenses_amount'] ?? 0) }}</span></div>
+                    <div class="sec-header">
+                        <span class="sec-title">Medical Expenses Log</span>
+                        <span class="sec-badge">{{ ($settings['currency'] ?? 'TZS') }} {{ number_format($expenses->sum('amount') ?? 0) }}</span>
+                    </div>
                     <div class="tbl-wrap">
                         <table class="tbl">
-                            <thead><tr><th>Date</th><th>Description</th><th>Amount ({{ $settings['currency'] ?? 'TZS' }})</th><th>Receipt</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount ({{ $settings['currency'] ?? 'TZS' }})</th>
+                                    <th>Receipt</th>
+                                </tr>
+                            </thead>
                             <tbody id="exp-tbl">
-                                @php
-                                    $expensesList = \App\Models\FundraiserExpense::orderByDesc('spent_at')->orderByDesc('created_at')->get();
-                                @endphp
-                                @forelse($expensesList as $exp)
+                                @forelse($expenses as $exp)
                                     <tr>
-                                        <td>{{ $exp->spent_at->format('Y-m-d') }}</td>
-                                        <td>{{ $exp->description }}</td>
-                                        <td>{{ number_format($exp->amount) }}</td>
+                                        <td style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)">{{ $exp->spent_at->format('Y-m-d') }}</td>
+                                        <td style="font-weight:500">{{ $exp->description }}</td>
+                                        <td style="font-family:var(--mono);color:var(--coral)">{{ number_format($exp->amount) }}</td>
                                         <td>
                                             @if($exp->receipt_path)
-                                                <a href="{{ \Illuminate\Support\Facades\Storage::url($exp->receipt_path) }}" target="_blank" class="text-mint">View</a>
+                                                <a href="{{ \Illuminate\Support\Facades\Storage::url($exp->receipt_path) }}" target="_blank" class="text-mint" style="font-size:0.75rem; text-decoration:underline">View Receipt</a>
                                             @else
-                                                -
+                                                <span style="color:rgba(255,255,255,0.2)">—</span>
                                             @endif
                                         </td>
                                     </tr>
