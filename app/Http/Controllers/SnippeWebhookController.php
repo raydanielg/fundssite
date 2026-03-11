@@ -13,60 +13,65 @@ class SnippeWebhookController extends Controller
     {
         $secret = config('services.snippe.webhook_secret');
         if (!$secret) {
+            \Log::error('Snippe webhook secret not configured in services.php');
             return response()->json(['message' => 'Webhook secret not configured.'], 500);
         }
 
         $secret = trim((string) $secret);
-
         $payload = $request->getContent();
         $signature = trim((string) $request->header('X-Webhook-Signature', ''));
 
         if ($signature === '') {
-            \Log::warning('Snippe webhook missing signature header', [
-                'path' => $request->path(),
-                'headers' => $request->headers->all(),
-            ]);
+            \Log::warning('Snippe webhook missing signature header');
             return response()->json(['message' => 'Invalid signature.'], 401);
         }
 
+        // Snippe uses sha256=... format
         if (str_starts_with($signature, 'sha256=')) {
             $signature = substr($signature, 7);
         }
 
         $expected = hash_hmac('sha256', $payload, $secret);
         if (!hash_equals($expected, $signature)) {
+            // Log details for debugging production mismatch
             \Log::warning('Snippe webhook invalid signature', [
-                'path' => $request->path(),
-                'signature_len' => strlen($signature),
-                'expected_prefix' => substr($expected, 0, 12),
-                'signature_prefix' => substr($signature, 0, 12),
+                'received_raw' => $request->header('X-Webhook-Signature'),
+                'received_cleaned' => $signature,
+                'payload_sample' => substr($payload, 0, 50),
+                'secret_set' => !empty($secret),
             ]);
-            return response()->json(['message' => 'Invalid signature.'], 401);
+            
+            // Temporary for production debugging: if secret starts with 'whsec_', it's definitely Snippe's format
+            return response()->json([
+                'message' => 'Invalid signature.',
+                'debug_hint' => 'Check if SNIPPE_WEBHOOK_SECRET in .env matches Snippe Dashboard.'
+            ], 401);
         }
 
         $data = $request->json()->all();
-        $eventHeader = (string) $request->header('X-Webhook-Event', '');
-
+        $type = (string) ($data['type'] ?? $request->header('X-Webhook-Event', ''));
         $eventId = $data['id'] ?? null;
-        $type = (string) ($data['type'] ?? $eventHeader);
-        $sessionData = is_array($data['data'] ?? null) ? $data['data'] : [];
+        $sessionData = $data['data'] ?? [];
 
+        // Idempotency: Save event to prevent double processing
         if ($eventId) {
             try {
-                SnippeWebhookEvent::firstOrCreate(
-                    ['event_id' => (string) $eventId],
-                    ['type' => $type ?: null, 'received_at' => now()]
-                );
+                $exists = SnippeWebhookEvent::where('event_id', $eventId)->exists();
+                if ($exists) {
+                    return response()->json(['ok' => true, 'message' => 'Already processed']);
+                }
+                SnippeWebhookEvent::create([
+                    'event_id' => $eventId,
+                    'type' => $type,
+                    'received_at' => now()
+                ]);
             } catch (\Throwable $e) {
-                // If unique constraint triggers due to duplicates, treat as already processed.
-                return response()->json(['ok' => true]);
+                \Log::error('Failed to log webhook event', ['error' => $e->getMessage()]);
             }
         }
 
-        // Snippe webhooks include payment reference AND session_reference
-        // Our DB stores session reference (PAY...) in donation_transactions.reference
-        $sessionRef = $sessionData['session_reference'] ?? null;
-        $ref = $sessionRef ?: ($sessionData['reference'] ?? null);
+        // Reference handling
+        $ref = $sessionData['session_reference'] ?? ($sessionData['reference'] ?? null);
 
         if (!$ref) {
             return response()->json(['message' => 'Missing reference.'], 422);
@@ -74,33 +79,30 @@ class SnippeWebhookController extends Controller
 
         $tx = DonationTransaction::where('reference', $ref)->first();
         if (!$tx) {
-            // Unknown transaction; acknowledge to prevent retries storm.
-            return response()->json(['ok' => true]);
+            \Log::info('Snippe webhook: Transaction not found', ['ref' => $ref]);
+            return response()->json(['ok' => true, 'message' => 'Transaction not found']);
         }
 
-        $status = (string) ($sessionData['status'] ?? $tx->status);
+        // Status mapping
+        $status = $tx->status;
         $paidAt = $tx->paid_at;
 
-        if ($status === 'completed' && !$tx->paid_at) {
-            $completedAt = $sessionData['completed_at'] ?? null;
-            $paidAt = $completedAt ? Carbon::parse($completedAt) : now();
+        if ($type === 'checkout.session.completed' || ($data['type'] ?? '') === 'payment.succeeded') {
+            $status = 'completed';
+            $paidAt = isset($sessionData['completed_at']) ? Carbon::parse($sessionData['completed_at']) : now();
+        } elseif (in_array($type, ['payment.failed', 'checkout.session.expired'])) {
+            $status = 'failed';
         }
 
-        if (in_array($type, ['payment.failed', 'payment.cancelled'], true) && $status === 'pending') {
-            $status = $type === 'payment.cancelled' ? 'cancelled' : 'failed';
-        }
-
-        $amountData = is_array($sessionData['amount'] ?? null) ? $sessionData['amount'] : [];
-        $amountValue = $amountData['value'] ?? null;
-        $amountCurrency = $amountData['currency'] ?? null;
-
+        $amountData = $sessionData['amount'] ?? [];
+        
         $tx->update([
             'status' => $status,
             'paid_at' => $paidAt,
-            'amount' => is_numeric($amountValue) ? (int) $amountValue : $tx->amount,
-            'currency' => $amountCurrency ?: $tx->currency,
+            'amount' => isset($amountData['value']) ? (int) $amountData['value'] : $tx->amount,
+            'currency' => $amountData['currency'] ?? $tx->currency,
             'external_reference' => $sessionData['external_reference'] ?? $tx->external_reference,
-            'webhook_event' => $type ?: $tx->webhook_event,
+            'webhook_event' => $type,
             'failure_reason' => $sessionData['failure_reason'] ?? $tx->failure_reason,
             'raw_payload' => $data,
         ]);

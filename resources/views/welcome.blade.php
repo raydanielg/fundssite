@@ -542,11 +542,11 @@
                 </div>
 
                 <div class="hero-cta">
-                    <button class="play-btn" type="button" onclick="startDonateDirect()" aria-label="Donate">
+                    <button class="play-btn" type="button" onclick="openDonate()" aria-label="Donate">
                         <span class="material-symbols-outlined">play_arrow</span>
                     </button>
                     <span class="cta-line" aria-hidden="true"></span>
-                    <button class="donate-btn" type="button" onclick="startDonateDirect()">
+                    <button class="donate-btn" type="button" onclick="openDonate()">
                         <span class="material-symbols-outlined">volunteer_activism</span>
                         Click here to donate
                     </button>
@@ -1067,31 +1067,65 @@
             const m = document.getElementById('donateModal');
             m.classList.add('open');
             m.setAttribute('aria-hidden', 'false');
-            document.getElementById('don-err').classList.remove('show');
+            document.getElementById('don-err').style.display = 'none';
             document.getElementById('don-success').classList.remove('show');
             document.getElementById('donate-form').style.display = 'block';
             document.getElementById('modal-subtitle').style.display = 'block';
+            document.body.style.overflow = 'hidden';
             setTimeout(() => document.getElementById('don-name')?.focus(), 50);
-        }
-
-        function checkStatus() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('status') === 'success') {
-                const m = document.getElementById('donateModal');
-                m.classList.add('open');
-                document.getElementById('donate-form').style.display = 'none';
-                document.getElementById('modal-subtitle').style.display = 'none';
-                document.getElementById('don-success').classList.add('show');
-                
-                // Clean URL
-                window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
-            }
         }
 
         function closeDonate() {
             const m = document.getElementById('donateModal');
             m.classList.remove('open');
             m.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        async function startDonate() {
+            const btn = document.getElementById('don-btn');
+            const err = document.getElementById('don-err');
+            
+            const name = document.getElementById('don-name').value.trim();
+            const email = document.getElementById('don-email').value.trim();
+            const phone = document.getElementById('don-phone').value.trim();
+            const amount = document.getElementById('don-amount').value.trim();
+
+            if (!amount || parseInt(amount) < 1000) {
+                err.innerText = 'Please enter a valid amount (Min TZS 1,000)';
+                err.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
+            err.style.display = 'none';
+
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const res = await fetch('{{ route('donate.session') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                    },
+                    body: JSON.stringify({ name, email, phone, amount })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                } else {
+                    throw new Error(data.message || 'Unable to start donation');
+                }
+            } catch (e) {
+                err.innerText = e.message;
+                err.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.15rem">lock</span> Continue';
+            }
         }
 
         function openPayInfo() {
@@ -1121,86 +1155,6 @@
                 alert('Copied: ' + text);
             } catch (e) {
                 alert('Unable to copy. Please copy manually: ' + text);
-            }
-        }
-
-        function callPay(phone) {
-            window.location.href = 'tel:' + phone;
-        }
-
-        async function startDonateDirect() {
-            // This function is called directly when "Donate" is clicked
-            // It bypasses the local modal and goes straight to Snippe
-            const btn = document.querySelector('.play-btn');
-            const donateBtn = document.querySelector('.donate-btn');
-            
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span>';
-            }
-            if (donateBtn) {
-                donateBtn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Starting...';
-                donateBtn.disabled = true;
-            }
-
-            try {
-                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                const res = await fetch('{{ route('donate.session') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': token,
-                    },
-                    body: JSON.stringify({
-                        name: null,
-                        phone: null,
-                        email: null,
-                        amount: null, // Snippe will handle custom amount entry
-                    }),
-                });
-
-                const data = await res.json().catch(() => ({}));
-                const checkoutUrl = data?.checkout_url || data?.data?.checkout_url || data?.details?.data?.checkout_url;
-                if (!res.ok || !checkoutUrl) {
-                    console.error('Donate session failed', {
-                        status: res.status,
-                        statusText: res.statusText,
-                        body: data,
-                    });
-
-                    // If backend returns an error status but Snippe response contains a checkout URL, proceed anyway.
-                    if (checkoutUrl) {
-                        window.location.href = checkoutUrl;
-                        return;
-                    }
-
-                    const msg = data?.message || 'Unable to start donation. Please try again.';
-                    const details = data?.details ? '\n\nDetails: ' + JSON.stringify(data.details) : '';
-                    const errors = data?.errors ? '\n\nErrors: ' + JSON.stringify(data.errors) : '';
-                    alert(msg + details + errors);
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
-                    }
-                    if (donateBtn) {
-                        donateBtn.innerHTML = '<span class="material-symbols-outlined">volunteer_activism</span> Click here to donate';
-                        donateBtn.disabled = false;
-                    }
-                    return;
-                }
-
-                window.location.href = checkoutUrl;
-            } catch (e) {
-                alert('Unable to start donation. Please try again.');
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
-                }
-                if (donateBtn) {
-                    donateBtn.innerHTML = '<span class="material-symbols-outlined">volunteer_activism</span> Click here to donate';
-                    donateBtn.disabled = false;
-                }
             }
         }
 
