@@ -864,10 +864,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="section-card" style="margin-bottom:24px">
-                    <div class="sec-header"><span class="sec-title">Top Contributions</span></div>
-                    <div class="bar-chart" id="bar-chart"></div>
-                </div>
             </div>
 
             <div id="tab-contributors" class="hidden">
