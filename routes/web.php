@@ -177,6 +177,7 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/admin/transactions/{transaction}', function (DonationTransaction $transaction) {
         $transaction->delete();
+        // The total raised is calculated dynamically from completed transactions in the controller/closure
         return redirect()->route('admin.transactions')->with('status', 'deleted');
     })->name('admin.transactions.destroy');
 
@@ -187,6 +188,10 @@ Route::middleware('auth')->group(function () {
             'amount' => ['required', 'integer', 'min:0'],
             'paid_at' => ['nullable', 'date'],
         ]);
+
+        $status = $transaction->status;
+        // If amount is 0 or very small (less than 10), we might want to treat it as pending visually
+        // but for database, we keep the status. The user specifically asked for front-end logic.
 
         $transaction->update([
             'customer_name' => $data['customer_name'],
