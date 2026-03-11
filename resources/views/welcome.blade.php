@@ -417,28 +417,129 @@
         .pay-btn { border: 1px solid rgba(255,255,255,0.18); background: rgba(0,0,0,0.18); color: rgba(255,255,255,0.90); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: transform 0.15s, background 0.15s, border-color 0.15s; }
         .pay-btn:hover { transform: translateY(-1px); background: rgba(0,0,0,0.28); border-color: rgba(111,207,173,0.45); }
         .pay-note { font-size: 0.75rem; color: rgba(255,255,255,0.60); line-height: 1.55; margin-top: 10px; }
-        .hero-paywrap { margin-top: 24px; max-width: 100%; }
-        .hero-payhead { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.60); margin-bottom: 12px; }
+
+        .hero-paywrap { margin-top: 24px; width: 100%; max-width: 600px; }
+        .hero-payhead { font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 14px; font-weight: 800; }
+        .hero-paywrap .pay-grid { 
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
         .hero-paywrap .pay-card { 
             background: rgba(0,0,0,0.22); 
             border: 1px solid rgba(255,255,255,0.12); 
-            padding: 12px;
-            min-width: 0;
-        }
-        .hero-paywrap .pay-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
-            gap: 12px; 
+            padding: 16px 20px;
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 16px;
+            min-height: 90px;
         }
-        .hero-paywrap .pay-num { font-size: 0.95rem; }
-        .hero-paywrap .pay-name { font-size: 0.9rem; }
-        .hero-paywrap .pay-title { font-size: 0.65rem; }
-        .hero-paywrap .pay-ic { width: 36px; height: 36px; font-size: 1.1rem; }
-        .hero-paywrap .pay-btn { padding: 6px 10px; font-size: 0.7rem; }
+        .hero-paywrap .pay-left { flex: 1; min-width: 0; display: flex; align-items: center; gap: 16px; }
+        .hero-paywrap .pay-num { font-size: 1.35rem; letter-spacing: 0.08em; white-space: nowrap; font-weight: 800; margin-top: 2px; }
+        .hero-paywrap .pay-name { font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; color: #fff; }
+        .hero-paywrap .pay-title { font-size: 0.8rem; opacity: 0.75; font-weight: 700; margin-bottom: 2px; }
+        .hero-paywrap .pay-ic { width: 52px; height: 52px; border-radius: 16px; font-size: 1.8rem; flex-shrink: 0; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); }
+        .hero-paywrap .pay-actions { flex-shrink: 0; margin-left: 16px; display: flex; flex-direction: row; gap: 8px; }
+        .hero-paywrap .pay-btn { padding: 10px 18px; font-size: 0.85rem; border-radius: 12px; height: fit-content; }
 
         @media (max-width: 700px) {
-            .hero-paywrap { margin-left: auto; margin-right: auto; max-width: 400px; }
+            .hero-paywrap { margin-left: auto; margin-right: auto; max-width: 100%; }
+            .hero-paywrap .pay-card { padding: 14px; min-height: 80px; }
+            .hero-paywrap .pay-num { font-size: 1.15rem; }
+            .hero-paywrap .pay-name { font-size: 1rem; }
+            .hero-paywrap .pay-ic { width: 44px; height: 44px; font-size: 1.4rem; }
+            .hero-paywrap .pay-actions { flex-direction: column; margin-left: 8px; gap: 6px; }
+            .hero-paywrap .pay-btn { padding: 8px 12px; font-size: 0.75rem; }
+        }
+            footer { border-top: 1px solid rgba(212,234,226,0.9); background: linear-gradient(135deg, var(--deep) 0%, #124b38 60%, var(--forest) 100%); }
+            .site-footer {
+                max-width: 1100px;
+                margin: 0 auto;
+                padding: 26px 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 14px;
+                color: rgba(255,255,255,0.78);
+                font-size: 0.75rem;
+                position: relative;
+                z-index: 1;
+            }
+            .site-footer::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background:
+                    radial-gradient(circle at 15% 50%, rgba(111,207,173,0.16) 0%, transparent 55%),
+                    radial-gradient(circle at 85% 30%, rgba(244,162,37,0.10) 0%, transparent 50%);
+                opacity: 0.55;
+                z-index: -1;
+            }
+            .foot-left { display: flex; align-items: center; gap: 10px; }
+            .foot-mark {
+                width: 38px;
+                height: 38px;
+                border-radius: 14px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255,255,255,0.10);
+                border: 1px solid rgba(255,255,255,0.16);
+                color: rgba(255,255,255,0.88);
+            }
+            .foot-mark .material-symbols-outlined { font-size: 1.25rem; }
+            .foot-title { font-weight: 800; color: rgba(255,255,255,0.92); letter-spacing: -0.01em; }
+            .foot-title strong { color: var(--mint); font-weight: 900; }
+            .foot-sub { color: rgba(255,255,255,0.62); margin-top: 2px; font-size: 0.72rem; }
+            .foot-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+            .foot-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 7px 10px;
+                border-radius: 999px;
+                background: rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,255,255,0.12);
+                color: rgba(255,255,255,0.76);
+                font-size: 0.7rem;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+            }
+            .foot-pill .material-symbols-outlined { font-size: 1.05rem; }
+            @media (max-width: 700px) {
+                .site-footer { flex-direction: column; align-items: flex-start; }
+                .foot-right { justify-content: flex-start; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="hero">
+            <div class="hero-deco"></div>
+            <div class="hero-deco2"></div>
+            <div class="hero-inner">
+                <div>
+                    <div class="hero-eyebrow"><span class="pulse-dot"></span> Live Medical Fundraiser</div>
+                    <h1>Stand With <span>Cliff</span></h1>
+                    <p class="hero-bio">
+                        Clifford is a devoted <strong>husband</strong>, a proud <strong>father of two beautiful children</strong>, and a man absolutely full of life.
+                        He has been diagnosed with <strong>Chronic Kidney Disease (CKD)</strong> and urgently needs lifetime dialysis or a kidney transplant.
+                        <br><br>
+                        His family, his friends, his community — all of us — have come together because some things are worth fighting for.
+                        <br><br>
+                        <em>Together, we are stronger than any diagnosis.</em>
+                    </p>
+                    <div class="hero-tags">
+                        <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">favorite</span></span>Husband</span>
+                        <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">family_restroom</span></span>Father of 2</span>
+                        <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">location_city</span></span>Dar es Salaam</span>
+                        <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">fitness_center</span></span>Fighter</span>
+                        <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">bolt</span></span>Full of Life</span>
+                    </div>
             .hero-paywrap .pay-grid { grid-template-columns: 1fr; }
         }
         footer { border-top: 1px solid rgba(212,234,226,0.9); background: linear-gradient(135deg, var(--deep) 0%, #124b38 60%, var(--forest) 100%); }
