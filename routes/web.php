@@ -75,8 +75,14 @@ Route::get('/', function () {
             'created_at',
         ])));
 
+    $expenses = FundraiserExpense::query()
+        ->orderByDesc('spent_at')
+        ->orderByDesc('created_at')
+        ->get();
+
     return view('welcome', [
         'transactions' => $transactions,
+        'expenses' => $expenses,
         'settings' => $settings,
     ]);
 });
