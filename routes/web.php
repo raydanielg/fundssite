@@ -22,23 +22,30 @@ Route::get('/', function () {
     if (Schema::hasTable('fundraiser_settings')) {
         $row = DB::table('fundraiser_settings')->orderBy('id')->first();
 
-        if (!$row) {
-            DB::table('fundraiser_settings')->insert([
-                'target_amount' => $settings['target_amount'],
-                'expenses_amount' => $settings['expenses_amount'],
-                'currency' => $settings['currency'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $row = DB::table('fundraiser_settings')->orderBy('id')->first();
-        }
-
         if ($row) {
             $settings = [
                 'target_amount' => (int) $row->target_amount,
                 'expenses_amount' => (int) $row->expenses_amount,
                 'currency' => (string) $row->currency,
+                'selcom_name' => (string) ($row->selcom_name ?? ''),
+                'selcom_number' => (string) ($row->selcom_number ?? ''),
+                'tigo_name' => (string) ($row->tigo_name ?? ''),
+                'tigo_number' => (string) ($row->tigo_number ?? ''),
+                'crdb_name' => (string) ($row->crdb_name ?? ''),
+                'crdb_number' => (string) ($row->crdb_number ?? ''),
+            ];
+        } else {
+            // If no settings exist yet, don't auto-insert or show dummy data
+            $settings = [
+                'target_amount' => 0,
+                'expenses_amount' => 0,
+                'currency' => 'TZS',
+                'selcom_name' => '',
+                'selcom_number' => '',
+                'tigo_name' => '',
+                'tigo_number' => '',
+                'crdb_name' => '',
+                'crdb_number' => '',
             ];
         }
     }
@@ -371,28 +378,24 @@ Route::middleware('auth')->group(function () {
         $data = $request->validate([
             'target_amount' => ['required', 'integer', 'min:1'],
             'expenses_amount' => ['required', 'integer', 'min:0'],
-            'currency' => ['required', 'string', 'size:3'],
+            'currency' => ['required', 'string', 'max:3'],
+            'selcom_name' => ['nullable', 'string', 'max:255'],
+            'selcom_number' => ['nullable', 'string', 'max:255'],
+            'tigo_name' => ['nullable', 'string', 'max:255'],
+            'tigo_number' => ['nullable', 'string', 'max:255'],
+            'crdb_name' => ['nullable', 'string', 'max:255'],
+            'crdb_number' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $row = DB::table('fundraiser_settings')->orderBy('id')->first();
-        if (!$row) {
-            DB::table('fundraiser_settings')->insert([
-                'target_amount' => (int) $data['target_amount'],
-                'expenses_amount' => (int) $data['expenses_amount'],
-                'currency' => strtoupper($data['currency']),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } else {
-            DB::table('fundraiser_settings')->where('id', $row->id)->update([
-                'target_amount' => (int) $data['target_amount'],
-                'expenses_amount' => (int) $data['expenses_amount'],
+        DB::table('fundraiser_settings')->updateOrInsert(
+            ['id' => 1],
+            array_merge($data, [
                 'currency' => strtoupper($data['currency']),
                 'updated_at' => now(),
-            ]);
-        }
+            ])
+        );
 
-        return redirect()->route('admin.fundraiser');
+        return redirect()->route('admin.fundraiser')->with('status', 'settings-updated');
     })->name('admin.fundraiser.update');
 });
 

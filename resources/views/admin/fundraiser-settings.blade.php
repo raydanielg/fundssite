@@ -16,13 +16,49 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted text-uppercase">Currency</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-currency-exchange"></i></span>
-                                    <input type="text" name="currency" class="form-control bg-light border-start-0" value="{{ old('currency', $settings->currency ?? 'TZS') }}" maxlength="3" placeholder="e.g. TZS" />
-                                </div>
+                                <div class="col-12">
+                                <label class="form-label fw-semibold" for="currency">Currency</label>
+                                <input id="currency" name="currency" type="text" class="form-control @error('currency') is-invalid @enderror" value="{{ old('currency', $settings->currency ?? 'TZS') }}" required>
                                 @error('currency')
-                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+
+                            <hr class="my-4">
+                            <h6 class="fw-bold mb-3 text-mint">Payment Accounts (Selcom)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Selcom Name</label>
+                                    <input name="selcom_name" type="text" class="form-control" value="{{ old('selcom_name', $settings->selcom_name) }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Selcom Number</label>
+                                    <input name="selcom_number" type="text" class="form-control" value="{{ old('selcom_number', $settings->selcom_number) }}">
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold mb-3 mt-4 text-mint">Payment Accounts (Tigo Pesa)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Tigo Name</label>
+                                    <input name="tigo_name" type="text" class="form-control" value="{{ old('tigo_name', $settings->tigo_name) }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Tigo Number</label>
+                                    <input name="tigo_number" type="text" class="form-control" value="{{ old('tigo_number', $settings->tigo_number) }}">
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold mb-3 mt-4 text-mint">Payment Accounts (CRDB)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">CRDB Name</label>
+                                    <input name="crdb_name" type="text" class="form-control" value="{{ old('crdb_name', $settings->crdb_name) }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">CRDB Number</label>
+                                    <input name="crdb_number" type="text" class="form-control" value="{{ old('crdb_number', $settings->crdb_number) }}">
+                                </div>
                             </div>
 
                             <div class="col-md-8">
