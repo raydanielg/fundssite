@@ -4,7 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name') }}</title>
+    
+    <!-- SEO Meta Tags -->
+    <title>Stand With Cliff — Medical Fundraiser</title>
+    <meta name="description" content="Join us in supporting Cliff's medical journey. Every contribution brings hope and helps cover essential treatment costs.">
+    <meta name="keywords" content="Medical Fundraiser, Stand With Cliff, Donation, Help Cliff, Medical Support Tanzania">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:title" content="Stand With Cliff — Medical Fundraiser">
+    <meta property="og:description" content="Cliff needs our support for his medical treatment. Together we can make a difference. Donate today.">
+    <meta property="og:image" content="{{ asset('WhatsApp Image 2026-03-10 at 17.56.33.jpeg') }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ url('/') }}">
+    <meta property="twitter:title" content="Stand With Cliff — Medical Fundraiser">
+    <meta property="twitter:description" content="Cliff needs our support for his medical treatment. Together we can make a difference. Donate today.">
+    <meta property="twitter:image" content="{{ asset('WhatsApp Image 2026-03-10 at 17.56.33.jpeg') }}">
+
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..700,0..1,-50..200" />
     <style>
