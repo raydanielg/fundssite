@@ -116,7 +116,7 @@
         .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; }
         .hero-tag { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); padding: 5px 13px; border-radius: 12px; font-size: 0.72rem; font-weight: 500; }
 
-        .hero-cta { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+        .hero-cta { display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
         .play-btn {
             width: 44px;
             height: 44px;
@@ -135,9 +135,31 @@
         .play-btn:active { transform: translateY(0) scale(0.98); }
         .play-btn .material-symbols-outlined { font-size: 1.4rem; }
         .cta-line { height: 1px; width: 54px; background: rgba(255,255,255,0.28); }
-        .cta-text { display: inline-flex; align-items: baseline; gap: 8px; font-family: var(--serif); font-weight: 800; color: rgba(255,255,255,0.92); letter-spacing: -0.01em; }
-        .cta-text small { font-family: var(--sans); font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.60); letter-spacing: 0.04em; text-transform: uppercase; }
-        .cta-text:hover { color: var(--mint); }
+        .donate-btn {
+            border: none;
+            cursor: pointer;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            color: #072b1a;
+            background: linear-gradient(90deg, rgba(111,207,173,1) 0%, rgba(244,162,37,1) 100%);
+            box-shadow: 0 16px 36px rgba(0,0,0,0.25);
+            transition: transform 0.18s ease, filter 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+        }
+        .donate-btn:hover { transform: translateY(-1px); filter: brightness(1.02); }
+        .donate-btn:active { transform: translateY(0); }
+        .donate-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+        .donate-btn .material-symbols-outlined { font-size: 1.1rem; }
+        @media (max-width: 700px) {
+            .hero-cta { justify-content: center; }
+            .cta-line { display: none; }
+        }
 
         .modal-backdrop { position: fixed; inset: 0; background: rgba(10, 28, 22, 0.62); display: none; align-items: center; justify-content: center; padding: 18px; z-index: 50; }
         .modal-backdrop.open { display: flex; }
@@ -394,6 +416,12 @@
         .pay-btn { border: 1px solid rgba(255,255,255,0.18); background: rgba(0,0,0,0.18); color: rgba(255,255,255,0.90); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: transform 0.15s, background 0.15s, border-color 0.15s; }
         .pay-btn:hover { transform: translateY(-1px); background: rgba(0,0,0,0.28); border-color: rgba(111,207,173,0.45); }
         .pay-note { font-size: 0.75rem; color: rgba(255,255,255,0.60); line-height: 1.55; margin-top: 10px; }
+        .hero-paywrap { margin-top: 18px; max-width: 560px; }
+        .hero-payhead { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.60); margin-bottom: 10px; }
+        .hero-paywrap .pay-card { background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.12); }
+        @media (max-width: 700px) {
+            .hero-paywrap { margin-left: auto; margin-right: auto; }
+        }
         footer { border-top: 1px solid rgba(212,234,226,0.9); background: linear-gradient(135deg, var(--deep) 0%, #124b38 60%, var(--forest) 100%); }
         .site-footer {
             max-width: 1100px;
@@ -486,7 +514,59 @@
                         <span class="material-symbols-outlined">play_arrow</span>
                     </button>
                     <span class="cta-line" aria-hidden="true"></span>
-                    <a class="cta-text" href="javascript:void(0)" onclick="startDonateDirect()">Donate <small>now</small></a>
+                    <button class="donate-btn" type="button" onclick="startDonateDirect()">
+                        <span class="material-symbols-outlined">volunteer_activism</span>
+                        Click here to donate
+                    </button>
+                </div>
+
+                <div class="hero-paywrap">
+                    <div class="hero-payhead">Other ways to pay</div>
+                    <div class="pay-grid">
+                        <div class="pay-card" style="border-left: 3px solid rgba(46,158,114,0.9);">
+                            <div class="pay-left">
+                                <div class="pay-ic">💚</div>
+                                <div>
+                                    <div class="pay-title" style="color: rgba(111,207,173,0.95);">Selcom Microfinance</div>
+                                    <div class="pay-name">Joseph Msuya</div>
+                                    <div class="pay-num">0714 172 979</div>
+                                </div>
+                            </div>
+                            <div class="pay-actions">
+                                <button class="pay-btn" type="button" onclick="copyPay('0714172979')">Copy</button>
+                                <button class="pay-btn" type="button" onclick="callPay('0714172979')">Call</button>
+                            </div>
+                        </div>
+
+                        <div class="pay-card" style="border-left: 3px solid rgba(91,156,255,0.9);">
+                            <div class="pay-left">
+                                <div class="pay-ic">💙</div>
+                                <div>
+                                    <div class="pay-title" style="color: rgba(91,156,255,0.95);">Tigo Pesa</div>
+                                    <div class="pay-name">Joseph Msuya</div>
+                                    <div class="pay-num">0714 172 979</div>
+                                </div>
+                            </div>
+                            <div class="pay-actions">
+                                <button class="pay-btn" type="button" onclick="copyPay('0714172979')">Copy</button>
+                                <button class="pay-btn" type="button" onclick="callPay('0714172979')">Call</button>
+                            </div>
+                        </div>
+
+                        <div class="pay-card" style="border-left: 3px solid rgba(255,106,66,0.9);">
+                            <div class="pay-left">
+                                <div class="pay-ic">🏦</div>
+                                <div>
+                                    <div class="pay-title" style="color: rgba(255,106,66,0.95);">CRDB Bank</div>
+                                    <div class="pay-name">Joseph Abdallah Msuya</div>
+                                    <div class="pay-num">0152 396 008 400</div>
+                                </div>
+                            </div>
+                            <div class="pay-actions">
+                                <button class="pay-btn" type="button" onclick="copyPay('0152396008400')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -994,15 +1074,15 @@
             // This function is called directly when "Donate" is clicked
             // It bypasses the local modal and goes straight to Snippe
             const btn = document.querySelector('.play-btn');
-            const ctaText = document.querySelector('.cta-text');
+            const donateBtn = document.querySelector('.donate-btn');
             
             if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span>';
             }
-            if (ctaText) {
-                ctaText.innerHTML = 'Processing...';
-                ctaText.style.pointerEvents = 'none';
+            if (donateBtn) {
+                donateBtn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Starting...';
+                donateBtn.disabled = true;
             }
 
             try {
@@ -1045,9 +1125,9 @@
                         btn.disabled = false;
                         btn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
                     }
-                    if (ctaText) {
-                        ctaText.innerHTML = 'Donate <small>now</small>';
-                        ctaText.style.pointerEvents = 'auto';
+                    if (donateBtn) {
+                        donateBtn.innerHTML = '<span class="material-symbols-outlined">volunteer_activism</span> Click here to donate';
+                        donateBtn.disabled = false;
                     }
                     return;
                 }
@@ -1059,9 +1139,9 @@
                     btn.disabled = false;
                     btn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
                 }
-                if (ctaText) {
-                    ctaText.innerHTML = 'Donate <small>now</small>';
-                    ctaText.style.pointerEvents = 'auto';
+                if (donateBtn) {
+                    donateBtn.innerHTML = '<span class="material-symbols-outlined">volunteer_activism</span> Click here to donate';
+                    donateBtn.disabled = false;
                 }
             }
         }

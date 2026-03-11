@@ -29,8 +29,6 @@
             .brand-row { display:flex; align-items:center; gap:10px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.14); }
             .brand-badge { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.14); display:flex; align-items:center; justify-content:center; }
             .brand-text { font-weight: 900; letter-spacing: 0.10em; }
-            .side-collapse-toggle { display:flex; align-items:center; justify-content: space-between; gap: 10px; }
-            .side-collapse-toggle .chev { opacity: 0.8; }
             .side-sub { padding-left: 10px; }
             .side-sub .side-link { font-weight: 600; opacity: 0.92; }
         </style>
@@ -63,23 +61,15 @@
                     </a>
 
                     <div class="side-section">Management</div>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 side-collapse-toggle" data-bs-toggle="collapse" href="#mgmtMenu" role="button" aria-expanded="true" aria-controls="mgmtMenu">
-                        <span><i class="bi bi-sliders me-2"></i> Management</span>
-                        <i class="bi bi-chevron-down chev"></i>
+                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}">
+                        <i class="bi bi-gear me-2"></i> Fundraiser Settings
                     </a>
-                    <div class="collapse show" id="mgmtMenu">
-                        <div class="side-sub">
-                            <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}">
-                                <i class="bi bi-gear me-2"></i> Fundraiser Settings
-                            </a>
-                            <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions/manual') ? 'active' : '' }}" href="{{ url('/admin/transactions/manual') }}">
-                                <i class="bi bi-plus-circle me-2"></i> Manual Donations
-                            </a>
-                            <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/expenses') ? 'active' : '' }}" href="{{ url('/admin/expenses') }}">
-                                <i class="bi bi-receipt me-2"></i> Expenses
-                            </a>
-                        </div>
-                    </div>
+                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions/manual') ? 'active' : '' }}" href="{{ url('/admin/transactions/manual') }}">
+                        <i class="bi bi-plus-circle me-2"></i> Manual Donations
+                    </a>
+                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/expenses') ? 'active' : '' }}" href="{{ url('/admin/expenses') }}">
+                        <i class="bi bi-receipt me-2"></i> Expenses
+                    </a>
 
                     <div class="side-section">Account</div>
                     <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('profile') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
@@ -156,14 +146,9 @@
                 <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions') ? 'active' : '' }}" href="{{ url('/admin/transactions') }}"><i class="bi bi-credit-card-2-front me-2"></i>Payments</a>
 
                 <div class="side-section">Management</div>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1" data-bs-toggle="collapse" href="#mgmtMenuMobile" role="button" aria-expanded="true" aria-controls="mgmtMenuMobile"><i class="bi bi-sliders me-2"></i>Management <span class="float-end"><i class="bi bi-chevron-down"></i></span></a>
-                <div class="collapse show" id="mgmtMenuMobile">
-                    <div class="side-sub">
-                        <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}"><i class="bi bi-gear me-2"></i>Fundraiser Settings</a>
-                        <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions/manual') ? 'active' : '' }}" href="{{ url('/admin/transactions/manual') }}"><i class="bi bi-plus-circle me-2"></i>Manual Donations</a>
-                        <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/expenses') ? 'active' : '' }}" href="{{ url('/admin/expenses') }}"><i class="bi bi-receipt me-2"></i>Expenses</a>
-                    </div>
-                </div>
+                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}"><i class="bi bi-gear me-2"></i>Fundraiser Settings</a>
+                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions/manual') ? 'active' : '' }}" href="{{ url('/admin/transactions/manual') }}"><i class="bi bi-plus-circle me-2"></i>Manual Donations</a>
+                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/expenses') ? 'active' : '' }}" href="{{ url('/admin/expenses') }}"><i class="bi bi-receipt me-2"></i>Expenses</a>
 
                 <div class="side-section">Account</div>
                 <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('profile') ? 'active' : '' }}" href="{{ route('profile.edit') }}">Profile</a>
