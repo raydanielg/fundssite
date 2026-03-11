@@ -165,26 +165,20 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/transactions', function () {
         $transactions = DonationTransaction::query()
-            ->whereIn('status', ['pending', 'completed'])
             ->orderByDesc('paid_at')
             ->orderByDesc('created_at')
-            ->limit(200)
-            ->get([
-                'reference',
-                'status',
-                'paid_at',
-                'amount',
-                'currency',
-                'customer_name',
-                'customer_phone',
-                'customer_email',
-                'created_at',
-            ]);
+            ->limit(500)
+            ->get();
 
         return view('admin.transactions', [
             'transactions' => $transactions,
         ]);
     })->name('admin.transactions');
+
+    Route::delete('/admin/transactions/{transaction}', function (DonationTransaction $transaction) {
+        $transaction->delete();
+        return redirect()->route('admin.transactions')->with('status', 'deleted');
+    })->name('admin.transactions.destroy');
 
     Route::post('/admin/transactions/sync', function (Request $request) {
         $data = $request->validate([

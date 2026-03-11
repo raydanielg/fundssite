@@ -83,6 +83,11 @@
                             <i class="bi bi-check-circle-fill me-2"></i> Synced pending payments with Snippe.
                         </div>
                     @endif
+                    @if (session('status') === 'deleted')
+                        <div class="alert alert-danger py-2 border-0 shadow-sm mb-4">
+                            <i class="bi bi-trash-fill me-2"></i> Transaction has been deleted successfully.
+                        </div>
+                    @endif
                     <div class="table-responsive">
                         <table id="transactionsTable" class="table table-hover align-middle">
                             <thead>
@@ -92,7 +97,7 @@
                                     <th class="small text-uppercase text-muted fw-bold">Status</th>
                                     <th class="small text-uppercase text-muted fw-bold">Method/Event</th>
                                     <th class="small text-uppercase text-muted fw-bold">Date</th>
-                                    <th class="pe-3 small text-uppercase text-muted fw-bold text-end">Details</th>
+                                    <th class="pe-3 small text-uppercase text-muted fw-bold text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -137,9 +142,14 @@
                                             </div>
                                         </td>
                                         <td class="pe-3 text-end">
-                                            <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#modal-{{ $t->id }}">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#modal-{{ $t->id }}" title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal-{{ $t->id }}" title="Delete Transaction">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
 
                                             <!-- Transaction Detail Modal -->
                                             <div class="modal fade" id="modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
@@ -194,6 +204,30 @@
                                                         </div>
                                                         <div class="modal-footer border-top-0 pt-0">
                                                             <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Delete Confirmation Modal -->
+                                            <div class="modal fade" id="delete-modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-sm">
+                                                    <div class="modal-content border-0 shadow">
+                                                        <div class="modal-body text-center p-4">
+                                                            <div class="text-danger mb-3">
+                                                                <i class="bi bi-exclamation-triangle-fill display-4"></i>
+                                                            </div>
+                                                            <h5 class="fw-bold mb-2">Delete Transaction?</h5>
+                                                            <p class="text-muted small mb-4">This action cannot be undone. This will remove the record from your database.</p>
+                                                            
+                                                            <form action="{{ route('admin.transactions.destroy', $t->id) }}" method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <div class="d-grid gap-2">
+                                                                    <button type="submit" class="btn btn-danger rounded-pill fw-bold">Confirm Delete</button>
+                                                                    <button type="button" class="btn btn-light rounded-pill border fw-bold" data-bs-dismiss="modal">Cancel</button>
+                                                                </div>
+                                                            </form>
                                                         </div>
                                                     </div>
                                                 </div>
