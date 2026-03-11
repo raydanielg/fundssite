@@ -6,27 +6,63 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
-    .dt-buttons { margin-bottom: 15px; }
-    .dataTables_filter { margin-bottom: 15px; }
-    .table thead th { border-top: none; background: #f8f9fa; }
+    .dt-buttons { margin-bottom: 0; }
+    .dataTables_filter { display: none; }
+    .table thead th { border-top: none; background: #f8f9fa; font-size: 0.75rem; }
     .status-badge { font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; padding: 5px 10px; border-radius: 999px; }
     .status-completed { background: #dcfce7; color: #166534; }
     .status-pending { background: #fef9c3; color: #854d0e; }
     .status-failed { background: #fee2e2; color: #991b1b; }
     .status-cancelled { background: #f3f4f6; color: #374151; }
     .x-small { font-size: 0.72rem; }
+    .filter-card { background: #fff; border-radius: 12px; border: 1px solid #edf2f7; margin-bottom: 24px; }
+    .btn-mint { background-color: #2e9e72; color: #fff; border: none; }
+    .btn-mint:hover { background-color: #25855f; color: #fff; }
 </style>
 @endpush
 
 @section('content')
+    <!-- Advanced Filters -->
+    <div class="filter-card p-4 shadow-sm">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted text-uppercase">Search</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" id="customSearch" class="form-control border-start-0" placeholder="Name, email, or ref...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Status</label>
+                <select id="statusFilter" class="form-select form-select-sm">
+                    <option value="">All Statuses</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted text-uppercase">Date Range</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-calendar3"></i></span>
+                    <input type="text" id="dateFilter" class="form-control border-start-0" placeholder="Select dates...">
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div id="tableButtons" class="d-inline-block"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
                     <div>
                         <h5 class="card-title mb-0 fw-bold">Contribution Stream</h5>
-                        <p class="text-muted small mb-0">Real-time donation logs and payment status.</p>
+                        <p class="text-muted small mb-0">Filtered results will be used for printing/exporting.</p>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <form method="POST" action="{{ route('admin.transactions.sync') }}" class="m-0">
@@ -68,7 +104,7 @@
                                                     {{ strtoupper(substr($t->customer_name ?? 'D', 0, 1)) }}
                                                 </div>
                                                 <div>
-                                                    <div class="fw-bold text-dark small">{{ $t->customer_name }}</div>
+                                                    <div class="fw-bold text-dark small contributor-name">{{ $t->customer_name }}</div>
                                                     <div class="text-muted x-small">
                                                         {{ $t->customer_phone ?? $t->customer_email ?? 'No contact' }}
                                                     </div>
@@ -90,13 +126,13 @@
                                             <div class="small text-dark">{{ $t->webhook_event ? str_replace(['checkout.session.', 'payment.'], '', $t->webhook_event) : '-' }}</div>
                                             <code class="x-small text-muted" style="font-size: 0.65rem;">{{ $t->reference }}</code>
                                         </td>
-                                        <td>
+                                        <td data-sort="{{ $t->paid_at ? $t->paid_at->timestamp : $t->created_at->timestamp }}">
                                             <div class="small">
                                                 @if($t->paid_at)
-                                                    <div class="fw-bold text-dark">{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('Y-m-d') }}</div>
+                                                    <div class="fw-bold text-dark date-cell">{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('Y-m-d') }}</div>
                                                     <div class="text-muted x-small">{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('H:i') }}</div>
                                                 @else
-                                                    <div class="text-muted x-small italic">Created {{ $t->created_at->diffForHumans() }}</div>
+                                                    <div class="text-muted x-small italic date-cell" data-raw="{{ $t->created_at->format('Y-m-d') }}">Created {{ $t->created_at->diffForHumans() }}</div>
                                                 @endif
                                             </div>
                                         </td>
@@ -184,33 +220,77 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
         $(document).ready(function() {
-            $('#transactionsTable').DataTable({
-                dom: '<"d-flex justify-content-between align-items-center mb-3"Bf>rt<"d-flex justify-content-between align-items-center mt-3"ip>',
+            // Custom Date Range Filtering
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    const dateRange = $('#dateFilter').val();
+                    if (!dateRange || !dateRange.includes(' to ')) return true;
+                    
+                    const [startStr, endStr] = dateRange.split(' to ');
+                    const start = new Date(startStr);
+                    const end = new Date(endStr);
+                    
+                    // Get date from table cell (using data-raw or text)
+                    const cell = $(settings.aoData[dataIndex].nTr).find('.date-cell');
+                    const rowDateStr = cell.data('raw') || cell.text().trim();
+                    const rowDate = new Date(rowDateStr);
+
+                    return (rowDate >= start && rowDate <= end);
+                }
+            );
+
+            const table = $('#transactionsTable').DataTable({
+                dom: 'rtip',
                 buttons: [
                     {
                         extend: 'print',
                         className: 'btn btn-sm btn-outline-secondary rounded-pill px-3 me-2',
-                        text: '<i class="bi bi-printer me-1"></i> Print'
+                        text: '<i class="bi bi-printer me-1"></i> Print Filtered',
+                        exportOptions: { columns: [0, 1, 2, 3, 4] }
                     },
                     {
                         extend: 'excel',
                         className: 'btn btn-sm btn-outline-success rounded-pill px-3 me-2',
-                        text: '<i class="bi bi-file-earmark-excel me-1"></i> Excel'
+                        text: '<i class="bi bi-file-earmark-excel me-1"></i> Excel',
+                        exportOptions: { columns: [0, 1, 2, 3, 4] }
                     },
                     {
                         extend: 'pdf',
                         className: 'btn btn-sm btn-outline-danger rounded-pill px-3',
-                        text: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF'
+                        text: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF',
+                        exportOptions: { columns: [0, 1, 2, 3, 4] }
                     }
                 ],
-                order: [[3, 'desc']],
+                order: [[4, 'desc']],
                 pageLength: 25,
                 language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Filter transactions..."
+                    emptyTable: "No transactions found matching your filters"
+                }
+            });
+
+            // Move buttons to custom container
+            table.buttons().container().appendTo('#tableButtons');
+
+            // Custom Search
+            $('#customSearch').on('keyup', function() {
+                table.search(this.value).draw();
+            });
+
+            // Status Filter
+            $('#statusFilter').on('change', function() {
+                table.column(2).search(this.value).draw();
+            });
+
+            // Date Range Filter (Flatpickr)
+            flatpickr("#dateFilter", {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                onClose: function() {
+                    table.draw();
                 }
             });
         });
