@@ -959,8 +959,8 @@
         };
 
         function render() {
-            const paid = contributors.filter(c => c.s === 'completed' && c.a > 10);
-            const pend = contributors.filter(c => c.s === 'pending' || c.a <= 10);
+            const paid = contributors.filter(c => c.s === 'completed' && c.a > 10).sort((a, b) => b.a - a.a);
+            const pend = contributors.filter(c => c.s === 'pending' || c.a <= 10).sort((a, b) => b.a - a.a);
             const total = paid.reduce((s, c) => s + c.a, 0);
             const balance = total - EXPENSES;
             const remaining = TARGET - total;
