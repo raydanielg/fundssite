@@ -405,10 +405,11 @@
         .spin { animation: fa-spin 2s infinite linear; display: inline-block; }
         @keyframes fa-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .pay-grid { display: grid; gap: 14px; }
+        .pay-grid { display: flex; flex-direction: column; gap: 14px; }
         .pay-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); }
         .pay-left { display: flex; align-items: center; gap: 12px; }
         .pay-ic { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); font-size: 1.25rem; }
+        .pay-ic .material-symbols-outlined { font-size: 1.35rem; }
         .pay-title { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
         .pay-name { font-family: var(--serif); font-weight: 900; font-size: 1.05rem; color: rgba(255,255,255,0.94); margin-bottom: 3px; }
         .pay-num { font-family: var(--mono); font-weight: 800; font-size: 1.05rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.88); }
@@ -416,11 +417,29 @@
         .pay-btn { border: 1px solid rgba(255,255,255,0.18); background: rgba(0,0,0,0.18); color: rgba(255,255,255,0.90); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: transform 0.15s, background 0.15s, border-color 0.15s; }
         .pay-btn:hover { transform: translateY(-1px); background: rgba(0,0,0,0.28); border-color: rgba(111,207,173,0.45); }
         .pay-note { font-size: 0.75rem; color: rgba(255,255,255,0.60); line-height: 1.55; margin-top: 10px; }
-        .hero-paywrap { margin-top: 18px; max-width: 560px; }
-        .hero-payhead { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.60); margin-bottom: 10px; }
-        .hero-paywrap .pay-card { background: rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.12); }
+        .hero-paywrap { margin-top: 24px; max-width: 100%; }
+        .hero-payhead { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.60); margin-bottom: 12px; }
+        .hero-paywrap .pay-card { 
+            background: rgba(0,0,0,0.22); 
+            border: 1px solid rgba(255,255,255,0.12); 
+            padding: 12px;
+            min-width: 0;
+        }
+        .hero-paywrap .pay-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 12px; 
+            width: 100%;
+        }
+        .hero-paywrap .pay-num { font-size: 0.95rem; }
+        .hero-paywrap .pay-name { font-size: 0.9rem; }
+        .hero-paywrap .pay-title { font-size: 0.65rem; }
+        .hero-paywrap .pay-ic { width: 36px; height: 36px; font-size: 1.1rem; }
+        .hero-paywrap .pay-btn { padding: 6px 10px; font-size: 0.7rem; }
+
         @media (max-width: 700px) {
-            .hero-paywrap { margin-left: auto; margin-right: auto; }
+            .hero-paywrap { margin-left: auto; margin-right: auto; max-width: 400px; }
+            .hero-paywrap .pay-grid { grid-template-columns: 1fr; }
         }
         footer { border-top: 1px solid rgba(212,234,226,0.9); background: linear-gradient(135deg, var(--deep) 0%, #124b38 60%, var(--forest) 100%); }
         .site-footer {
@@ -525,7 +544,7 @@
                     <div class="pay-grid">
                         <div class="pay-card" style="border-left: 3px solid rgba(46,158,114,0.9);">
                             <div class="pay-left">
-                                <div class="pay-ic">💚</div>
+                                <div class="pay-ic" style="color: rgba(111,207,173,0.95);"><span class="material-symbols-outlined">phone_iphone</span></div>
                                 <div>
                                     <div class="pay-title" style="color: rgba(111,207,173,0.95);">Selcom Microfinance</div>
                                     <div class="pay-name">Joseph Msuya</div>
@@ -540,7 +559,7 @@
 
                         <div class="pay-card" style="border-left: 3px solid rgba(91,156,255,0.9);">
                             <div class="pay-left">
-                                <div class="pay-ic">💙</div>
+                                <div class="pay-ic" style="color: rgba(91,156,255,0.95);"><span class="material-symbols-outlined">smartphone</span></div>
                                 <div>
                                     <div class="pay-title" style="color: rgba(91,156,255,0.95);">Tigo Pesa</div>
                                     <div class="pay-name">Joseph Msuya</div>
@@ -555,7 +574,7 @@
 
                         <div class="pay-card" style="border-left: 3px solid rgba(255,106,66,0.9);">
                             <div class="pay-left">
-                                <div class="pay-ic">🏦</div>
+                                <div class="pay-ic" style="color: rgba(255,106,66,0.95);"><span class="material-symbols-outlined">account_balance</span></div>
                                 <div>
                                     <div class="pay-title" style="color: rgba(255,106,66,0.95);">CRDB Bank</div>
                                     <div class="pay-name">Joseph Abdallah Msuya</div>
@@ -598,7 +617,7 @@
                 <div class="pay-grid">
                     <div class="pay-card" style="border-left: 3px solid rgba(46,158,114,0.9);">
                         <div class="pay-left">
-                            <div class="pay-ic">💚</div>
+                            <div class="pay-ic" style="color: rgba(111,207,173,0.95);"><span class="material-symbols-outlined">phone_iphone</span></div>
                             <div>
                                 <div class="pay-title" style="color: rgba(111,207,173,0.95);">Selcom Microfinance</div>
                                 <div class="pay-name">Joseph Msuya</div>
@@ -613,7 +632,7 @@
 
                     <div class="pay-card" style="border-left: 3px solid rgba(91,156,255,0.9);">
                         <div class="pay-left">
-                            <div class="pay-ic">💙</div>
+                            <div class="pay-ic" style="color: rgba(91,156,255,0.95);"><span class="material-symbols-outlined">smartphone</span></div>
                             <div>
                                 <div class="pay-title" style="color: rgba(91,156,255,0.95);">Tigo Pesa</div>
                                 <div class="pay-name">Joseph Msuya</div>
@@ -628,7 +647,7 @@
 
                     <div class="pay-card" style="border-left: 3px solid rgba(255,106,66,0.9);">
                         <div class="pay-left">
-                            <div class="pay-ic">🏦</div>
+                            <div class="pay-ic" style="color: rgba(255,106,66,0.95);"><span class="material-symbols-outlined">account_balance</span></div>
                             <div>
                                 <div class="pay-title" style="color: rgba(255,106,66,0.95);">CRDB Bank</div>
                                 <div class="pay-name">Joseph Abdallah Msuya</div>
@@ -641,7 +660,7 @@
                     </div>
                 </div>
 
-                <div class="pay-note">After paying using these methods, you can be recorded in the system via <strong>Admin → Management → Manual Donations</strong>.</div>
+                <div class="pay-note">After paying using these methods, you can be recorded in the system via <strong>Admin → Manual Donations</strong>.</div>
             </div>
         </div>
     </div>
