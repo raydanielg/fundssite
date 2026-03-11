@@ -995,15 +995,15 @@
                 </span>`
             ).join('');
 
-            const sp = [...paid].sort((a, b) => b.a - a.a);
-            const recent = [...paid].sort((a, b) => {
+            const overviewPaid = [...paid].sort((a, b) => b.a - a.a);
+            const allPaid = [...paid].sort((a, b) => {
                 const da = new Date(a.paid_at || a.created_at).getTime();
                 const db = new Date(b.paid_at || b.created_at).getTime();
                 return db - da;
-            }).slice(0, 12);
+            });
 
             document.getElementById('paid-bdg').textContent = paid.length + ' paid';
-            document.getElementById('recent-paid').innerHTML = recent.map(c => `
+            document.getElementById('recent-paid').innerHTML = overviewPaid.slice(0, 15).map(c => `
                 <div class="citem">
                     <div style="display:flex;align-items:center">
                         <div class="cavatar">${ini(c.n)}</div>
@@ -1025,7 +1025,7 @@
 
             // Home page should display paid contributions only
             document.getElementById('all-bdg').textContent = paid.length + ' paid';
-            document.getElementById('all-tbl').innerHTML = paid.map((c, i) => `
+            document.getElementById('all-tbl').innerHTML = allPaid.map((c, i) => `
                 <tr>
                     <td style="color:var(--light);font-family:var(--mono);font-size:0.7rem">${i + 1}</td>
                     <td style="font-weight:600">${c.n}</td>
