@@ -29,11 +29,11 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Selcom Name</label>
-                                    <input name="selcom_name" type="text" class="form-control" value="{{ old('selcom_name', $settings->selcom_name) }}">
+                                    <input name="selcom_name" type="text" class="form-control" value="{{ old('selcom_name', $settings->selcom_name ?? '') }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Selcom Number</label>
-                                    <input name="selcom_number" type="text" class="form-control" value="{{ old('selcom_number', $settings->selcom_number) }}">
+                                    <input name="selcom_number" type="text" class="form-control" value="{{ old('selcom_number', $settings->selcom_number ?? '') }}">
                                 </div>
                             </div>
 
@@ -41,11 +41,11 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Tigo Name</label>
-                                    <input name="tigo_name" type="text" class="form-control" value="{{ old('tigo_name', $settings->tigo_name) }}">
+                                    <input name="tigo_name" type="text" class="form-control" value="{{ old('tigo_name', $settings->tigo_name ?? '') }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Tigo Number</label>
-                                    <input name="tigo_number" type="text" class="form-control" value="{{ old('tigo_number', $settings->tigo_number) }}">
+                                    <input name="tigo_number" type="text" class="form-control" value="{{ old('tigo_number', $settings->tigo_number ?? '') }}">
                                 </div>
                             </div>
 
@@ -53,11 +53,11 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">CRDB Name</label>
-                                    <input name="crdb_name" type="text" class="form-control" value="{{ old('crdb_name', $settings->crdb_name) }}">
+                                    <input name="crdb_name" type="text" class="form-control" value="{{ old('crdb_name', $settings->crdb_name ?? '') }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">CRDB Number</label>
-                                    <input name="crdb_number" type="text" class="form-control" value="{{ old('crdb_number', $settings->crdb_number) }}">
+                                    <input name="crdb_number" type="text" class="form-control" value="{{ old('crdb_number', $settings->crdb_number ?? '') }}">
                                 </div>
                             </div>
 
