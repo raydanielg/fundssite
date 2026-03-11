@@ -11,15 +11,23 @@
     .dt-buttons { margin-bottom: 0; }
     .dataTables_filter { display: none; }
     .table thead th { border-top: none; background: #f8f9fa; font-size: 0.75rem; }
-    .status-badge { font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; padding: 5px 10px; border-radius: 999px; }
+    .status-badge { font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; padding: 5px 10px; border-radius: 6px; }
     .status-completed { background: #dcfce7; color: #166534; }
     .status-pending { background: #fef9c3; color: #854d0e; }
     .status-failed { background: #fee2e2; color: #991b1b; }
     .status-cancelled { background: #f3f4f6; color: #374151; }
     .x-small { font-size: 0.72rem; }
     .filter-card { background: #fff; border-radius: 12px; border: 1px solid #edf2f7; margin-bottom: 24px; }
-    .btn-mint { background-color: #2e9e72; color: #fff; border: none; }
+    .btn-mint { background-color: #2e9e72; color: #fff; border: none; border-radius: 8px; }
     .btn-mint:hover { background-color: #25855f; color: #fff; }
+    .btn-outline-dark { border-radius: 8px; }
+    .rounded-pill { border-radius: 8px !important; }
+    .btn-outline-secondary { border-radius: 8px !important; border-color: #e2e8f0; color: #475569; }
+    .btn-outline-success { border-radius: 8px !important; border-color: #c6f6d5; color: #2f855a; }
+    .btn-outline-danger { border-radius: 8px !important; border-color: #fed7d7; color: #c53030; }
+    .btn-primary.rounded-pill { border-radius: 8px !important; }
+    .btn-danger.rounded-pill { border-radius: 8px !important; }
+    .btn-light.rounded-pill { border-radius: 8px !important; }
 </style>
 @endpush
 
@@ -328,19 +336,19 @@
                 buttons: [
                     {
                         extend: 'print',
-                        className: 'btn btn-sm btn-outline-secondary rounded-pill px-3 me-2',
+                        className: 'btn btn-sm btn-dark px-3 me-2',
                         text: '<i class="bi bi-printer me-1"></i> Print Filtered',
                         exportOptions: { columns: [0, 1, 2, 3, 4] }
                     },
                     {
                         extend: 'excel',
-                        className: 'btn btn-sm btn-outline-success rounded-pill px-3 me-2',
+                        className: 'btn btn-sm btn-success px-3 me-2',
                         text: '<i class="bi bi-file-earmark-excel me-1"></i> Excel',
                         exportOptions: { columns: [0, 1, 2, 3, 4] }
                     },
                     {
                         extend: 'pdf',
-                        className: 'btn btn-sm btn-outline-danger rounded-pill px-3',
+                        className: 'btn btn-sm btn-danger px-3',
                         text: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF',
                         exportOptions: { columns: [0, 1, 2, 3, 4] }
                     }
