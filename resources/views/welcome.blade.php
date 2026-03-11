@@ -545,7 +545,7 @@
                 <div class="hero-eyebrow"><span class="pulse-dot"></span> Live Medical Fundraiser</div>
                 <h1>Stand With <span>Cliff</span></h1>
                 <p class="hero-bio">
-                    Clifford is a devoted <strong>husband</strong>, a proud <strong>father of two beautiful children</strong>, and a man absolutely full of life.
+                    Cliff is a devoted <strong>husband</strong>, a proud <strong>father of two beautiful children</strong>, and a man absolutely full of life.
                     He has been diagnosed with <strong>Chronic Kidney Disease (CKD)</strong> and urgently needs lifetime dialysis or a kidney transplant.
                     <br><br>
                     His family, his friends, his community — all of us — have come together because some things are worth fighting for.
