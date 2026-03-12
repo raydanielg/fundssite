@@ -24,6 +24,9 @@
     <meta property="twitter:description" content="A husband, father of 2, fighting for his life. Track contributions and join hundreds supporting Cliff's kidney treatment.">
     <meta property="twitter:image" content="{{ asset('WhatsApp Image 2026-03-11 at 10.34.15.jpeg') }}">
 
+    <link rel="icon" type="image/jpeg" href="{{ asset(str_replace(' ', '%20', 'WhatsApp Image 2026-03-12 at 14.40.39.jpeg')) }}">
+    <link rel="apple-touch-icon" href="{{ asset(str_replace(' ', '%20', 'WhatsApp Image 2026-03-12 at 14.40.39.jpeg')) }}">
+
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,200..700,0..1,-50..200" />
     <style>
