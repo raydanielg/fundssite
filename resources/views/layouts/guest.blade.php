@@ -7,8 +7,8 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <link rel="icon" type="image/jpeg" href="{{ asset(str_replace(' ', '%20', 'WhatsApp Image 2026-03-12 at 14.40.39.jpeg')) }}">
-        <link rel="apple-touch-icon" href="{{ asset(str_replace(' ', '%20', 'WhatsApp Image 2026-03-12 at 14.40.39.jpeg')) }}">
+        <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
