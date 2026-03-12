@@ -1031,7 +1031,7 @@
                         <div class="cavatar" style="background:rgba(255,165,0,0.1);color:orange">${ini(c.n)}</div>
                         <div><div class="cname">${c.n}</div><div class="cgrp">Pledged on ${fmtDT(c.created_at)}</div></div>
                     </div>
-                    <div class="cright"><span class="camt" style="color:orange">${CUR} ${f(c.a)}</span><span class="bdg" style="background:rgba(255,165,0,0.1);color:orange">ahadi</span></div>
+                    <div class="cright"><span class="bdg" style="background:rgba(255,165,0,0.1);color:orange">ahadi</span></div>
                 </div>
             `).join('') : '<div style="padding:20px;text-align:center;color:var(--muted);font-size:0.8rem">No pending pledges found.</div>';
 
