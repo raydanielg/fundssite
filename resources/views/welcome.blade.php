@@ -842,26 +842,28 @@
             </div>
 
             <div id="tab-overview">
-                <div class="two-col">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:24px">
                     <div class="section-card">
-                        <div class="sec-header"><span class="sec-title">Recent paid transactions</span><span class="sec-badge" id="paid-bdg">—</span></div>
-                        <div class="clist" id="recent-paid"></div>
-                    </div>
-                    <div class="section-card">
-                        <div class="sec-header"><span class="sec-title">Payment status</span><span class="sec-badge" id="pie-bdg">—</span></div>
-                        <div class="pie-wrap">
-                            <div class="pie" id="pie">
-                                <div class="pie-mid">
-                                    <div class="pct" id="pie-pct">0%</div>
-                                    <div class="lbl">Completed</div>
-                                </div>
-                            </div>
-                            <div class="pie-meta">
-                                <div class="kpi"><span class="k"><span class="dot ok"></span>Completed</span><span class="v" id="kpi-paid">—</span></div>
-                                <div class="kpi"><span class="k"><span class="dot pend"></span>Pending</span><span class="v" id="kpi-pend">—</span></div>
-                                <div class="kpi"><span class="k">Total</span><span class="v" id="kpi-total">—</span></div>
-                            </div>
+                        <div class="sec-header">
+                            <span class="sec-title">Recent Paid Transactions</span>
+                            <span id="paid-bdg" class="sec-badge">0 paid</span>
                         </div>
+                        <div id="recent-paid" class="clist"></div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="sec-header">
+                            <span class="sec-title">Pledges (Ahadi/Manual)</span>
+                            <span id="pledge-bdg" class="sec-badge" style="background:rgba(255,165,0,0.1);color:orange">0 pledges</span>
+                        </div>
+                        <div id="pledge-list" class="clist"></div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="sec-header">
+                            <span class="sec-title">Top Contributors</span>
+                        </div>
+                        <div id="bar-chart" style="padding:16px 0"></div>
                     </div>
                 </div>
             </div>
@@ -963,7 +965,7 @@
 
         function render() {
             const paid = contributors.filter(c => c.s === 'completed' && c.a > 10).sort((a, b) => b.a - a.a);
-            const pend = contributors.filter(c => c.s === 'pending' || c.a <= 10).sort((a, b) => b.a - a.a);
+            const pend = contributors.filter(c => c.s === 'pending').sort((a, b) => b.a - a.a);
             const total = paid.reduce((s, c) => s + c.a, 0);
             const balance = total - EXPENSES;
             const remaining = TARGET - total;
@@ -1020,15 +1022,17 @@
                 </div>
             `).join('');
 
-            const allTotal = paid.length + pend.length;
-            const piePct = allTotal === 0 ? 0 : Math.round((paid.length / allTotal) * 100);
-            document.getElementById('pie-pct').textContent = piePct + '%';
-            document.getElementById('pie-bdg').textContent = allTotal + ' total';
-            document.getElementById('kpi-paid').textContent = paid.length;
-            document.getElementById('kpi-pend').textContent = pend.length;
-            document.getElementById('kpi-total').textContent = allTotal;
-            const deg = Math.round((paid.length / Math.max(1, allTotal)) * 360);
-            document.getElementById('pie').style.background = `conic-gradient(var(--emerald) 0deg, var(--emerald) ${deg}deg, rgba(13,61,46,0.10) ${deg}deg, rgba(13,61,46,0.10) 360deg)`;
+            // Pledges (Ahadi)
+            document.getElementById('pledge-bdg').textContent = pend.length + ' pledges';
+            document.getElementById('pledge-list').innerHTML = pend.length ? pend.slice(0, 15).map(c => `
+                <div class="citem">
+                    <div style="display:flex;align-items:center">
+                        <div class="cavatar" style="background:rgba(255,165,0,0.1);color:orange">${ini(c.n)}</div>
+                        <div><div class="cname">${c.n}</div><div class="cgrp">Pledged on ${fmtDT(c.created_at)}</div></div>
+                    </div>
+                    <div class="cright"><span class="camt" style="color:orange">${CUR} ${f(c.a)}</span><span class="bdg" style="background:rgba(255,165,0,0.1);color:orange">ahadi</span></div>
+                </div>
+            `).join('') : '<div style="padding:20px;text-align:center;color:var(--muted);font-size:0.8rem">No pending pledges found.</div>';
 
             // Home page should display paid contributions only
             document.getElementById('all-bdg').textContent = paid.length + ' paid';
@@ -1051,7 +1055,7 @@
                 </tr>
             `;
 
-            const top10 = sp.slice(0, 10);
+            const top10 = overviewPaid.slice(0, 10);
             const max = top10[0]?.a || 1;
             document.getElementById('bar-chart').innerHTML = top10.map(c => {
                 const w = Math.round(c.a / max * 100);

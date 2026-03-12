@@ -345,6 +345,7 @@ Route::middleware('auth')->group(function () {
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:32'],
             'amount' => ['required', 'integer', 'min:1'],
+            'status' => ['required', 'string', 'in:completed,pending'],
         ]);
 
         $currency = 'TZS';
@@ -359,8 +360,8 @@ Route::middleware('auth')->group(function () {
 
         DonationTransaction::create([
             'reference' => $ref,
-            'status' => 'completed',
-            'paid_at' => now(),
+            'status' => $data['status'],
+            'paid_at' => $data['status'] === 'completed' ? now() : null,
             'amount' => (int) $data['amount'],
             'currency' => $currency,
             'customer_name' => $data['name'],

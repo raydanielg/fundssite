@@ -81,8 +81,27 @@
                             </div>
 
                             <div class="col-12">
+                                <label class="form-label fw-semibold">Payment Status</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" id="status_completed" value="completed" checked>
+                                        <label class="form-check-label" for="status_completed">
+                                            Paid (Kashalipa)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" id="status_pending" value="pending">
+                                        <label class="form-check-label" for="status_pending">
+                                            Pledge (Ahadi/Pending)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-muted small mt-1">Select 'Pledge' if the donor has promised to pay later.</div>
+                            </div>
+
+                            <div class="col-12">
                                 <button class="btn btn-success px-4" type="submit">
-                                    <i class="bi bi-check2-circle me-1"></i> Save
+                                    <i class="bi bi-check2-circle me-1"></i> Save Donation
                                 </button>
                             </div>
                         </form>
