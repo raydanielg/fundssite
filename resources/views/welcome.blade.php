@@ -949,10 +949,11 @@
             n: t.customer_name,
             a: parseInt(t.amount || 0, 10) || 0,
             s: t.status,
-            ref: t.reference,
+            e: t.webhook_event,
             paid_at: t.paid_at,
             created_at: t.created_at,
-        }));
+            ref: t.reference,
+        })).filter(c => c.n && c.a);
 
         const f = n => Math.round(n).toLocaleString('en-TZ');
         const ini = name => name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
@@ -965,7 +966,7 @@
 
         function render() {
             const paid = contributors.filter(c => c.s === 'completed' && c.a > 10).sort((a, b) => b.a - a.a);
-            const pend = contributors.filter(c => c.s === 'pending').sort((a, b) => b.a - a.a);
+            const pend = contributors.filter(c => c.s === 'pending' && c.e === 'manual').sort((a, b) => b.a - a.a);
             const total = paid.reduce((s, c) => s + c.a, 0);
             const balance = total - EXPENSES;
             const remaining = TARGET - total;

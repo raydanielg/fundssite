@@ -53,7 +53,13 @@ Route::get('/', function () {
     $hasPaidAt = Schema::hasColumn('donation_transactions', 'paid_at');
 
     $query = DonationTransaction::query()
-        ->whereIn('status', ['pending', 'completed']);
+        ->where(function ($q) {
+            $q->where('status', 'completed')
+                ->orWhere(function ($q2) {
+                    $q2->where('status', 'pending')
+                        ->where('webhook_event', 'manual');
+                });
+        });
 
     if ($hasPaidAt) {
         $query->orderByDesc('paid_at');
@@ -72,6 +78,7 @@ Route::get('/', function () {
             'customer_phone',
             'customer_email',
             'external_reference',
+            'webhook_event',
             'created_at',
         ])));
 
