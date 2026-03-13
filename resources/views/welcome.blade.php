@@ -1008,17 +1008,66 @@
         const EXPENSES = parseInt(SETTINGS.expenses_amount || 2289225, 10);
         const CUR = (SETTINGS.currency || 'TZS');
 
-        const transactions = @json($transactions ?? []);
+        let transactions = @json($transactions ?? []);
 
-        let contributors = transactions.map(t => ({
-            n: t.customer_name,
-            a: parseInt(t.amount || 0, 10) || 0,
-            s: t.status,
-            e: t.webhook_event,
-            paid_at: t.paid_at,
-            created_at: t.created_at,
-            ref: t.reference,
-        })).filter(c => c.n && c.a);
+        function setTransactions(newTx) {
+            transactions = Array.isArray(newTx) ? newTx : [];
+            contributors = transactions.map(t => ({
+                n: t.customer_name,
+                a: parseInt(t.amount || 0, 10) || 0,
+                s: t.status,
+                e: t.webhook_event,
+                paid_at: t.paid_at,
+                created_at: t.created_at,
+                ref: t.reference,
+            })).filter(c => c.n && c.a);
+        }
+
+        let contributors = [];
+        setTransactions(transactions);
+
+        let pollTimer = null;
+        let pollBusy = false;
+
+        async function pollLive() {
+            if (pollBusy) return;
+            if (document.visibilityState === 'hidden') return;
+            pollBusy = true;
+
+            try {
+                const res = await fetch('{{ route('public.live') }}', {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && Array.isArray(data.transactions)) {
+                    setTransactions(data.transactions);
+                    render();
+                }
+            } catch (e) {
+                // ignore polling errors
+            } finally {
+                pollBusy = false;
+            }
+        }
+
+        function startPolling() {
+            if (pollTimer) return;
+            pollTimer = setInterval(pollLive, 1000);
+        }
+
+        function stopPolling() {
+            if (!pollTimer) return;
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') stopPolling();
+            else startPolling();
+        });
+
+        startPolling();
 
         const f = n => Math.round(n).toLocaleString('en-TZ');
         const ini = name => name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();

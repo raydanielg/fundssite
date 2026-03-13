@@ -94,6 +94,44 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/api/public/live', function () {
+    $hasPaidAt = Schema::hasColumn('donation_transactions', 'paid_at');
+
+    $query = DonationTransaction::query()
+        ->where(function ($q) {
+            $q->where('status', 'completed')
+                ->orWhere(function ($q2) {
+                    $q2->where('status', 'pending')
+                        ->where('webhook_event', 'manual');
+                });
+        });
+
+    if ($hasPaidAt) {
+        $query->orderByDesc('paid_at');
+    }
+
+    $transactions = $query
+        ->orderByDesc('created_at')
+        ->limit(500)
+        ->get(array_values(array_filter([
+            'reference',
+            'status',
+            $hasPaidAt ? 'paid_at' : null,
+            'amount',
+            'currency',
+            'customer_name',
+            'customer_phone',
+            'external_reference',
+            'webhook_event',
+            'created_at',
+        ])));
+
+    return response()->json([
+        'transactions' => $transactions,
+        'server_time' => now()->toISOString(),
+    ]);
+})->name('public.live');
+
 Route::post('/donate/session', [DonationController::class, 'createSession'])->name('donate.session');
 Route::get('/donate/session', function () {
     return redirect('/');
