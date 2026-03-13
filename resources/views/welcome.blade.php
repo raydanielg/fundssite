@@ -465,7 +465,45 @@
         .hero-paywrap .pay-name { font-size: 0.95rem; }
         .hero-paywrap .pay-title { font-size: 0.7rem; color: var(--mint) !important; }
         .hero-paywrap .pay-ic { width: 40px; height: 40px; font-size: 1.2rem; color: var(--mint) !important; }
-        
+
+        .remain-card {
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 16px;
+            padding: 14px 14px;
+            color: rgba(255,255,255,0.90);
+            box-shadow: 0 14px 35px rgba(0,0,0,0.22);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            margin-bottom: 14px;
+        }
+        .remain-top { display:flex; align-items:center; justify-content:space-between; gap: 10px; }
+        .remain-title { font-size: 0.72rem; letter-spacing: 0.20em; text-transform: uppercase; color: rgba(255,255,255,0.65); font-weight: 900; }
+        .remain-chip { font-size: 0.68rem; font-weight: 900; padding: 6px 10px; border-radius: 999px; background: rgba(244,162,37,0.14); border: 1px solid rgba(244,162,37,0.28); color: rgba(255,255,255,0.92); }
+        .remain-amt { margin-top: 8px; font-family: var(--mono); font-weight: 900; font-size: 1.25rem; color: #fff; }
+        .remain-sub { margin-top: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.62); line-height: 1.5; }
+
+        .remain-float {
+            display:none;
+            position: fixed;
+            left: 14px;
+            right: 14px;
+            bottom: 14px;
+            z-index: 1200;
+        }
+        .remain-float .remain-card { margin: 0; }
+        .remain-float .remain-sub { display: none; }
+        .remain-float.open .remain-sub { display: block; }
+        .remain-float-btn {
+            width: 100%;
+            text-align: left;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            cursor: pointer;
+            color: inherit;
+        }
+
         @media (max-width: 700px) {
             .hero-paywrap .pay-grid { 
                 flex-direction: column;
@@ -475,6 +513,9 @@
                 flex: 1 1 auto;
                 width: 100%;
             }
+
+            .remain-card.desktop-only { display: none; }
+            .remain-float { display: block; }
         }
         footer { border-top: 1px solid rgba(212,234,226,0.9); background: linear-gradient(135deg, var(--deep) 0%, #124b38 60%, var(--forest) 100%); }
         .site-footer {
@@ -631,6 +672,14 @@
             </div>
 
             <div>
+                <div class="remain-card desktop-only">
+                    <div class="remain-top">
+                        <div class="remain-title">Amount Remaining</div>
+                        <div class="remain-chip">Live</div>
+                    </div>
+                    <div class="remain-amt" id="remain-amt-desktop">—</div>
+                    <div class="remain-sub">This is the amount still needed to reach the campaign target.</div>
+                </div>
                 <div class="photo-ring">
                     <div class="photo-inner" onclick="openPayInfo()" title="Click to view other payment methods">
                         <img id="cliff-photo" src="{{ asset('WhatsApp Image 2026-03-10 at 17.56.33.jpeg') }}" alt="Cliff" style="display:block" />
@@ -643,6 +692,19 @@
                 <input type="file" id="photo-input" accept="image/*" onchange="loadPhoto(event)">
             </div>
         </div>
+    </div>
+
+    <div class="remain-float" id="remainFloat">
+        <button class="remain-float-btn" type="button" onclick="toggleRemainFloat()" aria-label="Show remaining amount">
+            <div class="remain-card">
+                <div class="remain-top">
+                    <div class="remain-title">Amount Remaining</div>
+                    <div class="remain-chip" id="remain-chip">Tap</div>
+                </div>
+                <div class="remain-amt" id="remain-amt">—</div>
+                <div class="remain-sub" id="remain-sub">This is the amount still needed to reach the campaign target.</div>
+            </div>
+        </button>
     </div>
 
     <div class="modal-backdrop" id="payInfoModal" role="dialog" aria-modal="true" aria-hidden="true">
@@ -982,6 +1044,12 @@
             document.getElementById('bb-contributors').textContent = paid.length + ' contributors paid';
             document.getElementById('bb-remaining').textContent = CUR + ' ' + f(Math.max(0, remaining)) + ' remaining';
 
+            const remainAmt = document.getElementById('remain-amt');
+            if (remainAmt) remainAmt.textContent = CUR + ' ' + f(Math.max(0, remaining));
+
+            const remainAmtDesktop = document.getElementById('remain-amt-desktop');
+            if (remainAmtDesktop) remainAmtDesktop.textContent = CUR + ' ' + f(Math.max(0, remaining));
+
             document.getElementById('s-collected').textContent = CUR + ' ' + f(total);
             document.getElementById('s-paid-n').textContent = paid.length + ' contributors paid';
             document.getElementById('s-remaining').textContent = CUR + ' ' + f(Math.max(0, remaining)) + ' to go';
@@ -1168,6 +1236,14 @@
             const m = document.getElementById('payInfoModal');
             m.classList.remove('open');
             m.setAttribute('aria-hidden', 'true');
+        }
+
+        function toggleRemainFloat() {
+            const wrap = document.getElementById('remainFloat');
+            if (!wrap) return;
+            wrap.classList.toggle('open');
+            const chip = document.getElementById('remain-chip');
+            if (chip) chip.textContent = wrap.classList.contains('open') ? 'Close' : 'Tap';
         }
 
         async function copyPay(text) {
