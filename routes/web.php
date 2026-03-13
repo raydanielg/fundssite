@@ -214,6 +214,68 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('admin.dashboard');
 
+    Route::get('/admin/api/live', function () {
+        $settings = [
+            'target_amount' => 0,
+            'expenses_amount' => 0,
+            'currency' => 'TZS',
+        ];
+
+        if (Schema::hasTable('fundraiser_settings')) {
+            $row = DB::table('fundraiser_settings')->orderBy('id')->first();
+            if ($row) {
+                $settings = [
+                    'target_amount' => (int) $row->target_amount,
+                    'expenses_amount' => (int) $row->expenses_amount,
+                    'currency' => (string) $row->currency,
+                ];
+            }
+        }
+
+        $totalRaised = (int) DonationTransaction::query()
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        $paidCount = (int) DonationTransaction::query()
+            ->where('status', 'completed')
+            ->count();
+
+        $paidTodayCount = (int) DonationTransaction::query()
+            ->where('status', 'completed')
+            ->whereDate('paid_at', now()->toDateString())
+            ->count();
+
+        $pendingCount = (int) DonationTransaction::query()
+            ->where('status', 'pending')
+            ->count();
+
+        $recentPaid = DonationTransaction::query()
+            ->where('status', 'completed')
+            ->orderByDesc('paid_at')
+            ->orderByDesc('created_at')
+            ->limit(12)
+            ->get([
+                'reference',
+                'paid_at',
+                'amount',
+                'currency',
+                'customer_name',
+                'customer_phone',
+                'customer_email',
+                'created_at',
+            ]);
+
+        return response()->json([
+            'settings' => $settings,
+            'totalRaised' => $totalRaised,
+            'paidCount' => $paidCount,
+            'paidTodayCount' => $paidTodayCount,
+            'pendingCount' => $pendingCount,
+            'recentPaid' => $recentPaid,
+            'server_time' => now()->toISOString(),
+        ]);
+    })->name('admin.api.live');
+
     Route::get('/admin/transactions', function () {
         $transactions = DonationTransaction::query()
             ->orderByDesc('paid_at')
@@ -225,6 +287,34 @@ Route::middleware('auth')->group(function () {
             'transactions' => $transactions,
         ]);
     })->name('admin.transactions');
+
+    Route::get('/admin/api/transactions', function () {
+        $hasPaidAt = Schema::hasColumn('donation_transactions', 'paid_at');
+        $transactions = DonationTransaction::query()
+            ->orderByDesc($hasPaidAt ? 'paid_at' : 'created_at')
+            ->orderByDesc('created_at')
+            ->limit(500)
+            ->get(array_values(array_filter([
+                'id',
+                'reference',
+                'status',
+                $hasPaidAt ? 'paid_at' : null,
+                'amount',
+                'currency',
+                'customer_name',
+                'customer_phone',
+                'customer_email',
+                'external_reference',
+                'webhook_event',
+                'failure_reason',
+                'created_at',
+            ])));
+
+        return response()->json([
+            'transactions' => $transactions,
+            'server_time' => now()->toISOString(),
+        ]);
+    })->name('admin.api.transactions');
 
     Route::delete('/admin/transactions/{transaction}', function (DonationTransaction $transaction) {
         $transaction->delete();

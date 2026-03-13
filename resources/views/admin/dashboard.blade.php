@@ -26,7 +26,7 @@
         <div class="col-lg-3 col-sm-6">
             <div class="small-box shadow-sm mb-0" style="background-color: #17a2b8 !important; min-height: 120px; color: #fff !important;">
                 <div class="inner p-3">
-                    <h2 class="fw-bold mb-1" style="font-size: 2.2rem;">{{ (int) ($paidCount ?? 0) + (int) ($pendingCount ?? 0) }}</h2>
+                    <h2 id="kpi-total-users" class="fw-bold mb-1" style="font-size: 2.2rem;">{{ (int) ($paidCount ?? 0) + (int) ($pendingCount ?? 0) }}</h2>
                     <p class="mb-0">Total Users</p>
                 </div>
                 <div class="icon" style="opacity: 0.2;">
@@ -42,7 +42,7 @@
         <div class="col-lg-3 col-sm-6">
             <div class="small-box shadow-sm mb-0" style="background-color: #28a745 !important; min-height: 120px; color: #fff !important;">
                 <div class="inner p-3">
-                    <h2 class="fw-bold mb-1" style="font-size: 2.2rem;">{{ (int) ($paidCount ?? 0) + (int) ($pendingCount ?? 0) }}</h2>
+                    <h2 id="kpi-total-payments" class="fw-bold mb-1" style="font-size: 2.2rem;">{{ (int) ($paidCount ?? 0) + (int) ($pendingCount ?? 0) }}</h2>
                     <p class="mb-0">Total Payments</p>
                 </div>
                 <div class="icon" style="opacity: 0.2;">
@@ -58,7 +58,7 @@
         <div class="col-lg-3 col-sm-6">
             <div class="small-box shadow-sm mb-0" style="background-color: #ffc107 !important; min-height: 120px; color: #333 !important;">
                 <div class="inner p-3">
-                    <h2 class="fw-bold mb-1" style="font-size: 2.2rem;">{{ (int) ($paidTodayCount ?? 0) }}</h2>
+                    <h2 id="kpi-paid-today" class="fw-bold mb-1" style="font-size: 2.2rem;">{{ (int) ($paidTodayCount ?? 0) }}</h2>
                     <p class="mb-0">New Today</p>
                 </div>
                 <div class="icon" style="opacity: 0.2;">
@@ -74,7 +74,7 @@
         <div class="col-lg-3 col-sm-6">
             <div class="small-box shadow-sm mb-0" style="background-color: #dc3545 !important; min-height: 120px; color: #fff !important;">
                 <div class="inner p-3">
-                    <h2 class="fw-bold mb-1" style="font-size: 1.8rem; padding-top: 5px;">{{ $cur }} {{ $fmt($raised) }}</h2>
+                    <h2 id="kpi-cash-flow" class="fw-bold mb-1" style="font-size: 1.8rem; padding-top: 5px;">{{ $cur }} {{ $fmt($raised) }}</h2>
                     <p class="mb-0">Cash Flow</p>
                 </div>
                 <div class="icon" style="opacity: 0.2;">
@@ -120,10 +120,13 @@
             <!-- New Users Card -->
             <div class="card border-0 shadow-sm mb-4" style="border-radius: 0;">
                 <div class="card-header bg-white py-2 border-bottom">
-                    <h6 class="card-title mb-0 fw-bold" style="font-size: 14px;"><i class="bi bi-person-plus me-2"></i>New Users</h6>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h6 class="card-title mb-0 fw-bold" style="font-size: 14px;"><i class="bi bi-person-plus me-2"></i>New Users</h6>
+                        <span id="live-pill" class="badge text-bg-light border" style="font-weight:800">Live</span>
+                    </div>
                 </div>
                 <div class="card-body p-4 bg-light bg-opacity-50">
-                    <div class="row g-4 text-center">
+                    <div id="recent-users" class="row g-4 text-center">
                         @forelse(($recentPaid->slice(0, 6) ?? []) as $t)
                             <div class="col-4">
                                 <div class="bg-white text-dark rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm border" style="width: 45px; height: 45px; font-weight: 800; font-size: 1.2rem;">
@@ -204,6 +207,96 @@
                     }
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fmt = (n) => (parseInt(n || 0, 10) || 0).toLocaleString('en-TZ');
+            const shortName = (n) => (String(n || 'Donor').trim().split(' ')[0] || 'Donor').substring(0, 12);
+            const initials = (n) => {
+                const parts = String(n || 'D').trim().split(' ').filter(Boolean);
+                return (parts[0]?.[0] || 'D').toUpperCase();
+            };
+
+            let busy = false;
+            let timer = null;
+
+            async function poll() {
+                if (busy) return;
+                if (document.visibilityState === 'hidden') return;
+                busy = true;
+                const pill = document.getElementById('live-pill');
+                if (pill) pill.textContent = 'Live…';
+
+                try {
+                    const res = await fetch('{{ route('admin.api.live') }}', { headers: { 'Accept': 'application/json' } });
+                    if (!res.ok) return;
+                    const data = await res.json();
+
+                    const paidCount = parseInt(data.paidCount || 0, 10) || 0;
+                    const pendingCount = parseInt(data.pendingCount || 0, 10) || 0;
+                    const paidToday = parseInt(data.paidTodayCount || 0, 10) || 0;
+                    const totalRaised = parseInt(data.totalRaised || 0, 10) || 0;
+                    const cur = String(data?.settings?.currency || 'TZS');
+
+                    const elUsers = document.getElementById('kpi-total-users');
+                    if (elUsers) elUsers.textContent = fmt(paidCount + pendingCount);
+
+                    const elPays = document.getElementById('kpi-total-payments');
+                    if (elPays) elPays.textContent = fmt(paidCount + pendingCount);
+
+                    const elToday = document.getElementById('kpi-paid-today');
+                    if (elToday) elToday.textContent = fmt(paidToday);
+
+                    const elCash = document.getElementById('kpi-cash-flow');
+                    if (elCash) elCash.textContent = cur + ' ' + fmt(totalRaised);
+
+                    const wrap = document.getElementById('recent-users');
+                    if (wrap) {
+                        const items = Array.isArray(data.recentPaid) ? data.recentPaid.slice(0, 6) : [];
+                        wrap.innerHTML = items.length ? items.map(t => {
+                            const name = t.customer_name || 'Donor';
+                            const paidAt = t.paid_at ? new Date(t.paid_at) : null;
+                            const minsAgo = paidAt && !Number.isNaN(paidAt.getTime()) ? Math.max(1, Math.round((Date.now() - paidAt.getTime()) / 60000)) : 1;
+                            return `
+                                <div class="col-4">
+                                    <div class="bg-white text-dark rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm border" style="width: 45px; height: 45px; font-weight: 800; font-size: 1.2rem;">
+                                        ${initials(name)}
+                                    </div>
+                                    <div class="fw-bold text-truncate" style="font-size: 13px;">${shortName(name)}</div>
+                                    <div class="text-muted" style="font-size: 11px;">since ${minsAgo}m</div>
+                                </div>
+                            `;
+                        }).join('') : '<div class="col-12 text-muted py-3">No new users yet.</div>';
+                    }
+
+                    if (pill) pill.textContent = 'Live';
+                } catch (e) {
+                    if (pill) pill.textContent = 'Offline';
+                } finally {
+                    busy = false;
+                }
+            }
+
+            function start() {
+                if (timer) return;
+                timer = setInterval(poll, 3000);
+                poll();
+            }
+
+            function stop() {
+                if (!timer) return;
+                clearInterval(timer);
+                timer = null;
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') stop();
+                else start();
+            });
+
+            start();
         });
     </script>
     @endpush

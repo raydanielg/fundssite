@@ -69,7 +69,10 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
                     <div>
-                        <h5 class="card-title mb-0 fw-bold">Contribution Stream</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <h5 class="card-title mb-0 fw-bold">Contribution Stream</h5>
+                            <span id="tx-live-pill" class="badge text-bg-light border" style="font-weight:800">Live</span>
+                        </div>
                         <p class="text-muted small mb-0">Filtered results will be used for printing/exporting.</p>
                     </div>
                     <div class="d-flex align-items-center gap-2">
@@ -86,6 +89,15 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <div id="tx-new-alert" class="alert alert-info py-2 border-0 shadow-sm mb-4" style="display:none">
+                        <div class="d-flex align-items-center justify-content-between gap-3">
+                            <div class="small">
+                                <i class="bi bi-bell-fill me-2"></i>
+                                <span id="tx-new-text">New payments received.</span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.location.reload()">Refresh</button>
+                        </div>
+                    </div>
                     @if (session('status') === 'synced')
                         <div class="alert alert-success py-2 border-0 shadow-sm mb-4">
                             <i class="bi bi-check-circle-fill me-2"></i> Synced pending payments with Snippe.
@@ -115,7 +127,7 @@
                             </thead>
                             <tbody>
                                 @foreach (($transactions ?? []) as $t)
-                                    <tr>
+                                    <tr data-tx-id="{{ $t->id }}">
                                         <td class="ps-3 py-3">
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center text-mint fw-bold" style="width: 32px; height: 32px;">
@@ -130,27 +142,27 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <div class="fw-bold text-dark small">{{ $t->currency ?? 'TZS' }} {{ number_format((int) $t->amount) }}</div>
+                                            <div class="fw-bold text-dark small tx-amount">{{ $t->currency ?? 'TZS' }} {{ number_format((int) $t->amount) }}</div>
                                             @if($t->external_reference)
                                                 <div class="text-muted x-small">Ref: {{ $t->external_reference }}</div>
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="status-badge status-{{ $t->status }}">
+                                            <span class="status-badge tx-status status-{{ $t->status }}">
                                                 {{ $t->status }}
                                             </span>
                                         </td>
                                         <td>
-                                            <div class="small text-dark">{{ $t->webhook_event ? str_replace(['checkout.session.', 'payment.'], '', $t->webhook_event) : '-' }}</div>
+                                            <div class="small text-dark tx-event">{{ $t->webhook_event ? str_replace(['checkout.session.', 'payment.'], '', $t->webhook_event) : '-' }}</div>
                                             <code class="x-small text-muted" style="font-size: 0.65rem;">{{ $t->reference }}</code>
                                         </td>
                                         <td data-sort="{{ $t->paid_at ? $t->paid_at->timestamp : $t->created_at->timestamp }}">
                                             <div class="small">
                                                 @if($t->paid_at)
-                                                    <div class="fw-bold text-dark date-cell">{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('Y-m-d') }}</div>
+                                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('Y-m-d') }}">{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('Y-m-d') }}</div>
                                                     <div class="text-muted x-small">{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('H:i') }}</div>
                                                 @else
-                                                    <div class="text-muted x-small italic date-cell" data-raw="{{ $t->created_at->format('Y-m-d') }}">Created {{ $t->created_at->diffForHumans() }}</div>
+                                                    <div class="text-muted x-small italic date-cell tx-date" data-raw="{{ $t->created_at->format('Y-m-d') }}">Created {{ $t->created_at->diffForHumans() }}</div>
                                                 @endif
                                             </div>
                                         </td>
@@ -381,6 +393,103 @@
                     table.draw();
                 }
             });
+
+            // Live polling
+            let busy = false;
+            let timer = null;
+            let knownIds = new Set($('#transactionsTable tbody tr').map(function(){ return $(this).data('tx-id'); }).get());
+
+            const fmt = (n) => (parseInt(n || 0, 10) || 0).toLocaleString('en-TZ');
+
+            function showNewAlert(count) {
+                const box = document.getElementById('tx-new-alert');
+                const text = document.getElementById('tx-new-text');
+                if (text) text.textContent = count === 1 ? '1 new payment received. Please refresh to view it.' : (count + ' new payments received. Please refresh to view them.');
+                if (box) box.style.display = 'block';
+            }
+
+            async function poll() {
+                if (busy) return;
+                if (document.visibilityState === 'hidden') return;
+                busy = true;
+
+                const pill = document.getElementById('tx-live-pill');
+                if (pill) pill.textContent = 'Live…';
+
+                try {
+                    const res = await fetch('{{ route('admin.api.transactions') }}', { headers: { 'Accept': 'application/json' } });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const items = Array.isArray(data.transactions) ? data.transactions : [];
+
+                    let newCount = 0;
+                    items.forEach(t => {
+                        if (!knownIds.has(t.id)) {
+                            newCount++;
+                            return;
+                        }
+
+                        const row = $('#transactionsTable tbody tr[data-tx-id="' + t.id + '"]');
+                        if (!row.length) return;
+
+                        // Amount
+                        const amt = row.find('.tx-amount');
+                        if (amt.length) amt.text((t.currency || 'TZS') + ' ' + fmt(t.amount));
+
+                        // Status
+                        const st = row.find('.tx-status');
+                        if (st.length) {
+                            const s = String(t.status || '').toLowerCase();
+                            st.removeClass('status-completed status-pending status-failed status-cancelled status-completed status-pending status-failed status-cancelled');
+                            st.removeClass(function(i, cls){ return (cls.match(/\bstatus-\S+/g) || []).join(' '); });
+                            st.addClass('status-' + s);
+                            st.text(s);
+                        }
+
+                        // Event
+                        const ev = row.find('.tx-event');
+                        if (ev.length) {
+                            const raw = t.webhook_event || '-';
+                            ev.text(String(raw).replace('checkout.session.', '').replace('payment.', ''));
+                        }
+
+                        // Date raw (for filters)
+                        const dt = row.find('.tx-date');
+                        if (dt.length) {
+                            const raw = (t.paid_at || t.created_at || '').slice(0, 10);
+                            if (raw) dt.attr('data-raw', raw);
+                        }
+                    });
+
+                    if (newCount > 0) showNewAlert(newCount);
+
+                    if (pill) pill.textContent = 'Live';
+                } catch (e) {
+                    const pill = document.getElementById('tx-live-pill');
+                    if (pill) pill.textContent = 'Offline';
+                } finally {
+                    busy = false;
+                }
+            }
+
+            function start() {
+                if (timer) return;
+                timer = setInterval(poll, 3000);
+                poll();
+            }
+
+            function stop() {
+                if (!timer) return;
+                clearInterval(timer);
+                timer = null;
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') stop();
+                else start();
+            });
+
+            start();
         });
     </script>
     @endpush
