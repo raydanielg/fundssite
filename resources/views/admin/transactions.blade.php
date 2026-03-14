@@ -14,6 +14,7 @@
     .status-badge { font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; padding: 5px 10px; border-radius: 6px; }
     .status-completed { background: #dcfce7; color: #166534; }
     .status-pending { background: #fef9c3; color: #854d0e; }
+    .status-active { background: #fef9c3; color: #854d0e; }
     .status-failed { background: #fee2e2; color: #991b1b; }
     .status-cancelled { background: #f3f4f6; color: #374151; }
     .x-small { font-size: 0.72rem; }
@@ -95,7 +96,10 @@
                                 <i class="bi bi-bell-fill me-2"></i>
                                 <span id="tx-new-text">New payments received.</span>
                             </div>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.location.reload()">Refresh</button>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="txDismissNewAlert()">Dismiss</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="txAcknowledgeAndRefresh()">Refresh</button>
+                            </div>
                         </div>
                     </div>
                     @if (session('status') === 'synced')
@@ -202,6 +206,17 @@
                                                                 <div class="mb-3">
                                                                     <label class="form-label small fw-bold">Amount ({{ $t->currency }})</label>
                                                                     <input type="number" name="amount" class="form-control" value="{{ (int)$t->amount }}" required>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Status</label>
+                                                                    <select name="status" class="form-select" required>
+                                                                        <option value="completed" @selected($t->status === 'completed')>Completed</option>
+                                                                        <option value="pending" @selected($t->status === 'pending')>Pending</option>
+                                                                        <option value="active" @selected($t->status === 'active')>Active</option>
+                                                                        <option value="failed" @selected($t->status === 'failed')>Failed</option>
+                                                                        <option value="cancelled" @selected($t->status === 'cancelled')>Cancelled</option>
+                                                                    </select>
+                                                                    <div class="form-text">Pending/Active will remove paid date.</div>
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <label class="form-label small fw-bold">Date Paid</label>
@@ -398,6 +413,11 @@
             let busy = false;
             let timer = null;
             let knownIds = new Set($('#transactionsTable tbody tr').map(function(){ return $(this).data('tx-id'); }).get());
+            let pendingNewMaxId = 0;
+            let seenMaxId = (() => {
+                const v = parseInt(localStorage.getItem('admin_tx_seen_max_id') || '0', 10);
+                return Number.isFinite(v) ? v : 0;
+            })();
 
             const fmt = (n) => (parseInt(n || 0, 10) || 0).toLocaleString('en-TZ');
 
@@ -406,6 +426,24 @@
                 const text = document.getElementById('tx-new-text');
                 if (text) text.textContent = count === 1 ? '1 new payment received. Please refresh to view it.' : (count + ' new payments received. Please refresh to view them.');
                 if (box) box.style.display = 'block';
+            }
+
+            window.txDismissNewAlert = function() {
+                const box = document.getElementById('tx-new-alert');
+                if (pendingNewMaxId > seenMaxId) {
+                    seenMaxId = pendingNewMaxId;
+                    localStorage.setItem('admin_tx_seen_max_id', String(seenMaxId));
+                }
+                pendingNewMaxId = 0;
+                if (box) box.style.display = 'none';
+            }
+
+            window.txAcknowledgeAndRefresh = function() {
+                if (pendingNewMaxId > seenMaxId) {
+                    seenMaxId = pendingNewMaxId;
+                    localStorage.setItem('admin_tx_seen_max_id', String(seenMaxId));
+                }
+                window.location.reload();
             }
 
             async function poll() {
@@ -422,12 +460,17 @@
                     const data = await res.json();
                     const items = Array.isArray(data.transactions) ? data.transactions : [];
 
+                    // Track newest ID we have not acknowledged yet
+                    let maxId = 0;
+                    items.forEach(t => {
+                        const id = parseInt(t.id || 0, 10) || 0;
+                        if (id > maxId) maxId = id;
+                    });
+
                     let newCount = 0;
                     items.forEach(t => {
-                        if (!knownIds.has(t.id)) {
-                            newCount++;
-                            return;
-                        }
+                        const idNum = parseInt(t.id || 0, 10) || 0;
+                        if (!knownIds.has(t.id) && idNum > seenMaxId) newCount++;
 
                         const row = $('#transactionsTable tbody tr[data-tx-id="' + t.id + '"]');
                         if (!row.length) return;
@@ -461,7 +504,10 @@
                         }
                     });
 
-                    if (newCount > 0) showNewAlert(newCount);
+                    if (newCount > 0 && maxId > seenMaxId) {
+                        pendingNewMaxId = Math.max(pendingNewMaxId, maxId);
+                        showNewAlert(newCount);
+                    }
 
                     if (pill) pill.textContent = 'Live';
                 } catch (e) {

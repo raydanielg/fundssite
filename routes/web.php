@@ -327,18 +327,29 @@ Route::middleware('auth')->group(function () {
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_phone' => ['nullable', 'string', 'max:255'],
             'amount' => ['required', 'integer', 'min:0'],
+            'status' => ['required', 'string', 'in:completed,pending,active,failed,cancelled'],
             'paid_at' => ['nullable', 'date'],
         ]);
 
-        $status = $transaction->status;
-        // If amount is 0 or very small (less than 10), we might want to treat it as pending visually
-        // but for database, we keep the status. The user specifically asked for front-end logic.
+        $status = (string) $data['status'];
+
+        $paidAt = $transaction->paid_at;
+        if ($status === 'completed') {
+            if (!empty($data['paid_at'])) {
+                $paidAt = \Illuminate\Support\Carbon::parse($data['paid_at']);
+            } elseif (!$paidAt) {
+                $paidAt = now();
+            }
+        } else {
+            $paidAt = null;
+        }
 
         $transaction->update([
             'customer_name' => $data['customer_name'],
             'customer_phone' => $data['customer_phone'],
             'amount' => $data['amount'],
-            'paid_at' => $data['paid_at'] ? \Illuminate\Support\Carbon::parse($data['paid_at']) : $transaction->paid_at,
+            'status' => $status,
+            'paid_at' => $paidAt,
         ]);
 
         return redirect()->route('admin.transactions')->with('status', 'updated');
