@@ -936,6 +936,15 @@
             <div id="tab-contributors" class="hidden">
                 <div class="section-card" style="margin-bottom:24px">
                     <div class="sec-header"><span class="sec-title">All contributions</span><span class="sec-badge" id="all-bdg">—</span></div>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 14px">
+                        <input id="all-search" type="text" placeholder="Search name..." style="flex:1;min-width:220px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:10px 12px;color:var(--light);outline:none">
+                        <select id="all-sort" style="min-width:220px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:10px 12px;color:var(--light);outline:none">
+                            <option value="recent">Default: Recent (Last to First)</option>
+                            <option value="amount_desc">Amount: High to Low</option>
+                            <option value="amount_asc">Amount: Low to High</option>
+                            <option value="name_asc">Name: A to Z</option>
+                        </select>
+                    </div>
                     <div class="tbl-wrap">
                         <table class="tbl">
                             <thead><tr><th>#</th><th>Name</th><th>Amount</th><th>Status</th><th>Paid</th><th>Reference</th></tr></thead>
@@ -1126,7 +1135,18 @@
             ).join('');
 
             const overviewPaid = [...paid].sort((a, b) => b.a - a.a);
-            const allPaid = [...paid].sort((a, b) => {
+            const searchEl = document.getElementById('all-search');
+            const sortEl = document.getElementById('all-sort');
+            const q = (searchEl?.value || '').trim().toLowerCase();
+            const sort = (sortEl?.value || 'recent');
+
+            let allPaid = [...paid];
+            if (q) allPaid = allPaid.filter(c => String(c.n || '').toLowerCase().includes(q));
+
+            allPaid.sort((a, b) => {
+                if (sort === 'amount_desc') return (b.a || 0) - (a.a || 0);
+                if (sort === 'amount_asc') return (a.a || 0) - (b.a || 0);
+                if (sort === 'name_asc') return String(a.n || '').localeCompare(String(b.n || ''));
                 const da = new Date(a.paid_at || a.created_at).getTime();
                 const db = new Date(b.paid_at || b.created_at).getTime();
                 return db - da;
@@ -1187,6 +1207,9 @@
                 </div>`;
             }).join('');
         }
+
+        document.getElementById('all-search')?.addEventListener('input', () => render());
+        document.getElementById('all-sort')?.addEventListener('change', () => render());
 
         function showTab(tab) {
             ['overview', 'contributors', 'expenses'].forEach(t => {
