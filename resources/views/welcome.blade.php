@@ -1145,7 +1145,7 @@
 
             // Pledges (Ahadi)
             document.getElementById('pledge-bdg').textContent = pend.length + ' pledges';
-            document.getElementById('pledge-list').innerHTML = pend.length ? pend.slice(0, 15).map(c => `
+            document.getElementById('pledge-list').innerHTML = pend.length ? pend.map(c => `
                 <div class="citem">
                     <div style="display:flex;align-items:center">
                         <div class="cavatar" style="background:rgba(255,165,0,0.1);color:orange">${ini(c.n)}</div>
