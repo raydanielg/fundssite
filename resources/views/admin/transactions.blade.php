@@ -347,13 +347,10 @@
             );
 
             const table = $('#transactionsTable').DataTable({
+                data: @json($transactions),
                 ajax: {
                     url: '{{ route('admin.api.transactions') }}',
-                    dataSrc: 'transactions',
-                    data: function(d) {
-                        // Pass filters to the API if needed
-                        return d;
-                    }
+                    dataSrc: 'transactions'
                 },
                 columns: [
                     { 
