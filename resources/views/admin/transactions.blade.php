@@ -435,7 +435,7 @@
                         }
                     }
                 ],
-                dom: 'rtip',
+                dom: 'Brtip',
                 buttons: [
                     {
                         extend: 'print',
