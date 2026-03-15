@@ -288,6 +288,14 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('admin.transactions');
 
+    Route::post('/admin/api/sync', function (Request $request) {
+        $limit = (int) ($request->input('limit') ?? 20);
+        Artisan::call('snippe:sync-pending', [
+            '--limit' => $limit,
+        ]);
+        return response()->json(['status' => 'synced']);
+    })->name('admin.api.sync');
+
     Route::get('/admin/api/transactions', function () {
         $hasPaidAt = Schema::hasColumn('donation_transactions', 'paid_at');
         $transactions = DonationTransaction::query()

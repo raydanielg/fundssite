@@ -546,8 +546,23 @@
 
             function start() {
                 if (timer) return;
-                timer = setInterval(poll, 3000);
+                timer = setInterval(poll, 1000); // Updated to 1 second
                 poll();
+                
+                // Also poll for Snippe sync in background every 10 seconds
+                setInterval(async () => {
+                    if (document.visibilityState === 'hidden') return;
+                    try {
+                        await fetch('{{ route('admin.api.sync') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ limit: 10 })
+                        });
+                    } catch (e) {}
+                }, 10000);
             }
 
             function stop() {
