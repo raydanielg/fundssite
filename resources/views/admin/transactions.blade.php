@@ -398,7 +398,8 @@
                             const dateVal = data || row.created_at;
                             if (!dateVal) return '-';
                             const dateObj = new Date(dateVal);
-                            const dateRaw = dateVal.substring(0, 10);
+                            const dateStr = dateObj.toISOString();
+                            const dateRaw = dateStr.substring(0, 10);
                             const timeFormatted = dateObj.getHours().toString().padStart(2,'0') + ':' + dateObj.getMinutes().toString().padStart(2,'0');
                             
                             if (type === 'sort') return dateObj.getTime();
