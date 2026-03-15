@@ -523,10 +523,16 @@
 
             function start() {
                 if (timer) return;
-                timer = setInterval(poll, 1000); // Updated to 1 second
+                timer = setInterval(poll, 1000); // Poll every 1 second for instant detection
                 poll();
                 
-                // Also poll for Snippe sync in background every 10 seconds
+                // Full table redraw every 60 seconds to ensure total consistency
+                setInterval(() => {
+                    if (document.visibilityState === 'hidden') return;
+                    table.ajax.reload(null, false);
+                }, 60000);
+                
+                // Also poll for Snippe sync in background every 5 seconds (faster sync)
                 setInterval(async () => {
                     if (document.visibilityState === 'hidden') return;
                     try {
@@ -536,10 +542,10 @@
                                 'Accept': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                             },
-                            body: JSON.stringify({ limit: 10 })
+                            body: JSON.stringify({ limit: 20 })
                         });
                     } catch (e) {}
-                }, 10000);
+                }, 5000);
             }
 
             function stop() {
