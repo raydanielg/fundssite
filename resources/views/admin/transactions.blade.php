@@ -372,7 +372,15 @@
                 pageLength: 25,
                 language: {
                     emptyTable: "No transactions found matching your filters"
-                }
+                },
+                columns: [
+                    { orderable: true },
+                    { orderable: true },
+                    { orderable: true },
+                    { orderable: true },
+                    { orderable: true, type: 'string' },
+                    { orderable: false }
+                ]
             });
 
             // Move buttons to custom container
@@ -453,10 +461,14 @@
                             
                             const dateVal = t.paid_at || t.created_at;
                             const dateObj = new Date(dateVal);
+                            const dateRaw = dateVal.substring(0, 10);
+                            const dateFormatted = dateVal.substring(0, 10);
+                            const timeFormatted = dateObj.getHours().toString().padStart(2,'0') + ':' + dateObj.getMinutes().toString().padStart(2,'0');
+
                             const dateStr = `
                                 <div class="small">
-                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="${dateVal.substring(0,10)}">${dateVal.substring(0,10)}</div>
-                                    <div class="text-muted x-small">${dateObj.getHours().toString().padStart(2,'0')}:${dateObj.getMinutes().toString().padStart(2,'0')}</div>
+                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="${dateRaw}">${dateFormatted}</div>
+                                    <div class="text-muted x-small">${timeFormatted}</div>
                                 </div>
                             `;
                             
