@@ -18,7 +18,12 @@
     .status-failed { background: #fee2e2; color: #991b1b; }
     .status-cancelled { background: #f3f4f6; color: #374151; }
     .x-small { font-size: 0.72rem; }
-    .filter-card { background: #fff; border-radius: 12px; border: 1px solid #edf2f7; margin-bottom: 24px; }
+    .filter-card { background: #f8f9fa; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 24px; }
+    .filter-card .form-label { color: #4a5568; font-weight: 700; margin-bottom: 8px; }
+    .filter-card .form-control, .filter-card .form-select { border-radius: 8px; border: 1px solid #cbd5e0; padding: 0.6rem 1rem; height: 45px; font-size: 0.9rem; }
+    .filter-card .input-group-text { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px 0 0 8px; color: #718096; }
+    .filter-card .input-group .form-control { border-left: none; }
+    .filter-card .btn-outline-secondary { border: 1px solid #cbd5e0; border-left: none; border-radius: 0 8px 8px 0; background: #fff; }
     .btn-mint { background-color: #2e9e72; color: #fff; border: none; border-radius: 8px; }
     .btn-mint:hover { background-color: #25855f; color: #fff; }
     .btn-outline-dark { border-radius: 8px; }
@@ -35,17 +40,17 @@
 @section('content')
     <!-- Advanced Filters -->
     <div class="filter-card p-4 shadow-sm">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted text-uppercase">Search Contributor</label>
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" id="customSearch" class="form-control border-start-0" placeholder="Name, email, or ref...">
+        <div class="row g-4 align-items-end">
+            <div class="col-lg-3 col-md-4">
+                <label class="form-label small text-uppercase">Search Contributor</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" id="customSearch" class="form-control" placeholder="Search name, phone...">
                 </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-bold text-muted text-uppercase">Status</label>
-                <select id="statusFilter" class="form-select form-select-sm">
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label small text-uppercase">Status</label>
+                <select id="statusFilter" class="form-select">
                     <option value="">All Statuses</option>
                     <option value="completed">Completed</option>
                     <option value="pending">Pending</option>
@@ -53,18 +58,18 @@
                     <option value="failed">Failed</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted text-uppercase">Date Range</label>
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-calendar3"></i></span>
-                    <input type="text" id="dateFilter" class="form-control border-start-0" placeholder="Select dates...">
-                    <button class="btn btn-outline-secondary border-start-0" type="button" onclick="$('#dateFilter').val('').trigger('change'); table.draw();" title="Clear Date">
+            <div class="col-lg-3 col-md-4">
+                <label class="form-label small text-uppercase">Date Range</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                    <input type="text" id="dateFilter" class="form-control" placeholder="Select dates...">
+                    <button class="btn btn-outline-secondary" type="button" onclick="$('#dateFilter').val('').trigger('change'); table.draw();" title="Clear Date">
                         <i class="bi bi-x"></i>
                     </button>
                 </div>
             </div>
-            <div class="col-md-4 text-end">
-                <label class="form-label d-block small fw-bold text-muted text-uppercase">Export & Tools</label>
+            <div class="col-lg-4 col-md-12 text-md-end">
+                <label class="form-label d-block small text-uppercase">Export & Tools</label>
                 <div id="tableButtons" class="d-inline-flex gap-2"></div>
             </div>
         </div>
