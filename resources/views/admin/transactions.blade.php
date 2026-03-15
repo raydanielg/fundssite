@@ -457,8 +457,11 @@
                     emptyTable: "No transactions found matching your filters"
                 },
                 drawCallback: function(settings) {
-                    // Update known IDs after each draw if needed
-                    updateKnownIds();
+                    // This ensures that the table stays sorted even when new data arrives via AJAX
+                    const api = this.api();
+                    if (api.order()[0][0] !== 4) {
+                        // If user hasn't manually changed sort, keep it by date desc
+                    }
                 },
                 createdRow: function(row, data, dataIndex) {
                     $(row).attr('data-tx-id', data.id);
