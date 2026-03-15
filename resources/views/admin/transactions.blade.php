@@ -372,15 +372,7 @@
                 pageLength: 25,
                 language: {
                     emptyTable: "No transactions found matching your filters"
-                },
-                columns: [
-                    { orderable: true },
-                    { orderable: true },
-                    { orderable: true },
-                    { orderable: true },
-                    { orderable: true, type: 'string' },
-                    { orderable: false }
-                ]
+                }
             });
 
             // Move buttons to custom container
@@ -462,12 +454,11 @@
                             const dateVal = t.paid_at || t.created_at;
                             const dateObj = new Date(dateVal);
                             const dateRaw = dateVal.substring(0, 10);
-                            const dateFormatted = dateVal.substring(0, 10);
                             const timeFormatted = dateObj.getHours().toString().padStart(2,'0') + ':' + dateObj.getMinutes().toString().padStart(2,'0');
 
                             const dateStr = `
                                 <div class="small">
-                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="${dateRaw}">${dateFormatted}</div>
+                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="${dateRaw}">${dateRaw}</div>
                                     <div class="text-muted x-small">${timeFormatted}</div>
                                 </div>
                             `;
@@ -486,18 +477,24 @@
                                 </div>
                             `;
 
-                            const newRow = table.row.add([
-                                avatar,
-                                amountStr,
-                                statusStr,
-                                eventStr,
-                                dateStr,
-                                actionsStr
-                            ]).draw(false).node();
+                            // Using jQuery to add row manually to avoid DataTables strict parameter matching
+                            const rowHtml = `
+                                <tr data-tx-id="${t.id}" class="table-success">
+                                    <td class="ps-3 py-3">${avatar}</td>
+                                    <td>${amountStr}</td>
+                                    <td>${statusStr}</td>
+                                    <td>${eventStr}</td>
+                                    <td data-sort="${new Date(dateVal).getTime()}">${dateStr}</td>
+                                    <td class="pe-3 text-end">${actionsStr}</td>
+                                </tr>
+                            `;
                             
-                            $(newRow).attr('data-tx-id', t.id);
-                            $(newRow).addClass('table-success'); // Highlight new row temporarily
-                            setTimeout(() => $(newRow).removeClass('table-success'), 5000);
+                            const newRowNode = $(rowHtml);
+                            $('#transactionsTable tbody').prepend(newRowNode);
+                            
+                            // Re-bind modal events if necessary, though BS5 handles it via data attributes
+                            
+                            setTimeout(() => newRowNode.removeClass('table-success'), 5000);
                             
                             knownIds.add(tid);
                             addedAny = true;
