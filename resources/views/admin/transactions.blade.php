@@ -90,18 +90,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div id="tx-new-alert" class="alert alert-info py-2 border-0 shadow-sm mb-4" style="display:none">
-                        <div class="d-flex align-items-center justify-content-between gap-3">
-                            <div class="small">
-                                <i class="bi bi-bell-fill me-2"></i>
-                                <span id="tx-new-text">New payments received.</span>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="txDismissNewAlert()">Dismiss</button>
-                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="txAcknowledgeAndRefresh()">Refresh</button>
-                            </div>
-                        </div>
-                    </div>
                     @if (session('status') === 'synced')
                         <div class="alert alert-success py-2 border-0 shadow-sm mb-4">
                             <i class="bi bi-check-circle-fill me-2"></i> Synced pending payments with Snippe.
@@ -412,39 +400,14 @@
             // Live polling
             let busy = false;
             let timer = null;
-            let knownIds = new Set($('#transactionsTable tbody tr').map(function(){ return $(this).data('tx-id'); }).get());
-            let pendingNewMaxId = 0;
-            let seenMaxId = (() => {
-                const v = parseInt(localStorage.getItem('admin_tx_seen_max_id') || '0', 10);
-                return Number.isFinite(v) ? v : 0;
-            })();
+            let knownIds = new Set();
+            
+            function updateKnownIds() {
+                knownIds = new Set($('#transactionsTable tbody tr').map(function(){ return String($(this).data('tx-id')); }).get());
+            }
+            updateKnownIds();
 
             const fmt = (n) => (parseInt(n || 0, 10) || 0).toLocaleString('en-TZ');
-
-            function showNewAlert(count) {
-                const box = document.getElementById('tx-new-alert');
-                const text = document.getElementById('tx-new-text');
-                if (text) text.textContent = count === 1 ? '1 new payment received. Please refresh to view it.' : (count + ' new payments received. Please refresh to view them.');
-                if (box) box.style.display = 'block';
-            }
-
-            window.txDismissNewAlert = function() {
-                const box = document.getElementById('tx-new-alert');
-                if (pendingNewMaxId > seenMaxId) {
-                    seenMaxId = pendingNewMaxId;
-                    localStorage.setItem('admin_tx_seen_max_id', String(seenMaxId));
-                }
-                pendingNewMaxId = 0;
-                if (box) box.style.display = 'none';
-            }
-
-            window.txAcknowledgeAndRefresh = function() {
-                if (pendingNewMaxId > seenMaxId) {
-                    seenMaxId = pendingNewMaxId;
-                    localStorage.setItem('admin_tx_seen_max_id', String(seenMaxId));
-                }
-                window.location.reload();
-            }
 
             async function poll() {
                 if (busy) return;
@@ -460,53 +423,107 @@
                     const data = await res.json();
                     const items = Array.isArray(data.transactions) ? data.transactions : [];
 
-                    // Track newest ID we have not acknowledged yet
-                    let maxId = 0;
-                    items.forEach(t => {
-                        const id = parseInt(t.id || 0, 10) || 0;
-                        if (id > maxId) maxId = id;
+                    let addedAny = false;
+                    
+                    // Process items in reverse (oldest to newest) to maintain order if multiple arrive
+                    [...items].reverse().forEach(t => {
+                        const tid = String(t.id);
+                        
+                        if (!knownIds.has(tid)) {
+                            // NEW TRANSACTION: Add to table via DataTables API
+                            const avatar = `
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center text-mint fw-bold" style="width: 32px; height: 32px;">
+                                        ${(t.customer_name || 'D').substring(0,1).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark small contributor-name">${t.customer_name}</div>
+                                        <div class="text-muted x-small">${t.customer_phone || t.customer_email || 'No contact'}</div>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            const amountStr = `<div class="fw-bold text-dark small tx-amount">${t.currency || 'TZS'} ${fmt(t.amount)}</div>` + 
+                                            (t.external_reference ? `<div class="text-muted x-small">Ref: ${t.external_reference}</div>` : '');
+                            
+                            const statusStr = `<span class="status-badge tx-status status-${t.status}">${t.status}</span>`;
+                            
+                            const eventStr = `<div class="small text-dark tx-event">${(t.webhook_event || '-').replace('checkout.session.', '').replace('payment.', '')}</div>` +
+                                           `<code class="x-small text-muted" style="font-size: 0.65rem;">${t.reference}</code>`;
+                            
+                            const dateVal = t.paid_at || t.created_at;
+                            const dateObj = new Date(dateVal);
+                            const dateStr = `
+                                <div class="small">
+                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="${dateVal.substring(0,10)}">${dateVal.substring(0,10)}</div>
+                                    <div class="text-muted x-small">${dateObj.getHours().toString().padStart(2,'0')}:${dateObj.getMinutes().toString().padStart(2,'0')}</div>
+                                </div>
+                            `;
+                            
+                            const actionsStr = `
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#modal-${t.id}" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#edit-modal-${t.id}" title="Edit Transaction">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal-${t.id}" title="Delete Transaction">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+
+                            const newRow = table.row.add([
+                                avatar,
+                                amountStr,
+                                statusStr,
+                                eventStr,
+                                dateStr,
+                                actionsStr
+                            ]).draw(false).node();
+                            
+                            $(newRow).attr('data-tx-id', t.id);
+                            $(newRow).addClass('table-success'); // Highlight new row temporarily
+                            setTimeout(() => $(newRow).removeClass('table-success'), 5000);
+                            
+                            knownIds.add(tid);
+                            addedAny = true;
+                        } else {
+                            // EXISTING TRANSACTION: Update if needed
+                            const row = $('#transactionsTable tbody tr[data-tx-id="' + t.id + '"]');
+                            if (!row.length) return;
+
+                            // Amount
+                            const amt = row.find('.tx-amount');
+                            if (amt.length) amt.text((t.currency || 'TZS') + ' ' + fmt(t.amount));
+
+                            // Status
+                            const st = row.find('.tx-status');
+                            if (st.length && st.text().trim() !== String(t.status).toLowerCase()) {
+                                const s = String(t.status || '').toLowerCase();
+                                st.attr('class', 'status-badge tx-status status-' + s);
+                                st.text(s);
+                            }
+
+                            // Event
+                            const ev = row.find('.tx-event');
+                            if (ev.length) {
+                                const raw = t.webhook_event || '-';
+                                ev.text(String(raw).replace('checkout.session.', '').replace('payment.', ''));
+                            }
+
+                            // Date raw (for filters)
+                            const dt = row.find('.tx-date');
+                            if (dt.length) {
+                                const raw = (t.paid_at || t.created_at || '').slice(0, 10);
+                                if (raw) dt.attr('data-raw', raw);
+                            }
+                        }
                     });
 
-                    let newCount = 0;
-                    items.forEach(t => {
-                        const idNum = parseInt(t.id || 0, 10) || 0;
-                        if (!knownIds.has(t.id) && idNum > seenMaxId) newCount++;
-
-                        const row = $('#transactionsTable tbody tr[data-tx-id="' + t.id + '"]');
-                        if (!row.length) return;
-
-                        // Amount
-                        const amt = row.find('.tx-amount');
-                        if (amt.length) amt.text((t.currency || 'TZS') + ' ' + fmt(t.amount));
-
-                        // Status
-                        const st = row.find('.tx-status');
-                        if (st.length) {
-                            const s = String(t.status || '').toLowerCase();
-                            st.removeClass('status-completed status-pending status-failed status-cancelled status-completed status-pending status-failed status-cancelled');
-                            st.removeClass(function(i, cls){ return (cls.match(/\bstatus-\S+/g) || []).join(' '); });
-                            st.addClass('status-' + s);
-                            st.text(s);
-                        }
-
-                        // Event
-                        const ev = row.find('.tx-event');
-                        if (ev.length) {
-                            const raw = t.webhook_event || '-';
-                            ev.text(String(raw).replace('checkout.session.', '').replace('payment.', ''));
-                        }
-
-                        // Date raw (for filters)
-                        const dt = row.find('.tx-date');
-                        if (dt.length) {
-                            const raw = (t.paid_at || t.created_at || '').slice(0, 10);
-                            if (raw) dt.attr('data-raw', raw);
-                        }
-                    });
-
-                    if (newCount > 0 && maxId > seenMaxId) {
-                        pendingNewMaxId = Math.max(pendingNewMaxId, maxId);
-                        showNewAlert(newCount);
+                    if (addedAny) {
+                        table.draw(false);
                     }
 
                     if (pill) pill.textContent = 'Live';
