@@ -347,6 +347,91 @@
             );
 
             const table = $('#transactionsTable').DataTable({
+                ajax: {
+                    url: '{{ route('admin.api.transactions') }}',
+                    dataSrc: 'transactions',
+                    data: function(d) {
+                        // Pass filters to the API if needed
+                        return d;
+                    }
+                },
+                columns: [
+                    { 
+                        data: null,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center text-mint fw-bold" style="width: 32px; height: 32px;">
+                                        ${(row.customer_name || 'D').substring(0,1).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark small contributor-name">${row.customer_name}</div>
+                                        <div class="text-muted x-small">${row.customer_phone || row.customer_email || 'No contact'}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    },
+                    { 
+                        data: 'amount',
+                        render: function(data, type, row) {
+                            return `<div class="fw-bold text-dark small tx-amount">${row.currency || 'TZS'} ${fmt(data)}</div>` + 
+                                   (row.external_reference ? `<div class="text-muted x-small">Ref: ${row.external_reference}</div>` : '');
+                        }
+                    },
+                    { 
+                        data: 'status',
+                        render: function(data, type, row) {
+                            return `<span class="status-badge tx-status status-${data}">${data}</span>`;
+                        }
+                    },
+                    { 
+                        data: 'reference',
+                        render: function(data, type, row) {
+                            return `<div class="small text-dark tx-event">${(row.webhook_event || '-').replace('checkout.session.', '').replace('payment.', '')}</div>` +
+                                   `<code class="x-small text-muted" style="font-size: 0.65rem;">${data}</code>`;
+                        }
+                    },
+                    { 
+                        data: 'paid_at',
+                        render: function(data, type, row) {
+                            const dateVal = data || row.created_at;
+                            if (!dateVal) return '-';
+                            const dateObj = new Date(dateVal);
+                            const dateRaw = dateVal.substring(0, 10);
+                            const timeFormatted = dateObj.getHours().toString().padStart(2,'0') + ':' + dateObj.getMinutes().toString().padStart(2,'0');
+                            
+                            if (type === 'sort') return dateObj.getTime();
+                            
+                            return `
+                                <div class="small">
+                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="${dateRaw}">${dateRaw}</div>
+                                    <div class="text-muted x-small">${timeFormatted}</div>
+                                </div>
+                            `;
+                        }
+                    },
+                    { 
+                        data: null,
+                        orderable: false,
+                        className: 'text-end pe-3',
+                        render: function(data, type, row) {
+                            return `
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#modal-${row.id}" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#edit-modal-${row.id}" title="Edit Transaction">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal-${row.id}" title="Delete Transaction">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }
+                ],
                 dom: 'rtip',
                 buttons: [
                     {
@@ -372,6 +457,13 @@
                 pageLength: 25,
                 language: {
                     emptyTable: "No transactions found matching your filters"
+                },
+                drawCallback: function(settings) {
+                    // Update known IDs after each draw if needed
+                    updateKnownIds();
+                },
+                createdRow: function(row, data, dataIndex) {
+                    $(row).attr('data-tx-id', data.id);
                 }
             });
 
@@ -418,126 +510,10 @@
                 if (pill) pill.textContent = 'Live…';
 
                 try {
-                    const res = await fetch('{{ route('admin.api.transactions') }}', { headers: { 'Accept': 'application/json' } });
-                    if (!res.ok) return;
-                    const data = await res.json();
-                    const items = Array.isArray(data.transactions) ? data.transactions : [];
-
-                    let addedAny = false;
-                    
-                    // Process items in reverse (oldest to newest) to maintain order if multiple arrive
-                    [...items].reverse().forEach(t => {
-                        const tid = String(t.id);
-                        
-                        if (!knownIds.has(tid)) {
-                            // NEW TRANSACTION: Add to table via DataTables API
-                            const avatar = `
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center text-mint fw-bold" style="width: 32px; height: 32px;">
-                                        ${(t.customer_name || 'D').substring(0,1).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-dark small contributor-name">${t.customer_name}</div>
-                                        <div class="text-muted x-small">${t.customer_phone || t.customer_email || 'No contact'}</div>
-                                    </div>
-                                </div>
-                            `;
-                            
-                            const amountStr = `<div class="fw-bold text-dark small tx-amount">${t.currency || 'TZS'} ${fmt(t.amount)}</div>` + 
-                                            (t.external_reference ? `<div class="text-muted x-small">Ref: ${t.external_reference}</div>` : '');
-                            
-                            const statusStr = `<span class="status-badge tx-status status-${t.status}">${t.status}</span>`;
-                            
-                            const eventStr = `<div class="small text-dark tx-event">${(t.webhook_event || '-').replace('checkout.session.', '').replace('payment.', '')}</div>` +
-                                           `<code class="x-small text-muted" style="font-size: 0.65rem;">${t.reference}</code>`;
-                            
-                            const dateVal = t.paid_at || t.created_at;
-                            const dateObj = new Date(dateVal);
-                            const dateRaw = dateVal.substring(0, 10);
-                            const timeFormatted = dateObj.getHours().toString().padStart(2,'0') + ':' + dateObj.getMinutes().toString().padStart(2,'0');
-
-                            const dateStr = `
-                                <div class="small">
-                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="${dateRaw}">${dateRaw}</div>
-                                    <div class="text-muted x-small">${timeFormatted}</div>
-                                </div>
-                            `;
-                            
-                            const actionsStr = `
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#modal-${t.id}" title="View Details">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#edit-modal-${t.id}" title="Edit Transaction">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal-${t.id}" title="Delete Transaction">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            `;
-
-                            // Using jQuery to add row manually to avoid DataTables strict parameter matching
-                            const rowHtml = `
-                                <tr data-tx-id="${t.id}" class="table-success">
-                                    <td class="ps-3 py-3">${avatar}</td>
-                                    <td>${amountStr}</td>
-                                    <td>${statusStr}</td>
-                                    <td>${eventStr}</td>
-                                    <td data-sort="${new Date(dateVal).getTime()}">${dateStr}</td>
-                                    <td class="pe-3 text-end">${actionsStr}</td>
-                                </tr>
-                            `;
-                            
-                            const newRowNode = $(rowHtml);
-                            $('#transactionsTable tbody').prepend(newRowNode);
-                            
-                            // Re-bind modal events if necessary, though BS5 handles it via data attributes
-                            
-                            setTimeout(() => newRowNode.removeClass('table-success'), 5000);
-                            
-                            knownIds.add(tid);
-                            addedAny = true;
-                        } else {
-                            // EXISTING TRANSACTION: Update if needed
-                            const row = $('#transactionsTable tbody tr[data-tx-id="' + t.id + '"]');
-                            if (!row.length) return;
-
-                            // Amount
-                            const amt = row.find('.tx-amount');
-                            if (amt.length) amt.text((t.currency || 'TZS') + ' ' + fmt(t.amount));
-
-                            // Status
-                            const st = row.find('.tx-status');
-                            if (st.length && st.text().trim() !== String(t.status).toLowerCase()) {
-                                const s = String(t.status || '').toLowerCase();
-                                st.attr('class', 'status-badge tx-status status-' + s);
-                                st.text(s);
-                            }
-
-                            // Event
-                            const ev = row.find('.tx-event');
-                            if (ev.length) {
-                                const raw = t.webhook_event || '-';
-                                ev.text(String(raw).replace('checkout.session.', '').replace('payment.', ''));
-                            }
-
-                            // Date raw (for filters)
-                            const dt = row.find('.tx-date');
-                            if (dt.length) {
-                                const raw = (t.paid_at || t.created_at || '').slice(0, 10);
-                                if (raw) dt.attr('data-raw', raw);
-                            }
-                        }
-                    });
-
-                    if (addedAny) {
-                        table.draw(false);
-                    }
-
+                    // Use DataTables native ajax reload to update the table without full reload
+                    table.ajax.reload(null, false); // null = no callback, false = hold current paging
                     if (pill) pill.textContent = 'Live';
                 } catch (e) {
-                    const pill = document.getElementById('tx-live-pill');
                     if (pill) pill.textContent = 'Offline';
                 } finally {
                     busy = false;
