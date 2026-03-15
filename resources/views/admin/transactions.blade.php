@@ -37,7 +37,7 @@
     <div class="filter-card p-4 shadow-sm">
         <div class="row g-3 align-items-end">
             <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted text-uppercase">Search</label>
+                <label class="form-label small fw-bold text-muted text-uppercase">Search Contributor</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
                     <input type="text" id="customSearch" class="form-control border-start-0" placeholder="Name, email, or ref...">
@@ -49,6 +49,7 @@
                     <option value="">All Statuses</option>
                     <option value="completed">Completed</option>
                     <option value="pending">Pending</option>
+                    <option value="active">Active</option>
                     <option value="failed">Failed</option>
                 </select>
             </div>
@@ -57,10 +58,14 @@
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-calendar3"></i></span>
                     <input type="text" id="dateFilter" class="form-control border-start-0" placeholder="Select dates...">
+                    <button class="btn btn-outline-secondary border-start-0" type="button" onclick="$('#dateFilter').val('').trigger('change'); table.draw();" title="Clear Date">
+                        <i class="bi bi-x"></i>
+                    </button>
                 </div>
             </div>
             <div class="col-md-4 text-end">
-                <div id="tableButtons" class="d-inline-block"></div>
+                <label class="form-label d-block small fw-bold text-muted text-uppercase">Export & Tools</label>
+                <div id="tableButtons" class="d-inline-flex gap-2"></div>
             </div>
         </div>
     </div>
@@ -434,19 +439,19 @@
                 buttons: [
                     {
                         extend: 'print',
-                        className: 'btn btn-sm btn-dark px-3 me-2',
-                        text: '<i class="bi bi-printer me-1"></i> Print Filtered',
+                        className: 'btn btn-sm btn-dark rounded-pill px-3',
+                        text: '<i class="bi bi-printer me-1"></i> Print',
                         exportOptions: { columns: [0, 1, 2, 3, 4] }
                     },
                     {
                         extend: 'excel',
-                        className: 'btn btn-sm btn-success px-3 me-2',
+                        className: 'btn btn-sm btn-success rounded-pill px-3',
                         text: '<i class="bi bi-file-earmark-excel me-1"></i> Excel',
                         exportOptions: { columns: [0, 1, 2, 3, 4] }
                     },
                     {
                         extend: 'pdf',
-                        className: 'btn btn-sm btn-danger px-3',
+                        className: 'btn btn-sm btn-danger rounded-pill px-3',
                         text: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF',
                         exportOptions: { columns: [0, 1, 2, 3, 4] }
                     }
