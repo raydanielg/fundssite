@@ -507,7 +507,7 @@
                 if (document.visibilityState === 'hidden') return;
                 
                 // Only poll if we're not actively searching or filtering to avoid jumping
-                const isSearching = $('#customSearch').val() || $('#statusFilter').val() || $('#dateFilter').val();
+                const isSearching = $('#customSearch').val() || ($('#statusFilter').val() && $('#statusFilter').val() !== '') || ($('#dateFilter').val() && $('#dateFilter').val() !== '');
                 
                 busy = true;
 
