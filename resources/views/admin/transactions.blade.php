@@ -471,17 +471,17 @@
             // Move buttons to custom container
             table.buttons().container().appendTo('#tableButtons');
 
-            // Custom Search
+            // Custom Search (AJAX-friendly)
             $('#customSearch').on('keyup', function() {
                 table.search(this.value).draw();
             });
 
-            // Status Filter
+            // Status Filter (AJAX-friendly)
             $('#statusFilter').on('change', function() {
                 table.column(2).search(this.value).draw();
             });
 
-            // Date Range Filter (Flatpickr)
+            // Date Range Filter (Flatpickr + AJAX-friendly)
             flatpickr("#dateFilter", {
                 mode: "range",
                 dateFormat: "Y-m-d",
@@ -505,6 +505,10 @@
             async function poll() {
                 if (busy) return;
                 if (document.visibilityState === 'hidden') return;
+                
+                // Only poll if we're not actively searching or filtering to avoid jumping
+                const isSearching = $('#customSearch').val() || $('#statusFilter').val() || $('#dateFilter').val();
+                
                 busy = true;
 
                 const pill = document.getElementById('tx-live-pill');
