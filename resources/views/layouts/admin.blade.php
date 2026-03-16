@@ -14,99 +14,154 @@
         @stack('styles')
 
         <style>
-            :root { --admin-sidebar-w: 260px; }
-            body { background: #f2f4f7; }
+            :root { --admin-sidebar-w: 280px; }
+            body { background: #f9fafb; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
             .admin-shell { min-height: 100vh; }
-            .admin-sidebar { width: var(--admin-sidebar-w); height: 100vh; position: sticky; top: 0; }
-            .admin-content { min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
-            .admin-main { padding: 18px; flex-grow: 1; }
-            @media (min-width: 992px) {
-                .admin-main { padding: 22px; }
-            }
-            .admin-sidebar { background: linear-gradient(180deg, #0f7a38 0%, #0b4f25 100%); }
-            .side-link { color: rgba(255,255,255,0.80); font-weight: 600; }
-            .side-link:hover { color: rgba(255,255,255,0.95); background: rgba(255,255,255,0.08); }
-            .side-link.active { color: #0b2f17; background: #a6f4c5; }
-            .side-section { font-size: 0.70rem; letter-spacing: 0.10em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-top: 16px; margin-bottom: 8px; padding-left: 10px; }
-            .brand-row { display:flex; align-items:center; gap:10px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.14); }
-            .brand-badge { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.14); display:flex; align-items:center; justify-content:center; }
-            .brand-text { font-weight: 900; letter-spacing: 0.10em; }
-            .side-sub { padding-left: 10px; }
-            .side-sub .side-link { font-weight: 600; opacity: 0.92; }
+            .admin-sidebar { width: var(--admin-sidebar-w); height: 100vh; position: sticky; top: 0; background: #ffffff; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; overflow-y: auto; }
+            .admin-sidebar::-webkit-scrollbar { width: 4px; }
+            .admin-sidebar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+            .admin-content { min-width: 0; display: flex; flex-direction: column; min-height: 100vh; background: #f9fafb; }
+            .admin-main { padding: 24px; flex-grow: 1; }
+            
+            /* Sidebar Modern UI */
+            .sidebar-user { padding: 20px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.2s; text-decoration: none; border-bottom: 1px solid #f3f4f6; margin-bottom: 16px; width: 100%; border-left: none; border-right: none; border-top: none; background: transparent; }
+            .sidebar-user:hover { background: #f9fafb; }
+            .user-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 0 0 1px #e5e7eb; }
+            .user-info { flex-grow: 1; min-width: 0; text-align: left; }
+            .user-name { font-size: 0.875rem; font-weight: 700; color: #111827; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .user-email { font-size: 0.75rem; color: #6b7280; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .user-chevron { color: #9ca3af; font-size: 0.85rem; }
+
+            .sidebar-search { padding: 0 16px 16px; }
+            .search-box { position: relative; }
+            .search-box input { width: 100%; background: #f3f4f6; border: 1px solid transparent; border-radius: 10px; padding: 10px 12px 10px 40px; font-size: 0.875rem; transition: all 0.2s; color: #111827; }
+            .search-box input::placeholder { color: #9ca3af; }
+            .search-box input:focus { background: #ffffff; border-color: #3b82f6; outline: none; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+            .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 1rem; }
+
+            .side-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: #4b5563; font-size: 0.9375rem; font-weight: 500; text-decoration: none; border-radius: 10px; margin: 2px 12px; transition: all 0.2s; }
+            .side-link i { font-size: 1.25rem; color: #6b7280; transition: color 0.2s; }
+            .side-link:hover { background: #f3f4f6; color: #111827; }
+            .side-link:hover i { color: #111827; }
+            .side-link.active { background: #f3f4f6; color: #111827; font-weight: 600; }
+            .side-link.active i { color: #111827; }
+
+            .side-section { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #9ca3af; letter-spacing: 0.05em; margin: 24px 16px 8px; padding-left: 12px; display: flex; align-items: center; justify-content: space-between; }
+            .section-add { color: #9ca3af; cursor: pointer; transition: color 0.2s; font-size: 1rem; }
+            .section-add:hover { color: #4b5563; }
+
+            .admin-topbar { height: 64px; background: #ffffff !important; border-bottom: 1px solid #e5e7eb; padding: 0 24px; }
+            footer { background: #ffffff !important; border-top: 1px solid #e5e7eb; padding: 20px 0; }
         </style>
     </head>
     <body>
         <div class="admin-shell d-flex">
-            <aside class="admin-sidebar d-none d-lg-flex flex-column bg-dark text-white">
-                <div class="brand-row">
-                    <div class="brand-badge"><i class="bi bi-shield-check text-white"></i></div>
-                    <div class="brand-text">ADMIN</div>
-                </div>
+            <aside class="admin-sidebar d-none d-lg-flex">
+                <button class="sidebar-user dropdown-toggle border-0" data-bs-toggle="dropdown">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=random" class="user-avatar" alt="Avatar">
+                    <div class="user-info">
+                        <p class="user-name">{{ auth()->user()->name ?? 'Admin' }}</p>
+                        <p class="user-email">{{ auth()->user()->email ?? 'admin@fundssite.com' }}</p>
+                    </div>
+                    <i class="bi bi-chevron-expand user-chevron"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="border-radius: 12px; width: 240px;">
+                    <li><a class="dropdown-item small py-2" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item small py-2" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item small py-2 text-danger"><i class="bi bi-box-arrow-right me-2"></i>Sign out</button>
+                        </form>
+                    </li>
+                </ul>
 
-                <div class="p-3">
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control bg-secondary border-0 text-white" placeholder="Search..." aria-label="Search">
-                        <button class="btn btn-secondary" type="button"><i class="bi bi-search"></i></button>
+                <div class="sidebar-search">
+                    <div class="search-box">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" placeholder="Search projects">
                     </div>
                 </div>
 
-                <nav class="px-2 pb-3">
-                    <div class="side-section">Main</div>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin') ? 'active' : '' }}" href="{{ url('/admin') }}">
-                        <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                <nav class="flex-grow-1">
+                    <a class="side-link {{ request()->is('admin') ? 'active' : '' }}" href="{{ url('/admin') }}">
+                        <i class="bi bi-activity"></i> Activity
                     </a>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/users') ? 'active' : '' }}" href="{{ url('/admin/users') }}">
-                        <i class="bi bi-people me-2"></i> Users
+                    <a class="side-link {{ request()->is('admin/users') ? 'active' : '' }}" href="{{ url('/admin/users') }}">
+                        <i class="bi bi-person-lines-fill"></i> Contacts
                     </a>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions') ? 'active' : '' }}" href="{{ url('/admin/transactions') }}">
-                        <i class="bi bi-credit-card-2-front me-2"></i> Payments
-                    </a>
-
-                    <div class="side-section">Management</div>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}">
-                        <i class="bi bi-gear me-2"></i> Fundraiser Settings
-                    </a>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions/manual') ? 'active' : '' }}" href="{{ url('/admin/transactions/manual') }}">
-                        <i class="bi bi-plus-circle me-2"></i> Manual Donations
-                    </a>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/expenses') ? 'active' : '' }}" href="{{ url('/admin/expenses') }}">
-                        <i class="bi bi-receipt me-2"></i> Expenses
+                    <a class="side-link {{ request()->is('admin/tasks') ? 'active' : '' }}" href="#">
+                        <i class="bi bi-clipboard-check"></i> Tasks
                     </a>
 
-                    <div class="side-section">Account</div>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('profile') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
-                        <i class="bi bi-person me-2"></i> Profile
+                    <div class="side-section">
+                        <span>Collections</span>
+                        <i class="bi bi-plus-circle-fill section-add"></i>
+                    </div>
+                    
+                    <a class="side-link {{ request()->is('admin/transactions') ? 'active' : '' }}" href="{{ url('/admin/transactions') }}">
+                        <i class="bi bi-cart3"></i> Sales
                     </a>
-                    <a class="nav-link side-link rounded-3 px-3 py-2 mb-1" href="{{ url('/') }}">
-                        <i class="bi bi-box-arrow-up-right me-2"></i> View Website
+                    <a class="side-link" href="#">
+                        <i class="bi bi-palette"></i> Design
+                    </a>
+                    <a class="side-link" href="{{ url('/admin/fundraiser') }}">
+                        <i class="bi bi-megaphone"></i> Fundraising
+                    </a>
+                    <a class="side-link" href="#">
+                        <i class="bi bi-display"></i> Internal
+                    </a>
+                    <a class="side-link" href="#">
+                        <i class="bi bi-lightbulb"></i> Customer Success
+                    </a>
+                    <a class="side-link" href="#">
+                        <i class="bi bi-people"></i> Networking
+                    </a>
+                    <a class="side-link" href="#">
+                        <i class="bi bi-journal-bookmark"></i> Legal
+                    </a>
+                    
+                    <a class="side-link mt-2 text-muted" href="#">
+                        <i class="bi bi-plus-lg"></i> Add collection
                     </a>
                 </nav>
             </aside>
 
             <div class="admin-content flex-grow-1 d-flex flex-column">
                 <nav class="admin-topbar navbar navbar-expand bg-white border-bottom">
-                    <div class="container-fluid">
+                    <div class="container-fluid px-4">
                         <button class="btn btn-outline-secondary btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar">
                             <i class="bi bi-list"></i>
                         </button>
 
-                        <div class="d-none d-md-flex align-items-center ms-2 text-muted small">
-                            <span class="fw-semibold text-dark">@yield('page_title', 'Dashboard')</span>
+                        <div class="d-none d-md-flex align-items-center text-muted small">
+                            <span class="fw-semibold text-dark fs-6">@yield('page_title', 'Dashboard')</span>
                         </div>
 
                         <ul class="navbar-nav ms-auto align-items-center">
+                            <li class="nav-item me-3">
+                                <button class="btn btn-link text-secondary p-0 position-relative">
+                                    <i class="bi bi-bell fs-5"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+                                </button>
+                            </li>
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                                    <span class="badge rounded-pill text-bg-light border me-2">{{ auth()->user()->name ?? 'Admin' }}</span>
-                                    <i class="bi bi-person-circle fs-5"></i>
+                                <a class="nav-link d-flex align-items-center gap-2 p-0" href="#" role="button" data-bs-toggle="dropdown">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=random" class="rounded-circle border" width="32" height="32" alt="Profile">
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profile</a></li>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="border-radius: 12px;">
+                                    <li class="px-3 py-2 border-bottom mb-1">
+                                        <p class="small fw-bold mb-0 text-dark">{{ auth()->user()->name ?? 'Admin' }}</p>
+                                        <p class="x-small text-muted mb-0">{{ auth()->user()->email ?? 'admin@fundssite.com' }}</p>
+                                    </li>
+                                    <li><a class="dropdown-item small" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                    <li><a class="dropdown-item small" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form method="POST" action="{{ route('logout') }}">
                                             @csrf
-                                            <button type="submit" class="dropdown-item text-danger">Sign out</button>
+                                            <button type="submit" class="dropdown-item small text-danger"><i class="bi bi-box-arrow-right me-2"></i>Sign out</button>
                                         </form>
                                     </li>
                                 </ul>
@@ -129,32 +184,41 @@
             </div>
         </div>
 
-        <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="adminSidebar" aria-labelledby="adminSidebarLabel">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="adminSidebarLabel">Admin</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body p-2">
-                <div class="px-2 pb-2">
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control bg-secondary border-0 text-white" placeholder="Search..." aria-label="Search">
-                        <button class="btn btn-secondary" type="button"><i class="bi bi-search"></i></button>
-                    </div>
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="adminSidebar" aria-labelledby="adminSidebarLabel" style="width: var(--admin-sidebar-w);">
+            <div class="offcanvas-header border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=random" class="user-avatar" width="32" height="32" alt="Avatar">
+                    <span class="fw-bold small">{{ auth()->user()->name ?? 'Admin' }}</span>
                 </div>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-0">
+                <div class="py-3 px-2">
+                    <div class="sidebar-search mb-3">
+                        <div class="search-box">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" placeholder="Search projects">
+                        </div>
+                    </div>
 
-                <div class="side-section">Main</div>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin') ? 'active' : '' }}" href="{{ url('/admin') }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/users') ? 'active' : '' }}" href="{{ url('/admin/users') }}"><i class="bi bi-people me-2"></i>Users</a>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions') ? 'active' : '' }}" href="{{ url('/admin/transactions') }}"><i class="bi bi-credit-card-2-front me-2"></i>Payments</a>
+                    <nav>
+                        <a class="side-link {{ request()->is('admin') ? 'active' : '' }}" href="{{ url('/admin') }}">
+                            <i class="bi bi-activity"></i> Activity
+                        </a>
+                        <a class="side-link {{ request()->is('admin/users') ? 'active' : '' }}" href="{{ url('/admin/users') }}">
+                            <i class="bi bi-person-lines-fill"></i> Contacts
+                        </a>
+                        <a class="side-link" href="#"><i class="bi bi-clipboard-check"></i> Tasks</a>
 
-                <div class="side-section">Management</div>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/fundraiser') ? 'active' : '' }}" href="{{ url('/admin/fundraiser') }}"><i class="bi bi-gear me-2"></i>Fundraiser Settings</a>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/transactions/manual') ? 'active' : '' }}" href="{{ url('/admin/transactions/manual') }}"><i class="bi bi-plus-circle me-2"></i>Manual Donations</a>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('admin/expenses') ? 'active' : '' }}" href="{{ url('/admin/expenses') }}"><i class="bi bi-receipt me-2"></i>Expenses</a>
-
-                <div class="side-section">Account</div>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1 {{ request()->is('profile') ? 'active' : '' }}" href="{{ route('profile.edit') }}">Profile</a>
-                <a class="nav-link side-link rounded-3 px-3 py-2 mb-1" href="{{ url('/') }}">View Website</a>
+                        <div class="side-section">Collections</div>
+                        <a class="side-link {{ request()->is('admin/transactions') ? 'active' : '' }}" href="{{ url('/admin/transactions') }}">
+                            <i class="bi bi-cart3"></i> Sales
+                        </a>
+                        <a class="side-link" href="{{ url('/admin/fundraiser') }}">
+                            <i class="bi bi-megaphone"></i> Fundraising
+                        </a>
+                    </nav>
+                </div>
             </div>
         </div>
 
