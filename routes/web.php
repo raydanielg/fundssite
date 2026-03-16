@@ -277,7 +277,15 @@ Route::middleware('auth')->group(function () {
     })->name('admin.api.live');
 
     Route::get('/admin/transactions', function () {
-        return view('admin.transactions');
+        $transactions = DonationTransaction::query()
+            ->orderByDesc('paid_at')
+            ->orderByDesc('created_at')
+            ->limit(500)
+            ->get();
+
+        return view('admin.transactions', [
+            'transactions' => $transactions,
+        ]);
     })->name('admin.transactions');
 
     Route::post('/admin/api/sync', function (Request $request) {
@@ -293,6 +301,7 @@ Route::middleware('auth')->group(function () {
         $transactions = DonationTransaction::query()
             ->orderByDesc($hasPaidAt ? 'paid_at' : 'created_at')
             ->orderByDesc('created_at')
+            ->limit(500)
             ->get(array_values(array_filter([
                 'id',
                 'reference',

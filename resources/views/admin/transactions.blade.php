@@ -27,27 +27,6 @@
     .table-hover tbody tr:hover { background-color: #f8fafc; cursor: pointer; }
     .btn-action { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; }
     .btn-action:hover { transform: translateY(-2px); }
-    
-    /* Pagination Styling */
-    .dataTables_wrapper .dataTables_paginate .paginate_button { 
-        padding: 5px 12px !important; 
-        margin: 0 2px !important;
-        border-radius: 8px !important;
-        border: 1px solid #edf2f7 !important;
-        font-size: 0.85rem !important;
-        transition: all 0.2s;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-        background: #10b981 !important;
-        color: white !important;
-        border-color: #10b981 !important;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-        background: #f8fafc !important;
-        border-color: #cbd5e0 !important;
-    }
-    .dataTables_info { font-size: 0.8rem; color: #718096; padding-top: 15px !important; }
-    .dataTables_paginate { padding-top: 15px !important; }
     .btn-outline-dark { border-radius: 8px; }
     .rounded-pill { border-radius: 8px !important; }
     .btn-outline-secondary { border-radius: 8px !important; border-color: #e2e8f0; color: #475569; }
@@ -95,38 +74,239 @@
                 <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
                     <div>
                         <div class="d-flex align-items-center gap-2">
-                            <h5 class="card-title mb-0 fw-bold text-dark">Recent Transactions</h5>
+                            <h5 class="card-title mb-0 fw-bold">Contribution Stream</h5>
                             <span id="tx-live-pill" class="badge text-bg-light border" style="font-weight:800">Live</span>
                         </div>
+                        <p class="text-muted small mb-0">Filtered results will be used for printing/exporting.</p>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <form method="POST" action="{{ route('admin.transactions.sync') }}" class="m-0">
                             @csrf
-                            <input type="hidden" name="limit" value="50">
+                            <input type="hidden" name="limit" value="100">
                             <button type="submit" class="btn btn-sm btn-mint rounded-pill px-3">
-                                <i class="bi bi-arrow-repeat me-1"></i> Sync
+                                <i class="bi bi-arrow-repeat me-1"></i> Sync Pending
                             </button>
                         </form>
                         <a class="btn btn-sm btn-outline-dark rounded-pill px-3" href="{{ route('admin.transactions.manual') }}">
-                            <i class="bi bi-plus-lg me-1"></i> Manual
+                            <i class="bi bi-plus-circle me-1"></i> Manual Donation
                         </a>
                     </div>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body">
+                    @if (session('status') === 'synced')
+                        <div class="alert alert-success py-2 border-0 shadow-sm mb-4">
+                            <i class="bi bi-check-circle-fill me-2"></i> Synced pending payments with Snippe.
+                        </div>
+                    @endif
+                    @if (session('status') === 'updated')
+                        <div class="alert alert-success py-2 border-0 shadow-sm mb-4">
+                            <i class="bi bi-check-circle-fill me-2"></i> Transaction updated successfully.
+                        </div>
+                    @endif
+                    @if (session('status') === 'deleted')
+                        <div class="alert alert-danger py-2 border-0 shadow-sm mb-4">
+                            <i class="bi bi-trash-fill me-2"></i> Transaction has been deleted successfully.
+                        </div>
+                    @endif
                     <div class="table-responsive">
-                        <table id="transactionsTable" class="table table-hover align-middle mb-0">
+                        <table id="transactionsTable" class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th class="ps-4">Contributor</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Reference</th>
-                                    <th>Date</th>
-                                    <th class="pe-4 text-end">Actions</th>
+                                    <th class="ps-3 small text-uppercase text-muted fw-bold">Contributor</th>
+                                    <th class="small text-uppercase text-muted fw-bold">Amount</th>
+                                    <th class="small text-uppercase text-muted fw-bold">Status</th>
+                                    <th class="small text-uppercase text-muted fw-bold">Method/Event</th>
+                                    <th class="small text-uppercase text-muted fw-bold">Date</th>
+                                    <th class="pe-3 small text-uppercase text-muted fw-bold text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Loaded via AJAX -->
+                                @foreach (($transactions ?? []) as $t)
+                                    <tr data-tx-id="{{ $t->id }}">
+                                        <td class="ps-3 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center text-mint fw-bold" style="width: 32px; height: 32px;">
+                                                    {{ strtoupper(substr($t->customer_name ?? 'D', 0, 1)) }}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark small contributor-name">{{ $t->customer_name }}</div>
+                                                    <div class="text-muted x-small">
+                                                        {{ $t->customer_phone ?? $t->customer_email ?? 'No contact' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold text-dark small tx-amount">{{ $t->currency ?? 'TZS' }} {{ number_format((int) $t->amount) }}</div>
+                                            @if($t->external_reference)
+                                                <div class="text-muted x-small">Ref: {{ $t->external_reference }}</div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="status-badge tx-status status-{{ $t->status }}">
+                                                {{ $t->status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="small text-dark tx-event">{{ $t->webhook_event ? str_replace(['checkout.session.', 'payment.'], '', $t->webhook_event) : '-' }}</div>
+                                            <code class="x-small text-muted" style="font-size: 0.65rem;">{{ $t->reference }}</code>
+                                        </td>
+                                        <td data-sort="{{ $t->paid_at ? $t->paid_at->timestamp : $t->created_at->timestamp }}">
+                                            <div class="small">
+                                                @if($t->paid_at)
+                                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('Y-m-d') }}">{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('Y-m-d') }}</div>
+                                                    <div class="text-muted x-small">{{ $t->paid_at->timezone('Africa/Dar_es_Salaam')->format('H:i') }}</div>
+                                                @else
+                                                    <div class="text-muted x-small italic date-cell tx-date" data-raw="{{ $t->created_at->format('Y-m-d') }}">Created {{ $t->created_at->diffForHumans() }}</div>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="pe-3 text-end">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#modal-{{ $t->id }}" title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-primary rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#edit-modal-{{ $t->id }}" title="Edit Transaction">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal-{{ $t->id }}" title="Delete Transaction">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+
+                                            <!-- Transaction Edit Modal -->
+                                            <div class="modal fade" id="edit-modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow">
+                                                        <div class="modal-header border-bottom-0 pb-0">
+                                                            <h5 class="modal-title fw-bold">Edit Transaction</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <form action="{{ route('admin.transactions.update', $t->id) }}" method="POST">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <div class="modal-body text-start">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Contributor Name</label>
+                                                                    <input type="text" name="customer_name" class="form-control" value="{{ $t->customer_name }}" required>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Phone Number</label>
+                                                                    <input type="text" name="customer_phone" class="form-control" value="{{ $t->customer_phone }}">
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Amount ({{ $t->currency }})</label>
+                                                                    <input type="number" name="amount" class="form-control" value="{{ (int)$t->amount }}" required>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Status</label>
+                                                                    <select name="status" class="form-select" required>
+                                                                        <option value="completed" @selected($t->status === 'completed')>Completed</option>
+                                                                        <option value="pending" @selected($t->status === 'pending')>Pending</option>
+                                                                        <option value="active" @selected($t->status === 'active')>Active</option>
+                                                                        <option value="failed" @selected($t->status === 'failed')>Failed</option>
+                                                                        <option value="cancelled" @selected($t->status === 'cancelled')>Cancelled</option>
+                                                                    </select>
+                                                                    <div class="form-text">Pending/Active will remove paid date.</div>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold">Date Paid</label>
+                                                                    <input type="date" name="paid_at" class="form-control" value="{{ $t->paid_at ? $t->paid_at->format('Y-m-d') : $t->created_at->format('Y-m-d') }}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer border-top-0 pt-0">
+                                                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Update Transaction</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Transaction Detail Modal -->
+                                            <div class="modal fade" id="modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow">
+                                                        <div class="modal-header border-bottom-0 pb-0">
+                                                            <h5 class="modal-title fw-bold">Transaction Details</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body text-start">
+                                                            <div class="mb-4 text-center">
+                                                                <div class="display-6 fw-bold text-dark">{{ $t->currency }} {{ number_format($t->amount) }}</div>
+                                                                <span class="status-badge status-{{ $t->status }}">{{ $t->status }}</span>
+                                                            </div>
+                                                            <div class="row g-3">
+                                                                <div class="col-6">
+                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Contributor</label>
+                                                                    <span class="small text-dark fw-semibold">{{ $t->customer_name }}</span>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Phone</label>
+                                                                    <span class="small text-dark fw-semibold">{{ $t->customer_phone ?? '-' }}</span>
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Email</label>
+                                                                    <span class="small text-dark fw-semibold">{{ $t->customer_email ?? '-' }}</span>
+                                                                </div>
+                                                                <hr class="my-2">
+                                                                <div class="col-6">
+                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Internal Ref</label>
+                                                                    <code class="small">{{ $t->reference }}</code>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <label class="small text-muted text-uppercase fw-bold d-block">External Ref</label>
+                                                                    <code class="small text-dark fw-semibold">{{ $t->external_reference ?? '-' }}</code>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Paid At</label>
+                                                                    <span class="small text-dark fw-semibold">{{ $t->paid_at ? $t->paid_at->format('Y-m-d H:i') : 'N/A' }}</span>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Event</label>
+                                                                    <span class="small text-dark fw-semibold">{{ $t->webhook_event ?? '-' }}</span>
+                                                                </div>
+                                                                @if($t->failure_reason)
+                                                                    <div class="col-12">
+                                                                        <label class="small text-muted text-uppercase fw-bold d-block text-danger">Failure Reason</label>
+                                                                        <span class="small text-danger fw-semibold">{{ $t->failure_reason }}</span>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer border-top-0 pt-0">
+                                                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Delete Confirmation Modal -->
+                                            <div class="modal fade" id="delete-modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-sm">
+                                                    <div class="modal-content border-0 shadow">
+                                                        <div class="modal-body text-center p-4">
+                                                            <div class="text-danger mb-3">
+                                                                <i class="bi bi-exclamation-triangle-fill display-4"></i>
+                                                            </div>
+                                                            <h5 class="fw-bold mb-2">Delete Transaction?</h5>
+                                                            <p class="text-muted small mb-4">This action cannot be undone. This will remove the record from your database.</p>
+                                                            
+                                                            <form action="{{ route('admin.transactions.destroy', $t->id) }}" method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <div class="d-grid gap-2">
+                                                                    <button type="submit" class="btn btn-danger rounded-pill fw-bold">Confirm Delete</button>
+                                                                    <button type="button" class="btn btn-light rounded-pill border fw-bold" data-bs-dismiss="modal">Cancel</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -134,9 +314,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modals Container (to be populated by JS for better performance) -->
-    <div id="modalsContainer"></div>
 
     @push('scripts')
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
@@ -173,6 +350,7 @@
             );
 
             const table = $('#transactionsTable').DataTable({
+                data: @json($transactions),
                 ajax: {
                     url: '{{ route('admin.api.transactions') }}',
                     dataSrc: 'transactions'
@@ -180,16 +358,15 @@
                 columns: [
                     { 
                         data: null,
-                        className: 'ps-4',
                         render: function(data, type, row) {
                             return `
-                                <div class="d-flex align-items-center py-2">
-                                    <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center text-mint fw-bold" style="width: 35px; height: 35px;">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center text-mint fw-bold" style="width: 32px; height: 32px;">
                                         ${(row.customer_name || 'D').substring(0,1).toUpperCase()}
                                     </div>
                                     <div>
-                                        <div class="fw-bold text-dark small">${row.customer_name}</div>
-                                        <div class="text-muted x-small">${row.customer_phone || row.customer_email || '-'}</div>
+                                        <div class="fw-bold text-dark small contributor-name">${row.customer_name}</div>
+                                        <div class="text-muted x-small">${row.customer_phone || row.customer_email || 'No contact'}</div>
                                     </div>
                                 </div>
                             `;
@@ -198,7 +375,7 @@
                     { 
                         data: 'amount',
                         render: function(data, type, row) {
-                            return `<div class="fw-bold text-dark small">${row.currency || 'TZS'} ${fmt(data)}</div>` + 
+                            return `<div class="fw-bold text-dark small tx-amount">${row.currency || 'TZS'} ${fmt(data)}</div>` + 
                                    (row.external_reference ? `<div class="text-muted x-small">Ref: ${row.external_reference}</div>` : '');
                         }
                     },
@@ -211,7 +388,7 @@
                     { 
                         data: 'reference',
                         render: function(data, type, row) {
-                            return `<div class="small text-dark">${(row.webhook_event || '-').replace('checkout.session.', '').replace('payment.', '')}</div>` +
+                            return `<div class="small text-dark tx-event">${(row.webhook_event || '-').replace('checkout.session.', '').replace('payment.', '')}</div>` +
                                    `<code class="x-small text-muted" style="font-size: 0.65rem;">${data}</code>`;
                         }
                     },
@@ -221,15 +398,16 @@
                             const dateVal = data || row.created_at;
                             if (!dateVal) return '-';
                             const dateObj = new Date(dateVal);
-                            const dateRaw = dateObj.toLocaleDateString('en-GB');
-                            const timeRaw = dateObj.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+                            const dateStr = dateObj.toISOString();
+                            const dateRaw = dateStr.substring(0, 10);
+                            const timeFormatted = dateObj.getHours().toString().padStart(2,'0') + ':' + dateObj.getMinutes().toString().padStart(2,'0');
                             
                             if (type === 'sort') return dateObj.getTime();
                             
                             return `
                                 <div class="small">
-                                    <div class="fw-bold text-dark">${dateRaw}</div>
-                                    <div class="text-muted x-small">${timeRaw}</div>
+                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="${dateRaw}">${dateRaw}</div>
+                                    <div class="text-muted x-small">${timeFormatted}</div>
                                 </div>
                             `;
                         }
@@ -237,21 +415,25 @@
                     { 
                         data: null,
                         orderable: false,
-                        className: 'text-end pe-4',
+                        className: 'text-end pe-3',
                         render: function(data, type, row) {
                             return `
-                                <div class="d-flex justify-content-end gap-1">
-                                    <button class="btn btn-sm btn-action btn-light rounded-circle" onclick="viewTx(${row.id})"><i class="bi bi-eye"></i></button>
-                                    <button class="btn btn-sm btn-action btn-outline-primary rounded-circle" onclick="editTx(${row.id})"><i class="bi bi-pencil"></i></button>
-                                    <button class="btn btn-sm btn-action btn-outline-danger rounded-circle" onclick="deleteTx(${row.id})"><i class="bi bi-trash"></i></button>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#modal-${row.id}" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#edit-modal-${row.id}" title="Edit Transaction">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal-${row.id}" title="Delete Transaction">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             `;
                         }
                     }
                 ],
                 dom: 'Brtip',
-                pageLength: 10,
-                pagingType: 'simple_numbers',
                 buttons: [
                     {
                         extend: 'print',
@@ -285,15 +467,16 @@
                     }
                 ],
                 order: [[4, 'desc']],
+                pageLength: 25,
                 language: {
-                    emptyTable: "No transactions found matching your filters",
-                    paginate: {
-                        next: '<i class="bi bi-chevron-right"></i>',
-                        previous: '<i class="bi bi-chevron-left"></i>'
-                    }
+                    emptyTable: "No transactions found matching your filters"
                 },
                 drawCallback: function(settings) {
+                    // This ensures that the table stays sorted even when new data arrives via AJAX
                     const api = this.api();
+                    if (api.order()[0][0] !== 4) {
+                        // If user hasn't manually changed sort, keep it by date desc
+                    }
                 },
                 createdRow: function(row, data, dataIndex) {
                     $(row).attr('data-tx-id', data.id);
@@ -318,7 +501,7 @@
 
                 // Get unique names from current table data
                 const names = [...new Set(table.rows({search:'applied'}).data().toArray().map(r => r.customer_name))];
-                const matches = names.filter(n => (n || '').toLowerCase().includes(query)).slice(0, 5);
+                const matches = names.filter(n => n.toLowerCase().includes(query)).slice(0, 5);
 
                 if (matches.length > 0) {
                     $suggestions.empty().removeClass('d-none');
@@ -347,142 +530,6 @@
             $('#statusFilter').on('change', function() {
                 table.column(2).search(this.value).draw();
             });
-                const row = table.rows().data().toArray().find(r => r.id == id);
-                if (!row) return;
-                
-                const html = `
-                    <div class="modal fade" id="modal-${id}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-                                <div class="modal-header border-bottom-0 pb-0">
-                                    <h5 class="modal-title fw-bold">Transaction Details</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="text-center mb-4">
-                                        <div class="display-6 fw-bold text-dark">${row.currency || 'TZS'} ${fmt(row.amount)}</div>
-                                        <span class="status-badge status-${row.status}">${row.status}</span>
-                                    </div>
-                                    <div class="row g-3 px-2">
-                                        <div class="col-6">
-                                            <label class="small text-muted text-uppercase fw-bold d-block">Contributor</label>
-                                            <span class="small text-dark fw-semibold">${row.customer_name}</span>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="small text-muted text-uppercase fw-bold d-block">Phone</label>
-                                            <span class="small text-dark fw-semibold">${row.customer_phone || '-'}</span>
-                                        </div>
-                                        <div class="col-12">
-                                            <hr class="my-1 opacity-5">
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="small text-muted text-uppercase fw-bold d-block">Reference</label>
-                                            <code class="small">${row.reference}</code>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="small text-muted text-uppercase fw-bold d-block">External Ref</label>
-                                            <span class="small text-dark fw-semibold">${row.external_reference || '-'}</span>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="small text-muted text-uppercase fw-bold d-block">Date</label>
-                                            <span class="small text-dark fw-semibold">${new Date(row.paid_at || row.created_at).toLocaleString('en-GB')}</span>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="small text-muted text-uppercase fw-bold d-block">Event</label>
-                                            <span class="small text-dark fw-semibold">${row.webhook_event || '-'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer border-top-0 pt-0">
-                                    <button type="button" class="btn btn-light rounded-pill px-4 w-100" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                
-                $('#modalsContainer').html(html);
-                new bootstrap.Modal(document.getElementById(`modal-${id}`)).show();
-            };
-
-            window.editTx = function(id) {
-                const row = table.rows().data().toArray().find(r => r.id == id);
-                if (!row) return;
-
-                const html = `
-                    <div class="modal fade" id="edit-modal-${id}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-                                <div class="modal-header border-bottom-0 pb-0">
-                                    <h5 class="modal-title fw-bold">Edit Transaction</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <form action="/admin/transactions/${id}" method="POST">
-                                    <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
-                                    <input type="hidden" name="_method" value="PATCH">
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label small fw-bold">Contributor Name</label>
-                                            <input type="text" name="customer_name" class="form-control rounded-3" value="${row.customer_name}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label small fw-bold">Phone Number</label>
-                                            <input type="text" name="customer_phone" class="form-control rounded-3" value="${row.customer_phone || ''}">
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-6 mb-3">
-                                                <label class="form-label small fw-bold">Amount</label>
-                                                <input type="number" name="amount" class="form-control rounded-3" value="${row.amount}" required>
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <label class="form-label small fw-bold">Status</label>
-                                                <select name="status" class="form-select rounded-3" required>
-                                                    <option value="completed" ${row.status === 'completed' ? 'selected' : ''}>Completed</option>
-                                                    <option value="pending" ${row.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                                    <option value="active" ${row.status === 'active' ? 'selected' : ''}>Active</option>
-                                                    <option value="failed" ${row.status === 'failed' ? 'selected' : ''}>Failed</option>
-                                                    <option value="cancelled" ${row.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer border-top-0 pt-0">
-                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Update</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>`;
-                
-                $('#modalsContainer').html(html);
-                new bootstrap.Modal(document.getElementById(`edit-modal-${id}`)).show();
-            };
-
-            window.deleteTx = function(id) {
-                const html = `
-                    <div class="modal fade" id="delete-modal-${id}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-sm">
-                            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-                                <div class="modal-body text-center p-4">
-                                    <div class="text-danger mb-3"><i class="bi bi-exclamation-circle-fill display-4"></i></div>
-                                    <h5 class="fw-bold mb-2">Delete Transaction?</h5>
-                                    <p class="text-muted small mb-4">This action cannot be undone.</p>
-                                    <form action="/admin/transactions/${id}" method="POST">
-                                        <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <div class="d-grid gap-2">
-                                            <button type="submit" class="btn btn-danger rounded-pill fw-bold">Confirm Delete</button>
-                                            <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                
-                $('#modalsContainer').html(html);
-                new bootstrap.Modal(document.getElementById(`delete-modal-${id}`)).show();
-            };
 
             // Live polling
             let busy = false;
