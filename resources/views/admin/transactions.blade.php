@@ -10,22 +10,23 @@
 <style>
     .dt-buttons { margin-bottom: 0; }
     .dataTables_filter { display: none; }
-    .table thead th { border-top: none; background: #f8f9fa; font-size: 0.75rem; }
-    .status-badge { font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; padding: 5px 10px; border-radius: 6px; }
-    .status-completed { background: #dcfce7; color: #166534; }
-    .status-pending { background: #fef9c3; color: #854d0e; }
-    .status-active { background: #fef9c3; color: #854d0e; }
-    .status-failed { background: #fee2e2; color: #991b1b; }
-    .status-cancelled { background: #f3f4f6; color: #374151; }
-    .x-small { font-size: 0.72rem; }
-    .filter-card { background: #f8f9fa; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 24px; }
-    .filter-card .form-label { color: #4a5568; font-weight: 700; margin-bottom: 8px; }
-    .filter-card .form-control, .filter-card .form-select { border-radius: 8px; border: 1px solid #cbd5e0; padding: 0.6rem 1rem; height: 45px; font-size: 0.9rem; }
-    .filter-card .input-group-text { background: #fff; border: 1px solid #cbd5e0; border-radius: 8px 0 0 8px; color: #718096; }
-    .filter-card .input-group .form-control { border-left: none; }
-    .filter-card .btn-outline-secondary { border: 1px solid #cbd5e0; border-left: none; border-radius: 0 8px 8px 0; background: #fff; }
-    .btn-mint { background-color: #2e9e72; color: #fff; border: none; border-radius: 8px; }
-    .btn-mint:hover { background-color: #25855f; color: #fff; }
+    .table thead th { border-top: none; background: #f8f9fa; font-size: 0.8rem; padding: 12px 15px; color: #4a5568; }
+    .status-badge { font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; padding: 6px 12px; border-radius: 50px; display: inline-block; }
+    .status-completed { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+    .status-pending { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+    .status-active { background: #e0f2fe; color: #075985; border: 1px solid #0ea5e9; }
+    .status-failed { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+    .status-cancelled { background: #f3f4f6; color: #374151; border: 1px solid #6b7280; }
+    .avatar-sm { box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s; }
+    .avatar-sm:hover { transform: scale(1.1); }
+    .tx-amount { font-size: 0.95rem; letter-spacing: -0.01em; }
+    .filter-card { background: #ffffff; border-radius: 16px; border: 1px solid #edf2f7; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .btn-mint { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s; }
+    .btn-mint:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+    .card { border-radius: 16px; overflow: hidden; }
+    .table-hover tbody tr:hover { background-color: #f8fafc; cursor: pointer; }
+    .btn-action { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .btn-action:hover { transform: translateY(-2px); }
     .btn-outline-dark { border-radius: 8px; }
     .rounded-pill { border-radius: 8px !important; }
     .btn-outline-secondary { border-radius: 8px !important; border-color: #e2e8f0; color: #475569; }
@@ -444,21 +445,33 @@
                 buttons: [
                     {
                         extend: 'print',
-                        className: 'btn btn-sm btn-dark rounded-pill px-3',
-                        text: '<i class="bi bi-printer me-1"></i> Print',
-                        exportOptions: { columns: [0, 1, 2, 3, 4] }
+                        className: 'btn btn-sm btn-dark rounded-pill px-4 shadow-sm',
+                        text: '<i class="bi bi-printer me-2"></i>Print Report',
+                        title: 'Traction Report - ' + new Date().toLocaleDateString(),
+                        messageTop: 'Official System Transaction Report',
+                        exportOptions: { columns: [0, 1, 2, 3, 4] },
+                        customize: function (win) {
+                            $(win.document.body).css('font-size', '10pt').prepend('<h2 class="text-center mb-4">Selemani Fundraiser Traction Report</h2>');
+                            $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
+                        }
                     },
                     {
                         extend: 'excel',
-                        className: 'btn btn-sm btn-success rounded-pill px-3',
-                        text: '<i class="bi bi-file-earmark-excel me-1"></i> Excel',
+                        className: 'btn btn-sm btn-success rounded-pill px-4 shadow-sm',
+                        text: '<i class="bi bi-file-earmark-excel me-2"></i>Export Excel',
+                        filename: 'Traction_Report_' + new Date().getTime(),
                         exportOptions: { columns: [0, 1, 2, 3, 4] }
                     },
                     {
                         extend: 'pdf',
-                        className: 'btn btn-sm btn-danger rounded-pill px-3',
-                        text: '<i class="bi bi-file-earmark-pdf me-1"></i> PDF',
-                        exportOptions: { columns: [0, 1, 2, 3, 4] }
+                        className: 'btn btn-sm btn-danger rounded-pill px-4 shadow-sm',
+                        text: '<i class="bi bi-file-earmark-pdf me-2"></i>Download PDF',
+                        filename: 'Traction_Report_' + new Date().getTime(),
+                        exportOptions: { columns: [0, 1, 2, 3, 4] },
+                        customize: function(doc) {
+                            doc.content[1].table.widths = ['*', 'auto', 'auto', 'auto', 'auto'];
+                            doc.styles.tableHeader.fillColor = '#2e9e72';
+                        }
                     }
                 ],
                 order: [[4, 'desc']],
@@ -516,20 +529,30 @@
                 if (busy) return;
                 if (document.visibilityState === 'hidden') return;
                 
-                // Only poll if we're not actively searching or filtering to avoid jumping
-                const isSearching = $('#customSearch').val() || ($('#statusFilter').val() && $('#statusFilter').val() !== '') || ($('#dateFilter').val() && $('#dateFilter').val() !== '');
-                
-                busy = true;
+                // If user is actively typing in search or using filters, slow down polling or pause
+                const isSearching = $('#customSearch').val().length > 0 || ($('#statusFilter').val() && $('#statusFilter').val() !== '') || ($('#dateFilter').val() && $('#dateFilter').val() !== '');
+                if (isSearching) return; 
 
+                busy = true;
                 const pill = document.getElementById('tx-live-pill');
-                if (pill) pill.textContent = 'Live…';
+                if (pill) {
+                    pill.textContent = 'Updating...';
+                    pill.classList.replace('text-bg-light', 'text-bg-success');
+                }
 
                 try {
-                    // Use DataTables native ajax reload to update the table without full reload
-                    table.ajax.reload(null, false); // null = no callback, false = hold current paging
-                    if (pill) pill.textContent = 'Live';
+                    table.ajax.reload(null, false);
+                    setTimeout(() => {
+                        if (pill) {
+                            pill.textContent = 'Live';
+                            pill.classList.replace('text-bg-success', 'text-bg-light');
+                        }
+                    }, 1000);
                 } catch (e) {
-                    if (pill) pill.textContent = 'Offline';
+                    if (pill) {
+                        pill.textContent = 'Offline';
+                        pill.classList.replace('text-bg-light', 'text-bg-danger');
+                    }
                 } finally {
                     busy = false;
                 }
@@ -537,7 +560,7 @@
 
             function start() {
                 if (timer) return;
-                timer = setInterval(poll, 1000); // Poll every 1 second for instant detection
+                timer = setInterval(poll, 3000); // Polling every 3s is better for UX than 1s
                 poll();
                 
                 // Full table redraw every 60 seconds to ensure total consistency
