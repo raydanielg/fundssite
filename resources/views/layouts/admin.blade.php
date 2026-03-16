@@ -17,10 +17,9 @@
             :root { --admin-sidebar-w: 260px; }
             body { background: #f2f4f7; }
             .admin-shell { min-height: 100vh; }
-            .admin-sidebar { width: var(--admin-sidebar-w); }
-            .admin-content { min-width: 0; }
-            .admin-topbar { height: 58px; }
-            .admin-main { padding: 18px; }
+            .admin-sidebar { width: var(--admin-sidebar-w); height: 100vh; position: sticky; top: 0; }
+            .admin-content { min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
+            .admin-main { padding: 18px; flex-grow: 1; }
             @media (min-width: 992px) {
                 .admin-main { padding: 22px; }
             }
