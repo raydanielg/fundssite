@@ -293,7 +293,6 @@ Route::middleware('auth')->group(function () {
         $transactions = DonationTransaction::query()
             ->orderByDesc($hasPaidAt ? 'paid_at' : 'created_at')
             ->orderByDesc('created_at')
-            ->limit(500)
             ->get(array_values(array_filter([
                 'id',
                 'reference',

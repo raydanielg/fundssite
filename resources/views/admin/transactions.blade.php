@@ -27,6 +27,27 @@
     .table-hover tbody tr:hover { background-color: #f8fafc; cursor: pointer; }
     .btn-action { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; }
     .btn-action:hover { transform: translateY(-2px); }
+    
+    /* Pagination Styling */
+    .dataTables_wrapper .dataTables_paginate .paginate_button { 
+        padding: 5px 12px !important; 
+        margin: 0 2px !important;
+        border-radius: 8px !important;
+        border: 1px solid #edf2f7 !important;
+        font-size: 0.85rem !important;
+        transition: all 0.2s;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #10b981 !important;
+        color: white !important;
+        border-color: #10b981 !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #f8fafc !important;
+        border-color: #cbd5e0 !important;
+    }
+    .dataTables_info { font-size: 0.8rem; color: #718096; padding-top: 15px !important; }
+    .dataTables_paginate { padding-top: 15px !important; }
     .btn-outline-dark { border-radius: 8px; }
     .rounded-pill { border-radius: 8px !important; }
     .btn-outline-secondary { border-radius: 8px !important; border-color: #e2e8f0; color: #475569; }
@@ -229,6 +250,15 @@
                     }
                 ],
                 dom: 'Brtip',
+                pageLength: 10,
+                pagingType: 'simple_numbers',
+                language: {
+                    emptyTable: "No transactions found matching your filters",
+                    paginate: {
+                        next: '<i class="bi bi-chevron-right"></i>',
+                        previous: '<i class="bi bi-chevron-left"></i>'
+                    }
+                },
                 buttons: [
                     {
                         extend: 'print',
