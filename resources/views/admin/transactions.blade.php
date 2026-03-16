@@ -475,7 +475,7 @@
                 if (document.visibilityState === 'hidden') return;
                 
                 // If user is actively typing in search or using filters, slow down polling or pause
-                const isSearching = $('#customSearch').val().length > 0 || ($('#statusFilter').val() && $('#statusFilter').val() !== '') || ($('#dateFilter').val() && $('#dateFilter').val() !== '');
+                const isSearching = $('#customSearch').val().length > 0 || ($('#statusFilter').val() && $('#statusFilter').val() !== '');
                 if (isSearching) return; 
 
                 busy = true;
@@ -486,7 +486,16 @@
                 }
 
                 try {
-                    table.ajax.reload(null, false);
+                    // Check for new transactions silently without reloading the whole table
+                    // If we find new ones, we can notify or refresh
+                    const res = await fetch('{{ route('admin.api.live') }}', { headers: { 'Accept': 'application/json' } });
+                    if (!res.ok) throw new Error('Network error');
+                    
+                    const data = await res.json();
+                    
+                    // Logic to detect if we need a refresh could go here
+                    // For now, we just update the indicator
+                    
                     setTimeout(() => {
                         if (pill) {
                             pill.textContent = 'Live';
