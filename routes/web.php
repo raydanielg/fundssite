@@ -278,10 +278,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/transactions', function () {
         $transactions = DonationTransaction::query()
-            ->orderByDesc('paid_at')
-            ->orderByDesc('created_at')
-            ->limit(500)
-            ->get();
+            ->orderByDesc('id')
+            ->paginate(25);
 
         return view('admin.transactions', [
             'transactions' => $transactions,

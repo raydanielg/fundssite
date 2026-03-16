@@ -121,7 +121,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (($transactions ?? []) as $t)
+                                @foreach ($transactions as $t)
                                     <tr data-tx-id="{{ $t->id }}">
                                         <td class="ps-3 py-3">
                                             <div class="d-flex align-items-center">
@@ -173,146 +173,153 @@
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </div>
-
-                                            <!-- Transaction Edit Modal -->
-                                            <div class="modal fade" id="edit-modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content border-0 shadow">
-                                                        <div class="modal-header border-bottom-0 pb-0">
-                                                            <h5 class="modal-title fw-bold">Edit Transaction</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <form action="{{ route('admin.transactions.update', $t->id) }}" method="POST">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <div class="modal-body text-start">
-                                                                <div class="mb-3">
-                                                                    <label class="form-label small fw-bold">Contributor Name</label>
-                                                                    <input type="text" name="customer_name" class="form-control" value="{{ $t->customer_name }}" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label small fw-bold">Phone Number</label>
-                                                                    <input type="text" name="customer_phone" class="form-control" value="{{ $t->customer_phone }}">
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label small fw-bold">Amount ({{ $t->currency }})</label>
-                                                                    <input type="number" name="amount" class="form-control" value="{{ (int)$t->amount }}" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label small fw-bold">Status</label>
-                                                                    <select name="status" class="form-select" required>
-                                                                        <option value="completed" @selected($t->status === 'completed')>Completed</option>
-                                                                        <option value="pending" @selected($t->status === 'pending')>Pending</option>
-                                                                        <option value="active" @selected($t->status === 'active')>Active</option>
-                                                                        <option value="failed" @selected($t->status === 'failed')>Failed</option>
-                                                                        <option value="cancelled" @selected($t->status === 'cancelled')>Cancelled</option>
-                                                                    </select>
-                                                                    <div class="form-text">Pending/Active will remove paid date.</div>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label small fw-bold">Date Paid</label>
-                                                                    <input type="date" name="paid_at" class="form-control" value="{{ $t->paid_at ? $t->paid_at->format('Y-m-d') : $t->created_at->format('Y-m-d') }}">
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer border-top-0 pt-0">
-                                                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Update Transaction</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Transaction Detail Modal -->
-                                            <div class="modal fade" id="modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content border-0 shadow">
-                                                        <div class="modal-header border-bottom-0 pb-0">
-                                                            <h5 class="modal-title fw-bold">Transaction Details</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body text-start">
-                                                            <div class="mb-4 text-center">
-                                                                <div class="display-6 fw-bold text-dark">{{ $t->currency }} {{ number_format($t->amount) }}</div>
-                                                                <span class="status-badge status-{{ $t->status }}">{{ $t->status }}</span>
-                                                            </div>
-                                                            <div class="row g-3">
-                                                                <div class="col-6">
-                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Contributor</label>
-                                                                    <span class="small text-dark fw-semibold">{{ $t->customer_name }}</span>
-                                                                </div>
-                                                                <div class="col-6">
-                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Phone</label>
-                                                                    <span class="small text-dark fw-semibold">{{ $t->customer_phone ?? '-' }}</span>
-                                                                </div>
-                                                                <div class="col-12">
-                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Email</label>
-                                                                    <span class="small text-dark fw-semibold">{{ $t->customer_email ?? '-' }}</span>
-                                                                </div>
-                                                                <hr class="my-2">
-                                                                <div class="col-6">
-                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Internal Ref</label>
-                                                                    <code class="small">{{ $t->reference }}</code>
-                                                                </div>
-                                                                <div class="col-6">
-                                                                    <label class="small text-muted text-uppercase fw-bold d-block">External Ref</label>
-                                                                    <code class="small text-dark fw-semibold">{{ $t->external_reference ?? '-' }}</code>
-                                                                </div>
-                                                                <div class="col-6">
-                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Paid At</label>
-                                                                    <span class="small text-dark fw-semibold">{{ $t->paid_at ? $t->paid_at->format('Y-m-d H:i') : 'N/A' }}</span>
-                                                                </div>
-                                                                <div class="col-6">
-                                                                    <label class="small text-muted text-uppercase fw-bold d-block">Event</label>
-                                                                    <span class="small text-dark fw-semibold">{{ $t->webhook_event ?? '-' }}</span>
-                                                                </div>
-                                                                @if($t->failure_reason)
-                                                                    <div class="col-12">
-                                                                        <label class="small text-muted text-uppercase fw-bold d-block text-danger">Failure Reason</label>
-                                                                        <span class="small text-danger fw-semibold">{{ $t->failure_reason }}</span>
-                                                                    </div>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer border-top-0 pt-0">
-                                                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Delete Confirmation Modal -->
-                                            <div class="modal fade" id="delete-modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered modal-sm">
-                                                    <div class="modal-content border-0 shadow">
-                                                        <div class="modal-body text-center p-4">
-                                                            <div class="text-danger mb-3">
-                                                                <i class="bi bi-exclamation-triangle-fill display-4"></i>
-                                                            </div>
-                                                            <h5 class="fw-bold mb-2">Delete Transaction?</h5>
-                                                            <p class="text-muted small mb-4">This action cannot be undone. This will remove the record from your database.</p>
-                                                            
-                                                            <form action="{{ route('admin.transactions.destroy', $t->id) }}" method="POST">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <div class="d-grid gap-2">
-                                                                    <button type="submit" class="btn btn-danger rounded-pill fw-bold">Confirm Delete</button>
-                                                                    <button type="button" class="btn btn-light rounded-pill border fw-bold" data-bs-dismiss="modal">Cancel</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
+                    <div class="mt-4 d-flex justify-content-center">
+                        {{ $transactions->links() }}
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Modals (Outside Table for Better UI/Accessibility) -->
+    @foreach ($transactions as $t)
+        <!-- Transaction Edit Modal -->
+        <div class="modal fade" id="edit-modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h5 class="modal-title fw-bold">Edit Transaction</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route('admin.transactions.update', $t->id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <div class="modal-body text-start">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Contributor Name</label>
+                                <input type="text" name="customer_name" class="form-control" value="{{ $t->customer_name }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Phone Number</label>
+                                <input type="text" name="customer_phone" class="form-control" value="{{ $t->customer_phone }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Amount ({{ $t->currency }})</label>
+                                <input type="number" name="amount" class="form-control" value="{{ (int)$t->amount }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Status</label>
+                                <select name="status" class="form-select" required>
+                                    <option value="completed" @selected($t->status === 'completed')>Completed</option>
+                                    <option value="pending" @selected($t->status === 'pending')>Pending</option>
+                                    <option value="active" @selected($t->status === 'active')>Active</option>
+                                    <option value="failed" @selected($t->status === 'failed')>Failed</option>
+                                    <option value="cancelled" @selected($t->status === 'cancelled')>Cancelled</option>
+                                </select>
+                                <div class="form-text">Pending/Active will remove paid date.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Date Paid</label>
+                                <input type="date" name="paid_at" class="form-control" value="{{ $t->paid_at ? $t->paid_at->format('Y-m-d') : $t->created_at->format('Y-m-d') }}">
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Update Transaction</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Detail Modal -->
+        <div class="modal fade" id="modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h5 class="modal-title fw-bold">Transaction Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-start">
+                        <div class="mb-4 text-center">
+                            <div class="display-6 fw-bold text-dark">{{ $t->currency }} {{ number_format($t->amount) }}</div>
+                            <span class="status-badge status-{{ $t->status }}">{{ $t->status }}</span>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Contributor</label>
+                                <span class="small text-dark fw-semibold">{{ $t->customer_name }}</span>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Phone</label>
+                                <span class="small text-dark fw-semibold">{{ $t->customer_phone ?? '-' }}</span>
+                            </div>
+                            <div class="col-12">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Email</label>
+                                <span class="small text-dark fw-semibold">{{ $t->customer_email ?? '-' }}</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Internal Ref</label>
+                                <code class="small">{{ $t->reference }}</code>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold d-block">External Ref</label>
+                                <code class="small text-dark fw-semibold">{{ $t->external_reference ?? '-' }}</code>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Paid At</label>
+                                <span class="small text-dark fw-semibold">{{ $t->paid_at ? $t->paid_at->format('Y-m-d H:i') : 'N/A' }}</span>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Event</label>
+                                <span class="small text-dark fw-semibold">{{ $t->webhook_event ?? '-' }}</span>
+                            </div>
+                            @if($t->failure_reason)
+                                <div class="col-12">
+                                    <label class="small text-muted text-uppercase fw-bold d-block text-danger">Failure Reason</label>
+                                    <span class="small text-danger fw-semibold">{{ $t->failure_reason }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="delete-modal-{{ $t->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-body text-center p-4">
+                        <div class="text-danger mb-3">
+                            <i class="bi bi-exclamation-triangle-fill display-4"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Delete Transaction?</h5>
+                        <p class="text-muted small mb-4">This action cannot be undone. This will remove the record from your database.</p>
+                        
+                        <form action="{{ route('admin.transactions.destroy', $t->id) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-danger rounded-pill fw-bold">Confirm Delete</button>
+                                <button type="button" class="btn btn-light rounded-pill border fw-bold" data-bs-dismiss="modal">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
     </div>
 
     @push('scripts')
@@ -350,90 +357,10 @@
             );
 
             const table = $('#transactionsTable').DataTable({
-                data: @json($transactions),
-                ajax: {
-                    url: '{{ route('admin.api.transactions') }}',
-                    dataSrc: 'transactions'
-                },
-                columns: [
-                    { 
-                        data: null,
-                        render: function(data, type, row) {
-                            return `
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center text-mint fw-bold" style="width: 32px; height: 32px;">
-                                        ${(row.customer_name || 'D').substring(0,1).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-dark small contributor-name">${row.customer_name}</div>
-                                        <div class="text-muted x-small">${row.customer_phone || row.customer_email || 'No contact'}</div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    },
-                    { 
-                        data: 'amount',
-                        render: function(data, type, row) {
-                            return `<div class="fw-bold text-dark small tx-amount">${row.currency || 'TZS'} ${fmt(data)}</div>` + 
-                                   (row.external_reference ? `<div class="text-muted x-small">Ref: ${row.external_reference}</div>` : '');
-                        }
-                    },
-                    { 
-                        data: 'status',
-                        render: function(data, type, row) {
-                            return `<span class="status-badge tx-status status-${data}">${data}</span>`;
-                        }
-                    },
-                    { 
-                        data: 'reference',
-                        render: function(data, type, row) {
-                            return `<div class="small text-dark tx-event">${(row.webhook_event || '-').replace('checkout.session.', '').replace('payment.', '')}</div>` +
-                                   `<code class="x-small text-muted" style="font-size: 0.65rem;">${data}</code>`;
-                        }
-                    },
-                    { 
-                        data: 'paid_at',
-                        render: function(data, type, row) {
-                            const dateVal = data || row.created_at;
-                            if (!dateVal) return '-';
-                            const dateObj = new Date(dateVal);
-                            const dateStr = dateObj.toISOString();
-                            const dateRaw = dateStr.substring(0, 10);
-                            const timeFormatted = dateObj.getHours().toString().padStart(2,'0') + ':' + dateObj.getMinutes().toString().padStart(2,'0');
-                            
-                            if (type === 'sort') return dateObj.getTime();
-                            
-                            return `
-                                <div class="small">
-                                    <div class="fw-bold text-dark date-cell tx-date" data-raw="${dateRaw}">${dateRaw}</div>
-                                    <div class="text-muted x-small">${timeFormatted}</div>
-                                </div>
-                            `;
-                        }
-                    },
-                    { 
-                        data: null,
-                        orderable: false,
-                        className: 'text-end pe-3',
-                        render: function(data, type, row) {
-                            return `
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#modal-${row.id}" title="View Details">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-primary rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#edit-modal-${row.id}" title="Edit Transaction">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger rounded-circle" type="button" data-bs-toggle="modal" data-bs-target="#delete-modal-${row.id}" title="Delete Transaction">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            `;
-                        }
-                    }
-                ],
-                dom: 'Brtip',
+                paging: false,
+                info: false,
+                order: [[4, 'desc']],
+                dom: 'Brt',
                 buttons: [
                     {
                         extend: 'print',
