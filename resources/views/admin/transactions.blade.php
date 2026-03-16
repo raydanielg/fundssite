@@ -341,6 +341,132 @@
 
     <script>
         $(document).ready(function() {
+            async function fetchAllTransactionsForExport() {
+                const q = String($('#customSearch').val() || '').trim();
+                const status = String($('#statusFilter').val() || '').trim();
+
+                const params = new URLSearchParams();
+                params.set('limit', '5000');
+                if (q !== '') params.set('q', q);
+                if (status !== '') params.set('status', status);
+
+                const res = await fetch(`{{ route('admin.api.transactions') }}?${params.toString()}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) throw new Error('Failed to fetch transactions');
+                const json = await res.json();
+                return Array.isArray(json.transactions) ? json.transactions : [];
+            }
+
+            function buildTempTableFromTransactions(rows) {
+                const $wrap = $('<div style="position:fixed;left:-10000px;top:-10000px;width:1px;height:1px;overflow:hidden;"></div>');
+                const $table = $(
+                    '<table class="table" id="_txExportTemp">'
+                    + '<thead><tr>'
+                    + '<th>Contributor</th>'
+                    + '<th>Amount</th>'
+                    + '<th>Status</th>'
+                    + '<th>Method/Event</th>'
+                    + '<th>Date</th>'
+                    + '</tr></thead>'
+                    + '<tbody></tbody>'
+                    + '</table>'
+                );
+
+                const $tbody = $table.find('tbody');
+                rows.forEach(r => {
+                    const name = r.customer_name || '';
+                    const phoneOrEmail = r.customer_phone || r.customer_email || '';
+                    const contributor = phoneOrEmail ? `${name} (${phoneOrEmail})` : name;
+                    const amount = `${r.currency || 'TZS'} ${Number(r.amount || 0).toLocaleString('en-TZ')}`;
+                    const status = r.status || '';
+                    const evt = (r.webhook_event || '-').replace('checkout.session.', '').replace('payment.', '');
+                    const ref = r.reference || '';
+                    const methodEvent = ref ? `${evt} | ${ref}` : evt;
+                    const dateStr = (r.paid_at || r.created_at || '').toString();
+                    const date = dateStr ? dateStr.substring(0, 10) : '';
+
+                    const $tr = $('<tr></tr>');
+                    $tr.append($('<td></td>').text(contributor));
+                    $tr.append($('<td></td>').text(amount));
+                    $tr.append($('<td></td>').text(status));
+                    $tr.append($('<td></td>').text(methodEvent));
+                    $tr.append($('<td></td>').text(date));
+                    $tbody.append($tr);
+                });
+
+                $wrap.append($table);
+                $('body').append($wrap);
+                return { $wrap, $table };
+            }
+
+            async function exportAll(kind) {
+                const pill = document.getElementById('tx-live-pill');
+                const oldText = pill ? pill.textContent : '';
+
+                try {
+                    if (pill) pill.textContent = 'Preparing export…';
+                    const rows = await fetchAllTransactionsForExport();
+                    const { $wrap, $table } = buildTempTableFromTransactions(rows);
+
+                    const title = 'Traction Report - ' + new Date().toLocaleDateString();
+
+                    const buttons = [];
+
+                    if (kind === 'print') {
+                        buttons.push({
+                            extend: 'print',
+                            title,
+                            messageTop: 'Official System Transaction Report',
+                            exportOptions: { columns: [0, 1, 2, 3, 4] },
+                            customize: function (win) {
+                                $(win.document.body)
+                                    .css('font-size', '10pt')
+                                    .prepend('<h2 class="text-center mb-4">Selemani Fundraiser Traction Report</h2>');
+                                $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
+                            }
+                        });
+                    }
+
+                    if (kind === 'excel') {
+                        buttons.push({
+                            extend: 'excelHtml5',
+                            filename: 'Traction_Report_' + new Date().getTime(),
+                            exportOptions: { columns: [0, 1, 2, 3, 4] }
+                        });
+                    }
+
+                    if (kind === 'pdf') {
+                        buttons.push({
+                            extend: 'pdfHtml5',
+                            filename: 'Traction_Report_' + new Date().getTime(),
+                            exportOptions: { columns: [0, 1, 2, 3, 4] },
+                            customize: function (doc) {
+                                doc.content[1].table.widths = ['*', 'auto', 'auto', 'auto', 'auto'];
+                                doc.styles.tableHeader.fillColor = '#2e9e72';
+                            }
+                        });
+                    }
+
+                    const dt = $table.DataTable({
+                        paging: false,
+                        searching: false,
+                        info: false,
+                        ordering: false,
+                        dom: 'B',
+                        buttons
+                    });
+
+                    dt.button(0).trigger();
+                    dt.destroy();
+                    $wrap.remove();
+                } catch (e) {
+                    alert('Export failed. Please try again.');
+                } finally {
+                    if (pill) pill.textContent = oldText || 'Live';
+                }
+            }
+
             const table = $('#transactionsTable').DataTable({
                 paging: false,
                 info: false,
@@ -349,34 +475,19 @@
                 dom: 'Bt',
                 buttons: [
                     {
-                        extend: 'print',
-                        className: 'btn btn-sm btn-dark rounded-pill px-4 shadow-sm',
                         text: '<i class="bi bi-printer me-2"></i>Print Report',
-                        title: 'Traction Report - ' + new Date().toLocaleDateString(),
-                        messageTop: 'Official System Transaction Report',
-                        exportOptions: { columns: [0, 1, 2, 3, 4] },
-                        customize: function (win) {
-                            $(win.document.body).css('font-size', '10pt').prepend('<h2 class="text-center mb-4">Selemani Fundraiser Traction Report</h2>');
-                            $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
-                        }
+                        className: 'btn btn-sm btn-dark rounded-pill px-4 shadow-sm',
+                        action: function () { exportAll('print'); }
                     },
                     {
-                        extend: 'excel',
-                        className: 'btn btn-sm btn-success rounded-pill px-4 shadow-sm',
                         text: '<i class="bi bi-file-earmark-excel me-2"></i>Export Excel',
-                        filename: 'Traction_Report_' + new Date().getTime(),
-                        exportOptions: { columns: [0, 1, 2, 3, 4] }
+                        className: 'btn btn-sm btn-success rounded-pill px-4 shadow-sm',
+                        action: function () { exportAll('excel'); }
                     },
                     {
-                        extend: 'pdf',
-                        className: 'btn btn-sm btn-danger rounded-pill px-4 shadow-sm',
                         text: '<i class="bi bi-file-earmark-pdf me-2"></i>Download PDF',
-                        filename: 'Traction_Report_' + new Date().getTime(),
-                        exportOptions: { columns: [0, 1, 2, 3, 4] },
-                        customize: function(doc) {
-                            doc.content[1].table.widths = ['*', 'auto', 'auto', 'auto', 'auto'];
-                            doc.styles.tableHeader.fillColor = '#2e9e72';
-                        }
+                        className: 'btn btn-sm btn-danger rounded-pill px-4 shadow-sm',
+                        action: function () { exportAll('pdf'); }
                     }
                 ],
                 language: {

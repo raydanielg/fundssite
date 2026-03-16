@@ -294,12 +294,36 @@ Route::middleware('auth')->group(function () {
         return response()->json(['status' => 'synced']);
     })->name('admin.api.sync');
 
-    Route::get('/admin/api/transactions', function () {
+    Route::get('/admin/api/transactions', function (Request $request) {
         $hasPaidAt = Schema::hasColumn('donation_transactions', 'paid_at');
-        $transactions = DonationTransaction::query()
+
+        $limit = (int) ($request->query('limit') ?? 500);
+        if ($limit < 1) $limit = 1;
+        if ($limit > 5000) $limit = 5000;
+
+        $q = trim((string) ($request->query('q') ?? ''));
+        $status = trim((string) ($request->query('status') ?? ''));
+
+        $transactionsQuery = DonationTransaction::query();
+
+        if ($status !== '') {
+            $transactionsQuery->where('status', $status);
+        }
+
+        if ($q !== '') {
+            $transactionsQuery->where(function ($sub) use ($q) {
+                $sub->where('customer_name', 'like', "%{$q}%")
+                    ->orWhere('customer_phone', 'like', "%{$q}%")
+                    ->orWhere('customer_email', 'like', "%{$q}%")
+                    ->orWhere('reference', 'like', "%{$q}%")
+                    ->orWhere('external_reference', 'like', "%{$q}%");
+            });
+        }
+
+        $transactions = $transactionsQuery
             ->orderByDesc($hasPaidAt ? 'paid_at' : 'created_at')
             ->orderByDesc('created_at')
-            ->limit(500)
+            ->limit($limit)
             ->get(array_values(array_filter([
                 'id',
                 'reference',
