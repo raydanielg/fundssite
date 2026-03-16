@@ -39,38 +39,30 @@
 @endpush
 
 @section('content')
-    <!-- Advanced Filters -->
     <div class="filter-card p-4 shadow-sm">
         <div class="row g-4 align-items-end">
-            <div class="col-lg-3 col-md-4">
-                <label class="form-label small text-uppercase">Search Contributor</label>
+            <div class="col-lg-5 col-md-6 position-relative">
+                <label class="form-label small text-uppercase fw-bold">Search Contributor</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" id="customSearch" class="form-control" placeholder="Search name, phone...">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" id="customSearch" class="form-control border-start-0 ps-0" placeholder="Type name or phone..." autocomplete="off">
+                </div>
+                <div id="searchSuggestions" class="list-group position-absolute w-100 shadow-lg mt-1 d-none" style="z-index: 1050; max-height: 250px; overflow-y: auto; border-radius: 12px; border: 1px solid #edf2f7;">
                 </div>
             </div>
-            <div class="col-lg-2 col-md-4">
-                <label class="form-label small text-uppercase">Status</label>
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small text-uppercase fw-bold">Status</label>
                 <select id="statusFilter" class="form-select">
                     <option value="">All Statuses</option>
                     <option value="completed">Completed</option>
                     <option value="pending">Pending</option>
                     <option value="active">Active</option>
                     <option value="failed">Failed</option>
+                    <option value="cancelled">Cancelled</option>
                 </select>
             </div>
-            <div class="col-lg-3 col-md-4">
-                <label class="form-label small text-uppercase">Date Range</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                    <input type="text" id="dateFilter" class="form-control" placeholder="Select dates...">
-                    <button class="btn btn-outline-secondary" type="button" onclick="$('#dateFilter').val('').trigger('change'); table.draw();" title="Clear Date">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-            </div>
             <div class="col-lg-4 col-md-12 text-md-end">
-                <label class="form-label d-block small text-uppercase">Export & Tools</label>
+                <label class="form-label d-block small text-uppercase fw-bold">Tools</label>
                 <div id="tableButtons" class="d-inline-flex gap-2"></div>
             </div>
         </div>
@@ -494,23 +486,49 @@
             // Move buttons to custom container
             table.buttons().container().appendTo('#tableButtons');
 
-            // Custom Search (AJAX-friendly)
-            $('#customSearch').on('keyup', function() {
-                table.search(this.value).draw();
+            // Custom Search & Suggestions
+            const $searchInput = $('#customSearch');
+            const $suggestions = $('#searchSuggestions');
+
+            $searchInput.on('input', function() {
+                const query = $(this).val().toLowerCase();
+                table.search(query).draw();
+
+                if (query.length < 2) {
+                    $suggestions.addClass('d-none');
+                    return;
+                }
+
+                // Get unique names from current table data
+                const names = [...new Set(table.rows({search:'applied'}).data().toArray().map(r => r.customer_name))];
+                const matches = names.filter(n => n.toLowerCase().includes(query)).slice(0, 5);
+
+                if (matches.length > 0) {
+                    $suggestions.empty().removeClass('d-none');
+                    matches.forEach(name => {
+                        $suggestions.append(`<button type="button" class="list-group-item list-group-item-action py-2 px-3 border-0 small suggestion-item">${name}</button>`);
+                    });
+                } else {
+                    $suggestions.addClass('d-none');
+                }
             });
 
-            // Status Filter (AJAX-friendly)
+            $(document).on('click', '.suggestion-item', function() {
+                const name = $(this).text();
+                $searchInput.val(name);
+                table.search(name).draw();
+                $suggestions.addClass('d-none');
+            });
+
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.position-relative').length) {
+                    $suggestions.addClass('d-none');
+                }
+            });
+
+            // Status Filter
             $('#statusFilter').on('change', function() {
                 table.column(2).search(this.value).draw();
-            });
-
-            // Date Range Filter (Flatpickr + AJAX-friendly)
-            flatpickr("#dateFilter", {
-                mode: "range",
-                dateFormat: "Y-m-d",
-                onClose: function() {
-                    table.draw();
-                }
             });
 
             // Live polling
