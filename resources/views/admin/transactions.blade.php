@@ -326,7 +326,6 @@
             </div>
         </div>
     @endforeach
-@endsection
 
     @push('scripts')
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
@@ -339,29 +338,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
         $(document).ready(function() {
-            // Custom Date Range Filtering
-            $.fn.dataTable.ext.search.push(
-                function(settings, data, dataIndex) {
-                    const dateRange = $('#dateFilter').val();
-                    if (!dateRange || !dateRange.includes(' to ')) return true;
-                    
-                    const [startStr, endStr] = dateRange.split(' to ');
-                    const start = new Date(startStr);
-                    const end = new Date(endStr);
-                    
-                    // Get date from table cell (using data-raw or text)
-                    const cell = $(settings.aoData[dataIndex].nTr).find('.date-cell');
-                    const rowDateStr = cell.data('raw') || cell.text().trim();
-                    const rowDate = new Date(rowDateStr);
-
-                    return (rowDate >= start && rowDate <= end);
-                }
-            );
-
             const table = $('#transactionsTable').DataTable({
                 paging: false,
                 info: false,
@@ -400,20 +379,8 @@
                         }
                     }
                 ],
-                order: [[4, 'desc']],
-                pageLength: 25,
                 language: {
                     emptyTable: "No transactions found matching your filters"
-                },
-                drawCallback: function(settings) {
-                    // This ensures that the table stays sorted even when new data arrives via AJAX
-                    const api = this.api();
-                    if (api.order()[0][0] !== 4) {
-                        // If user hasn't manually changed sort, keep it by date desc
-                    }
-                },
-                createdRow: function(row, data, dataIndex) {
-                    $(row).attr('data-tx-id', data.id);
                 }
             });
 
@@ -523,12 +490,6 @@
                 if (timer) return;
                 timer = setInterval(poll, 3000); // Polling every 3s is better for UX than 1s
                 poll();
-                
-                // Full table redraw every 60 seconds to ensure total consistency
-                setInterval(() => {
-                    if (document.visibilityState === 'hidden') return;
-                    table.ajax.reload(null, false);
-                }, 60000);
                 
                 // Also poll for Snippe sync in background every 5 seconds (faster sync)
                 setInterval(async () => {
