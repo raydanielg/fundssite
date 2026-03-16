@@ -34,7 +34,13 @@
     .btn-outline-danger { border-radius: 8px !important; border-color: #fed7d7; color: #c53030; }
     .btn-primary.rounded-pill { border-radius: 8px !important; }
     .btn-danger.rounded-pill { border-radius: 8px !important; }
-    .btn-light.rounded-pill { border-radius: 8px !important; }
+    .pagination { margin-bottom: 0; gap: 5px; }
+    .page-item .page-link { border: none; border-radius: 8px !important; padding: 8px 16px; color: #4a5568; font-weight: 600; transition: all 0.2s; }
+    .page-item.active .page-link { background-color: #10b981; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
+    .page-item.disabled .page-link { background-color: transparent; color: #cbd5e0; }
+    .page-link:hover { background-color: #edf2f7; color: #2d3748; }
+    .dataTables_info { display: none !important; }
+    .dataTables_paginate { display: none !important; }
 </style>
 @endpush
 
@@ -359,8 +365,9 @@
             const table = $('#transactionsTable').DataTable({
                 paging: false,
                 info: false,
+                searching: true,
                 order: [[4, 'desc']],
-                dom: 'Brt',
+                dom: 'Bt',
                 buttons: [
                     {
                         extend: 'print',
