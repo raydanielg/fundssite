@@ -12,6 +12,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 
+Route::get('/lang/{locale}', function (Request $request, string $locale) {
+    $locale = strtolower(trim($locale));
+    if (! in_array($locale, ['en', 'sw'], true)) {
+        $locale = config('app.locale', 'en');
+    }
+
+    $request->session()->put('locale', $locale);
+
+    return redirect()->back();
+})->name('public.lang.switch');
+
 Route::get('/', function () {
     $settings = [
         'target_amount' => 150000000,
@@ -276,10 +287,33 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('admin.api.live');
 
-    Route::get('/admin/transactions', function () {
-        $transactions = DonationTransaction::query()
+    Route::get('/admin/transactions', function (Request $request) {
+        $q = trim((string) ($request->query('q') ?? ''));
+        $status = trim((string) ($request->query('status') ?? ''));
+
+        $transactionsQuery = DonationTransaction::query();
+
+        if ($status !== '') {
+            $transactionsQuery->where('status', $status);
+        }
+
+        if ($q !== '') {
+            $transactionsQuery->where(function ($sub) use ($q) {
+                $sub->where('customer_name', 'like', "%{$q}%")
+                    ->orWhere('customer_phone', 'like', "%{$q}%")
+                    ->orWhere('customer_email', 'like', "%{$q}%")
+                    ->orWhere('reference', 'like', "%{$q}%")
+                    ->orWhere('external_reference', 'like', "%{$q}%");
+            });
+        }
+
+        $transactions = $transactionsQuery
             ->orderByDesc('id')
-            ->paginate(25);
+            ->paginate(25)
+            ->appends([
+                'q' => $q,
+                'status' => $status,
+            ]);
 
         return view('admin.transactions', [
             'transactions' => $transactions,

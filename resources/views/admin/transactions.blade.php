@@ -51,7 +51,7 @@
                 <label class="form-label small text-uppercase fw-bold">Search Contributor</label>
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" id="customSearch" class="form-control border-start-0 ps-0" placeholder="Type name or phone..." autocomplete="off">
+                    <input type="text" id="customSearch" class="form-control border-start-0 ps-0" placeholder="Type name or phone..." autocomplete="off" value="{{ request('q') }}">
                 </div>
                 <div id="searchSuggestions" class="list-group position-absolute w-100 shadow-lg mt-1 d-none" style="z-index: 1050; max-height: 250px; overflow-y: auto; border-radius: 12px; border: 1px solid #edf2f7;">
                 </div>
@@ -60,11 +60,11 @@
                 <label class="form-label small text-uppercase fw-bold">Status</label>
                 <select id="statusFilter" class="form-select">
                     <option value="">All Statuses</option>
-                    <option value="completed">Completed</option>
-                    <option value="pending">Pending</option>
-                    <option value="active">Active</option>
-                    <option value="failed">Failed</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="completed" @selected(request('status') === 'completed')>Completed</option>
+                    <option value="pending" @selected(request('status') === 'pending')>Pending</option>
+                    <option value="active" @selected(request('status') === 'active')>Active</option>
+                    <option value="failed" @selected(request('status') === 'failed')>Failed</option>
+                    <option value="cancelled" @selected(request('status') === 'cancelled')>Cancelled</option>
                 </select>
             </div>
             <div class="col-lg-4 col-md-12 text-md-end">
@@ -470,7 +470,7 @@
             const table = $('#transactionsTable').DataTable({
                 paging: false,
                 info: false,
-                searching: true,
+                searching: false,
                 order: [[4, 'desc']],
                 dom: 'Bt',
                 buttons: [
@@ -502,34 +502,99 @@
             const $searchInput = $('#customSearch');
             const $suggestions = $('#searchSuggestions');
 
+            function navigateWithFilters(qOverride = null, statusOverride = null) {
+                const q = qOverride !== null ? String(qOverride).trim() : String($searchInput.val() || '').trim();
+                const status = statusOverride !== null ? String(statusOverride).trim() : String($('#statusFilter').val() || '').trim();
+
+                const params = new URLSearchParams();
+                if (q !== '') params.set('q', q);
+                if (status !== '') params.set('status', status);
+
+                const baseUrl = `{{ route('admin.transactions') }}`;
+                const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+                window.location.href = url;
+            }
+
+            let suggestTimer = null;
+            let suggestAbort = null;
+            async function fetchSuggestions(query) {
+                if (suggestAbort) {
+                    try { suggestAbort.abort(); } catch (e) {}
+                }
+                suggestAbort = new AbortController();
+
+                const status = String($('#statusFilter').val() || '').trim();
+                const params = new URLSearchParams();
+                params.set('limit', '20');
+                params.set('q', query);
+                if (status !== '') params.set('status', status);
+
+                const res = await fetch(`{{ route('admin.api.transactions') }}?${params.toString()}`, {
+                    headers: { 'Accept': 'application/json' },
+                    signal: suggestAbort.signal
+                });
+                if (!res.ok) return [];
+                const json = await res.json();
+                const rows = Array.isArray(json.transactions) ? json.transactions : [];
+
+                const seen = new Set();
+                const out = [];
+                for (const r of rows) {
+                    const name = String(r.customer_name || '').trim();
+                    const phone = String(r.customer_phone || '').trim();
+                    const email = String(r.customer_email || '').trim();
+                    const label = phone ? `${name} (${phone})` : (email ? `${name} (${email})` : name);
+                    const key = label.toLowerCase();
+                    if (!label) continue;
+                    if (seen.has(key)) continue;
+                    seen.add(key);
+                    out.push({ label, q: phone || email || name });
+                    if (out.length >= 8) break;
+                }
+                return out;
+            }
+
             $searchInput.on('input', function() {
-                const query = $(this).val().toLowerCase();
-                table.search(query).draw();
+                const query = String($(this).val() || '').trim();
+
+                if (suggestTimer) clearTimeout(suggestTimer);
 
                 if (query.length < 2) {
                     $suggestions.addClass('d-none');
                     return;
                 }
 
-                // Get unique names from current table data
-                const names = [...new Set(table.rows({search:'applied'}).data().toArray().map(r => r.customer_name))];
-                const matches = names.filter(n => n.toLowerCase().includes(query)).slice(0, 5);
+                suggestTimer = setTimeout(async () => {
+                    try {
+                        const items = await fetchSuggestions(query);
+                        if (items.length > 0) {
+                            $suggestions.empty().removeClass('d-none');
+                            items.forEach(item => {
+                                $suggestions.append(
+                                    `<button type="button" data-q="${String(item.q).replace(/"/g, '&quot;')}" class="list-group-item list-group-item-action py-2 px-3 border-0 small suggestion-item">${item.label}</button>`
+                                );
+                            });
+                        } else {
+                            $suggestions.addClass('d-none');
+                        }
+                    } catch (e) {
+                        $suggestions.addClass('d-none');
+                    }
+                }, 250);
+            });
 
-                if (matches.length > 0) {
-                    $suggestions.empty().removeClass('d-none');
-                    matches.forEach(name => {
-                        $suggestions.append(`<button type="button" class="list-group-item list-group-item-action py-2 px-3 border-0 small suggestion-item">${name}</button>`);
-                    });
-                } else {
-                    $suggestions.addClass('d-none');
+            $searchInput.on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    navigateWithFilters();
                 }
             });
 
             $(document).on('click', '.suggestion-item', function() {
-                const name = $(this).text();
-                $searchInput.val(name);
-                table.search(name).draw();
+                const q = String($(this).data('q') || $(this).text() || '').trim();
+                $searchInput.val(q);
                 $suggestions.addClass('d-none');
+                navigateWithFilters(q);
             });
 
             $(document).on('click', function(e) {
@@ -540,7 +605,7 @@
 
             // Status Filter
             $('#statusFilter').on('change', function() {
-                table.column(2).search(this.value).draw();
+                navigateWithFilters(null, this.value);
             });
 
             // Live polling

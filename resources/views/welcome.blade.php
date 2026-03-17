@@ -6,22 +6,22 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- SEO Meta Tags -->
-    <title>Help Save Cliff's Life</title>
-    <meta name="description" content="A husband, father of 2, fighting for his life. Track contributions and join hundreds supporting Cliff's kidney treatment.">
+    <title>{{ __('public.seo_title') }}</title>
+    <meta name="description" content="{{ __('public.seo_description') }}">
     <meta name="keywords" content="Medical Fundraiser, Stand With Cliff, Donation, Help Cliff, Medical Support Tanzania">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url('/') }}">
-    <meta property="og:title" content="Help Save Cliff's Life">
-    <meta property="og:description" content="A husband, father of 2, fighting for his life. Track contributions and join hundreds supporting Cliff's kidney treatment.">
+    <meta property="og:title" content="{{ __('public.seo_title') }}">
+    <meta property="og:description" content="{{ __('public.seo_description') }}">
     <meta property="og:image" content="{{ asset('WhatsApp Image 2026-03-11 at 10.34.15.jpeg') }}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ url('/') }}">
-    <meta property="twitter:title" content="Help Save Cliff's Life">
-    <meta property="twitter:description" content="A husband, father of 2, fighting for his life. Track contributions and join hundreds supporting Cliff's kidney treatment.">
+    <meta property="twitter:title" content="{{ __('public.seo_title') }}">
+    <meta property="twitter:description" content="{{ __('public.seo_description') }}">
     <meta property="twitter:image" content="{{ asset('WhatsApp Image 2026-03-11 at 10.34.15.jpeg') }}">
 
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
@@ -585,23 +585,27 @@
         <div class="hero-deco"></div>
         <div class="hero-deco2"></div>
         <div class="hero-inner">
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:14px;">
+                <a href="{{ route('public.lang.switch', ['locale' => 'en']) }}" style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.22);background:{{ app()->getLocale() === 'en' ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.08)' }};color:rgba(255,255,255,0.92);font-weight:800;font-size:0.75rem;letter-spacing:0.04em;text-transform:uppercase;">{{ __('public.lang_en') }}</a>
+                <a href="{{ route('public.lang.switch', ['locale' => 'sw']) }}" style="padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.22);background:{{ app()->getLocale() === 'sw' ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.08)' }};color:rgba(255,255,255,0.92);font-weight:800;font-size:0.75rem;letter-spacing:0.04em;text-transform:uppercase;">{{ __('public.lang_sw') }}</a>
+            </div>
             <div>
-                <div class="hero-eyebrow"><span class="pulse-dot"></span> Live Medical Fundraiser</div>
-                <h1>Stand With <span>Cliff</span></h1>
+                <div class="hero-eyebrow"><span class="pulse-dot"></span> {{ __('public.live_medical_fundraiser') }}</div>
+                <h1>{{ __('public.stand_with') }} <span>Cliff</span></h1>
                 <p class="hero-bio">
-                    Cliff is a devoted <strong>husband</strong>, a proud <strong>father of two beautiful children</strong>, and a man absolutely full of life.
-                    He has been diagnosed with <strong>Chronic Kidney Disease (CKD)</strong> and urgently needs lifetime dialysis or a kidney transplant.
-                    <br><br>
-                    His family, his friends, his community — all of us — have come together because some things are worth fighting for.
-                    <br><br>
-                    <em>Together, we are stronger than any diagnosis.</em>
+                    {!! nl2br(__('public.bio', [
+                        'husband' => e(__('public.tag_husband')),
+                        'father' => e(__('public.tag_father_of_2')),
+                        'ckd' => 'Chronic Kidney Disease (CKD)',
+                        'together' => e('Together, we are stronger than any diagnosis.'),
+                    ])) !!}
                 </p>
                 <div class="hero-tags">
-                    <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">favorite</span></span>Husband</span>
-                    <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">family_restroom</span></span>Father of 2</span>
+                    <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">favorite</span></span>{{ __('public.tag_husband') }}</span>
+                    <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">family_restroom</span></span>{{ __('public.tag_father_of_2') }}</span>
                     <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">location_city</span></span>Dar es Salaam</span>
-                    <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">fitness_center</span></span>Fighter</span>
-                    <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">bolt</span></span>Full of Life</span>
+                    <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">fitness_center</span></span>{{ __('public.tag_fighter') }}</span>
+                    <span class="hero-tag"><span class="mi"><span class="material-symbols-outlined">bolt</span></span>{{ __('public.tag_full_of_life') }}</span>
                 </div>
 
                 <div class="hero-cta">
@@ -611,12 +615,12 @@
                     <span class="cta-line" aria-hidden="true"></span>
                     <button class="donate-btn" type="button" onclick="openDonate()">
                         <span class="material-symbols-outlined">volunteer_activism</span>
-                        Click here to donate
+                        {{ __('public.click_here_to_donate') }}
                     </button>
                 </div>
 
                 <div class="hero-paywrap">
-                    <div class="hero-payhead">Other ways to pay</div>
+                    <div class="hero-payhead">{{ __('public.other_ways_to_pay') }}</div>
                     <div class="pay-grid">
                         <div class="pay-card" onclick="copyPay('{{ str_replace(' ', '', $settings['selcom_number'] ?? '') }}')">
                             <div class="pay-left">
@@ -674,18 +678,18 @@
             <div>
                 <div class="remain-card desktop-only">
                     <div class="remain-top">
-                        <div class="remain-title">Amount Remaining</div>
-                        <div class="remain-chip">Live</div>
+                        <div class="remain-title">{{ __('public.amount_remaining') }}</div>
+                        <div class="remain-chip">{{ __('public.live') }}</div>
                     </div>
                     <div class="remain-amt" id="remain-amt-desktop">—</div>
-                    <div class="remain-sub">This is the amount still needed to reach the campaign target.</div>
+                    <div class="remain-sub">{{ __('public.amount_remaining_help') }}</div>
                 </div>
                 <div class="photo-ring">
-                    <div class="photo-inner" onclick="openPayInfo()" title="Click to view other payment methods">
+                    <div class="photo-inner" onclick="openPayInfo()" title="{{ __('public.other_payment_methods') }}">
                         <img id="cliff-photo" src="{{ asset('WhatsApp Image 2026-03-10 at 17.56.33.jpeg') }}" alt="Cliff" style="display:block" />
                         <div class="photo-placeholder" id="photo-ph" style="display:none">
                             <span class="icon"><span class="material-symbols-outlined">photo_camera</span></span>
-                            <span>Add Cliff's photo</span>
+                            <span>{{ __('public.add_cliff_photo') }}</span>
                         </div>
                     </div>
                 </div>
@@ -695,14 +699,14 @@
     </div>
 
     <div class="remain-float" id="remainFloat">
-        <button class="remain-float-btn" type="button" onclick="toggleRemainFloat()" aria-label="Show remaining amount">
+        <button class="remain-float-btn" type="button" onclick="toggleRemainFloat()" aria-label="{{ __('public.aria_show_remaining_amount') }}">
             <div class="remain-card">
                 <div class="remain-top">
-                    <div class="remain-title">Amount Remaining</div>
-                    <div class="remain-chip" id="remain-chip">Tap</div>
+                    <div class="remain-title">{{ __('public.amount_remaining') }}</div>
+                    <div class="remain-chip" id="remain-chip">{{ __('public.tap') }}</div>
                 </div>
                 <div class="remain-amt" id="remain-amt">—</div>
-                <div class="remain-sub" id="remain-sub">This is the amount still needed to reach the campaign target.</div>
+                <div class="remain-sub" id="remain-sub">{{ __('public.amount_remaining_help') }}</div>
             </div>
         </button>
     </div>
@@ -710,11 +714,11 @@
     <div class="modal-backdrop" id="payInfoModal" role="dialog" aria-modal="true" aria-hidden="true">
         <div class="modal" style="max-width: 760px;">
             <div class="modal-head">
-                <button class="modal-x" type="button" onclick="closePayInfo()" aria-label="Close">
+                <button class="modal-x" type="button" onclick="closePayInfo()" aria-label="{{ __('public.aria_close') }}">
                     <span class="material-symbols-outlined">close</span>
                 </button>
-                <div class="modal-title"><span class="material-symbols-outlined">account_balance_wallet</span>Other payment methods</div>
-                <div class="modal-sub">Use any of the options below. Tap <strong>Copy</strong> to copy the number/account.</div>
+                <div class="modal-title"><span class="material-symbols-outlined">account_balance_wallet</span>{{ __('public.other_payment_methods') }}</div>
+                <div class="modal-sub">{!! __('public.other_payment_methods_help', ['copy' => '<strong>'.e(__('public.copy')).'</strong>']) !!}</div>
             </div>
             <div class="modal-body">
                 <div class="pay-grid">
@@ -728,8 +732,8 @@
                             </div>
                         </div>
                         <div class="pay-actions">
-                            <button class="pay-btn" type="button" onclick="copyPay('0714172979')">Copy</button>
-                            <button class="pay-btn" type="button" onclick="callPay('0714172979')">Call</button>
+                            <button class="pay-btn" type="button" onclick="copyPay('0714172979')">{{ __('public.copy') }}</button>
+                            <button class="pay-btn" type="button" onclick="callPay('0714172979')">{{ __('public.call') }}</button>
                         </div>
                     </div>
 
@@ -758,12 +762,12 @@
                             </div>
                         </div>
                         <div class="pay-actions">
-                            <button class="pay-btn" type="button" onclick="copyPay('0152396008400')">Copy</button>
+                            <button class="pay-btn" type="button" onclick="copyPay('0152396008400')">{{ __('public.copy') }}</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="pay-note">After paying using these methods, you can be recorded in the system via <strong>Admin → Manual Donations</strong>.</div>
+                <div class="pay-note">{!! __('public.pay_note', ['path' => '<strong>'.e(__('public.admin_manual_donations')).'</strong>']) !!}</div>
             </div>
         </div>
     </div>
@@ -771,53 +775,53 @@
     <div class="modal-backdrop" id="donateModal" role="dialog" aria-modal="true" aria-hidden="true">
         <div class="modal">
             <div class="modal-head">
-                <button class="modal-x" type="button" onclick="closeDonate()" aria-label="Close">
+                <button class="modal-x" type="button" onclick="closeDonate()" aria-label="{{ __('public.aria_close') }}">
                     <span class="material-symbols-outlined">close</span>
                 </button>
-                <div class="modal-title"><span class="material-symbols-outlined">volunteer_activism</span>Donate securely</div>
-                <div class="modal-sub" id="modal-subtitle">You will be redirected to Snippe checkout to complete your donation.</div>
+                <div class="modal-title"><span class="material-symbols-outlined">volunteer_activism</span>{{ __('public.donate_securely') }}</div>
+                <div class="modal-sub" id="modal-subtitle">{{ __('public.donate_redirect') }}</div>
             </div>
             <div class="modal-body">
                 <div id="donate-form">
                     <div class="mgrid">
                         <div class="mgrp">
-                            <label>Full name</label>
+                            <label>{{ __('public.full_name') }}</label>
                             <input class="minput" id="don-name" type="text" placeholder="e.g. Jane Mwangi" autocomplete="name" />
                         </div>
                         <div class="mgrp">
-                            <label>Phone (optional)</label>
+                            <label>{{ __('public.phone_optional') }}</label>
                             <input class="minput" id="don-phone" type="text" placeholder="e.g. +2557XXXXXXXX" autocomplete="tel" />
                         </div>
                     </div>
                     <div class="mgrid" style="margin-top:12px">
                         <div class="mgrp">
-                            <label>Amount (TZS)</label>
+                            <label>{{ __('public.amount_tzs') }}</label>
                             <input class="minput" id="don-amount" type="number" min="1000" step="1" placeholder="e.g. 50000" />
                         </div>
                         <div class="mgrp">
-                            <label>Email (optional)</label>
+                            <label>{{ __('public.email_optional') }}</label>
                             <input class="minput" id="don-email" type="email" placeholder="e.g. name@example.com" autocomplete="email" />
                         </div>
                     </div>
 
-                    <div class="modal-error" id="don-err">Something went wrong.</div>
+                    <div class="modal-error" id="don-err">{{ __('public.something_went_wrong') }}</div>
 
                     <div class="modal-actions">
-                        <button class="btn modal secondary" type="button" onclick="closeDonate()">Cancel</button>
+                        <button class="btn modal secondary" type="button" onclick="closeDonate()">{{ __('public.cancel') }}</button>
                         <button class="btn modal" type="button" id="don-btn" onclick="startDonate()">
                             <span class="material-symbols-outlined" style="font-size:1.15rem">lock</span>
-                            Continue
+                            {{ __('public.continue') }}
                         </button>
                     </div>
 
-                    <div class="modal-note">If you use mobile money, you may receive a prompt on your phone to authorize the payment.</div>
+                    <div class="modal-note">{{ __('public.donate_note_mobile_money') }}</div>
                 </div>
 
                 <div class="modal-success" id="don-success">
                     <div class="icon"><span class="material-symbols-outlined">check_circle</span></div>
-                    <h4>Thank you so much!</h4>
-                    <p id="success-msg">Your donation has been received successfully. Every shilling counts in Cliff's journey.</p>
-                    <button class="btn modal primary" style="margin-top:18px; width:100%" onclick="closeDonate()">Close</button>
+                    <h4>{{ __('public.thank_you') }}</h4>
+                    <p id="success-msg">{{ __('public.donation_received') }}</p>
+                    <button class="btn modal primary" style="margin-top:18px; width:100%" onclick="closeDonate()">{{ __('public.close') }}</button>
                 </div>
             </div>
         </div>
@@ -825,24 +829,24 @@
 
     <div class="balance-banner">
         <div class="bb-item">
-            <div class="bb-label"><span class="mi"><span class="material-symbols-outlined">bolt</span></span>Live Net Balance</div>
+            <div class="bb-label"><span class="mi"><span class="material-symbols-outlined">bolt</span></span>{{ __('public.live_net_balance') }}</div>
             <div class="bb-value" id="bb-balance">—</div>
-            <div class="bb-sub" id="bb-status">vs. expenses so far</div>
+            <div class="bb-sub" id="bb-status">{{ __('public.vs_expenses_so_far') }}</div>
         </div>
         <div class="bb-item">
-            <div class="bb-label"><span class="mi"><span class="material-symbols-outlined">payments</span></span>Total Raised</div>
+            <div class="bb-label"><span class="mi"><span class="material-symbols-outlined">payments</span></span>{{ __('public.total_raised') }}</div>
             <div class="bb-value" id="bb-raised">—</div>
             <div class="bb-sub" id="bb-contributors">— contributors</div>
         </div>
         <div class="bb-item">
-            <div class="bb-label"><span class="mi"><span class="material-symbols-outlined">target</span></span>Campaign Target</div>
+            <div class="bb-label"><span class="mi"><span class="material-symbols-outlined">target</span></span>{{ __('public.campaign_target') }}</div>
             <div class="bb-value">{{ ($settings['currency'] ?? 'TZS') }} {{ number_format($settings['target_amount'] ?? 150000000) }}</div>
             <div class="bb-sub" id="bb-remaining">— remaining</div>
         </div>
         <div class="bb-item">
-            <div class="bb-label"><span class="mi"><span class="material-symbols-outlined">local_hospital</span></span>Medical Expenses</div>
+            <div class="bb-label"><span class="mi"><span class="material-symbols-outlined">local_hospital</span></span>{{ __('public.medical_expenses') }}</div>
             <div class="bb-value">{{ ($settings['currency'] ?? 'TZS') }} {{ number_format($settings['expenses_amount'] ?? 2289225) }}</div>
-            <div class="bb-sub">13 entries recorded</div>
+            <div class="bb-sub">{{ __('public.entries_recorded', ['count' => 13]) }}</div>
         </div>
     </div>
 
@@ -851,41 +855,41 @@
             <div class="stats-grid">
                 <div class="stat-card sc-green">
                     <div class="stat-icon"><span class="material-symbols-outlined">payments</span></div>
-                    <div class="stat-label">Total Collected</div>
+                    <div class="stat-label">{{ __('public.total_collected') }}</div>
                     <div class="stat-value" id="s-collected">TZS —</div>
                     <div class="stat-sub" id="s-paid-n">— paid</div>
                 </div>
                 <div class="stat-card sc-gold">
                     <div class="stat-icon"><span class="material-symbols-outlined">target</span></div>
-                    <div class="stat-label">Fundraising Target</div>
+                    <div class="stat-label">{{ __('public.fundraising_target') }}</div>
                     <div class="stat-value">{{ ($settings['currency'] ?? 'TZS') }} {{ number_format($settings['target_amount'] ?? 150000000) }}</div>
                     <div class="stat-sub" id="s-remaining">— remaining</div>
                 </div>
                 <div class="stat-card sc-coral">
                     <div class="stat-icon"><span class="material-symbols-outlined">local_hospital</span></div>
-                    <div class="stat-label">Medical Expenses</div>
+                    <div class="stat-label">{{ __('public.medical_expenses') }}</div>
                     <div class="stat-value">{{ ($settings['currency'] ?? 'TZS') }} {{ number_format($settings['expenses_amount'] ?? 2289225) }}</div>
-                    <div class="stat-sub">13 expense entries</div>
+                    <div class="stat-sub">{{ __('public.entries_recorded', ['count' => 13]) }}</div>
                 </div>
                 <div class="stat-card sc-sky">
                     <div class="stat-icon"><span class="material-symbols-outlined">hourglass_empty</span></div>
-                    <div class="stat-label">Pending Contributors</div>
+                    <div class="stat-label">{{ __('public.pending_contributors') }}</div>
                     <div class="stat-value" id="s-pending">—</div>
-                    <div class="stat-sub">yet to contribute</div>
+                    <div class="stat-sub">{{ __('public.yet_to_contribute') }}</div>
                 </div>
                 <div class="stat-card sc-deep">
                     <div class="stat-icon"><span class="material-symbols-outlined">monitoring</span></div>
-                    <div class="stat-label">Campaign Progress</div>
+                    <div class="stat-label">{{ __('public.campaign_progress') }}</div>
                     <div class="stat-value" id="s-pct">0%</div>
-                    <div class="stat-sub">of target</div>
+                    <div class="stat-sub">{{ __('public.of_target') }}</div>
                 </div>
             </div>
 
             <div class="progress-card">
                 <div class="prog-top">
                     <div>
-                        <div class="prog-title">Funding Journey</div>
-                        <div class="prog-subtitle">Target: {{ ($settings['currency'] ?? 'TZS') }} {{ number_format($settings['target_amount'] ?? 150000000) }} — Every shilling counts.</div>
+                        <div class="prog-title">{{ __('public.funding_journey') }}</div>
+                        <div class="prog-subtitle">{{ __('public.campaign_target') }}: {{ ($settings['currency'] ?? 'TZS') }} {{ number_format($settings['target_amount'] ?? 150000000) }} — {{ __('public.every_shilling_counts') }}</div>
                     </div>
                     <div class="prog-pct" id="p-pct">0%<span>completed</span></div>
                 </div>
@@ -901,32 +905,32 @@
             </div>
 
             <div class="tab-nav">
-                <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
-                <button class="tab-btn" onclick="showTab('contributors')">All Contributors</button>
-                <button class="tab-btn" onclick="showTab('expenses')">Expenses</button>
+                <button class="tab-btn active" onclick="showTab('overview')">{{ __('public.overview') }}</button>
+                <button class="tab-btn" onclick="showTab('contributors')">{{ __('public.all_contributors') }}</button>
+                <button class="tab-btn" onclick="showTab('expenses')">{{ __('public.expenses') }}</button>
             </div>
 
             <div id="tab-overview">
                 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:24px">
                     <div class="section-card">
                         <div class="sec-header">
-                            <span class="sec-title">Recent Paid Transactions</span>
-                            <span id="paid-bdg" class="sec-badge">0 paid</span>
+                            <span class="sec-title">{{ __('public.recent_paid_transactions') }}</span>
+                            <span id="paid-bdg" class="sec-badge">{{ __('public.paid_count', ['count' => 0]) }}</span>
                         </div>
                         <div id="recent-paid" class="clist"></div>
                     </div>
 
                     <div class="section-card">
                         <div class="sec-header">
-                            <span class="sec-title">Pledges (Ahadi/Manual)</span>
-                            <span id="pledge-bdg" class="sec-badge" style="background:rgba(255,165,0,0.1);color:orange">0 pledges</span>
+                            <span class="sec-title">{{ __('public.pledges') }}</span>
+                            <span id="pledge-bdg" class="sec-badge" style="background:rgba(255,165,0,0.1);color:orange">{{ __('public.pledges_count', ['count' => 0]) }}</span>
                         </div>
                         <div id="pledge-list" class="clist"></div>
                     </div>
 
                     <div class="section-card">
                         <div class="sec-header">
-                            <span class="sec-title">Top Contributors</span>
+                            <span class="sec-title">{{ __('public.top_contributors') }}</span>
                         </div>
                         <div id="bar-chart" style="padding:16px 0"></div>
                     </div>
@@ -935,19 +939,19 @@
 
             <div id="tab-contributors" class="hidden">
                 <div class="section-card" style="margin-bottom:24px">
-                    <div class="sec-header"><span class="sec-title">All contributions</span><span class="sec-badge" id="all-bdg">—</span></div>
+                    <div class="sec-header"><span class="sec-title">{{ __('public.all_contributions') }}</span><span class="sec-badge" id="all-bdg">—</span></div>
                     <div style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 14px">
-                        <input id="all-search" type="text" placeholder="Search name..." style="flex:1;min-width:220px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:10px 12px;color:var(--light);outline:none">
+                        <input id="all-search" type="text" placeholder="{{ __('public.search_name') }}" style="flex:1;min-width:220px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:10px 12px;color:var(--light);outline:none">
                         <select id="all-sort" style="min-width:220px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:10px 12px;color:var(--light);outline:none">
-                            <option value="recent">Default: Recent (Last to First)</option>
-                            <option value="amount_desc">Amount: High to Low</option>
-                            <option value="amount_asc">Amount: Low to High</option>
-                            <option value="name_asc">Name: A to Z</option>
+                            <option value="recent">{{ __('public.sort_recent') }}</option>
+                            <option value="amount_desc">{{ __('public.sort_amount_high_low') }}</option>
+                            <option value="amount_asc">{{ __('public.sort_amount_low_high') }}</option>
+                            <option value="name_asc">{{ __('public.sort_name_a_z') }}</option>
                         </select>
                     </div>
                     <div class="tbl-wrap">
                         <table class="tbl">
-                            <thead><tr><th>#</th><th>Name</th><th>Amount</th><th>Status</th><th>Paid</th><th>Reference</th></tr></thead>
+                            <thead><tr><th>{{ __('public.tbl_no') }}</th><th>{{ __('public.tbl_name') }}</th><th>{{ __('public.tbl_amount') }}</th><th>{{ __('public.tbl_status') }}</th><th>{{ __('public.tbl_paid') }}</th><th>{{ __('public.tbl_reference') }}</th></tr></thead>
                             <tbody id="all-tbl"></tbody>
                         </table>
                     </div>
@@ -957,17 +961,17 @@
             <div id="tab-expenses" class="hidden">
                 <div class="section-card" style="margin-bottom:24px">
                     <div class="sec-header">
-                        <span class="sec-title">Medical Expenses Log</span>
+                        <span class="sec-title">{{ __('public.medical_expenses_log') }}</span>
                         <span class="sec-badge">{{ ($settings['currency'] ?? 'TZS') }} {{ number_format($expenses->sum('amount') ?? 0) }}</span>
                     </div>
                     <div class="tbl-wrap">
                         <table class="tbl">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
-                                    <th>Description</th>
+                                    <th>{{ __('public.date') }}</th>
+                                    <th>{{ __('public.description') }}</th>
                                     <th>Amount ({{ $settings['currency'] ?? 'TZS' }})</th>
-                                    <th>Receipt</th>
+                                    <th>{{ __('public.receipt') }}</th>
                                 </tr>
                             </thead>
                             <tbody id="exp-tbl">
@@ -978,14 +982,14 @@
                                         <td style="font-family:var(--mono);color:var(--coral)">{{ number_format($exp->amount) }}</td>
                                         <td>
                                             @if($exp->receipt_path)
-                                                <a href="{{ \Illuminate\Support\Facades\Storage::url($exp->receipt_path) }}" target="_blank" class="text-mint" style="font-size:0.75rem; text-decoration:underline">View Receipt</a>
+                                                <a href="{{ \Illuminate\Support\Facades\Storage::url($exp->receipt_path) }}" target="_blank" class="text-mint" style="font-size:0.75rem; text-decoration:underline">{{ __('public.view_receipt') }}</a>
                                             @else
                                                 <span style="color:rgba(255,255,255,0.2)">—</span>
                                             @endif
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="4" style="text-align:center; padding:20px; color:rgba(255,255,255,0.4)">No expenses recorded yet.</td></tr>
+                                    <tr><td colspan="4" style="text-align:center; padding:20px; color:rgba(255,255,255,0.4)">{{ __('public.no_expenses_recorded_yet') }}</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -1000,13 +1004,13 @@
             <div class="foot-left">
                 <span class="foot-mark"><span class="material-symbols-outlined">volunteer_activism</span></span>
                 <div>
-                    <div class="foot-title">Made with love for <strong>Cliff</strong></div>
-                    <div class="foot-sub">By his people, for his life · Dar es Salaam, Tanzania</div>
+                    <div class="foot-title">{!! __('public.footer_made_with_love_for', ['name' => '<strong>Cliff</strong>']) !!}</div>
+                    <div class="foot-sub">{{ __('public.footer_sub') }}</div>
                 </div>
             </div>
             <div class="foot-right">
-                <span class="foot-pill"><span class="material-symbols-outlined">shield</span>Transparency</span>
-                <span class="foot-pill"><span class="material-symbols-outlined">monitoring</span>Live updates</span>
+                <span class="foot-pill"><span class="material-symbols-outlined">shield</span>{{ __('public.transparency') }}</span>
+                <span class="foot-pill"><span class="material-symbols-outlined">monitoring</span>{{ __('public.live_updates') }}</span>
             </div>
         </div>
     </footer>
@@ -1078,6 +1082,30 @@
 
         startPolling();
 
+        const I18N = {
+            tap: @json(__('public.tap')),
+            close: @json(__('public.close')),
+            completed: @json(__('public.completed')),
+            remaining: @json(__('public.remaining')),
+            raised: @json(__('public.raised')),
+            expensesFullyCovered: @json(__('public.expenses_fully_covered')),
+            shortfallOf: @json(__('public.shortfall_of')),
+            contributorsPaid: @json(__('public.contributors_paid', ['count' => '__COUNT__'])),
+            paid: @json(__('public.paid')),
+            pending: @json(__('public.pending')),
+            pledgedOn: @json(__('public.pledged_on', ['date' => '__DATE__'])),
+            ahadi: @json(__('public.ahadi')),
+            noPendingPledgesFound: @json(__('public.no_pending_pledges_found')),
+            toGo: @json(__('public.to_go')),
+            pleaseEnterValidAmount: @json(__('public.please_enter_valid_amount')),
+            processing: @json(__('public.processing')),
+            copied: @json(__('public.copied', ['text' => '__TEXT__'])),
+            unableToCopy: @json(__('public.unable_to_copy', ['text' => '__TEXT__'])),
+            totalMedicalExpensesToDate: @json(__('public.total_medical_expenses_to_date')),
+            paidCount: @json(__('public.paid_count', ['count' => '__COUNT__'])),
+            pledgesCount: @json(__('public.pledges_count', ['count' => '__COUNT__'])),
+        };
+
         const f = n => Math.round(n).toLocaleString('en-TZ');
         const ini = name => name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
         const fmtDT = (iso) => {
@@ -1097,10 +1125,12 @@
             const pctStr = pct < 1 ? pct.toFixed(3) : pct.toFixed(2);
 
             document.getElementById('bb-balance').textContent = (balance >= 0 ? '+' : '') + CUR + ' ' + f(balance);
-            document.getElementById('bb-status').textContent = balance >= 0 ? 'Expenses fully covered' : 'Shortfall of ' + CUR + ' ' + f(Math.abs(balance));
+            document.getElementById('bb-status').textContent = balance >= 0
+                ? I18N.expensesFullyCovered
+                : I18N.shortfallOf + ' ' + CUR + ' ' + f(Math.abs(balance));
             document.getElementById('bb-raised').textContent = CUR + ' ' + f(total);
-            document.getElementById('bb-contributors').textContent = paid.length + ' contributors paid';
-            document.getElementById('bb-remaining').textContent = CUR + ' ' + f(Math.max(0, remaining)) + ' remaining';
+            document.getElementById('bb-contributors').textContent = I18N.contributorsPaid.replace('__COUNT__', String(paid.length));
+            document.getElementById('bb-remaining').textContent = CUR + ' ' + f(Math.max(0, remaining)) + ' ' + I18N.remaining;
 
             const remainAmt = document.getElementById('remain-amt');
             if (remainAmt) remainAmt.textContent = CUR + ' ' + f(Math.max(0, remaining));
@@ -1109,14 +1139,14 @@
             if (remainAmtDesktop) remainAmtDesktop.textContent = CUR + ' ' + f(Math.max(0, remaining));
 
             document.getElementById('s-collected').textContent = CUR + ' ' + f(total);
-            document.getElementById('s-paid-n').textContent = paid.length + ' contributors paid';
-            document.getElementById('s-remaining').textContent = CUR + ' ' + f(Math.max(0, remaining)) + ' to go';
+            document.getElementById('s-paid-n').textContent = I18N.contributorsPaid.replace('__COUNT__', String(paid.length));
+            document.getElementById('s-remaining').textContent = CUR + ' ' + f(Math.max(0, remaining)) + ' ' + I18N.toGo;
             document.getElementById('s-pending').textContent = pend.length;
             document.getElementById('s-pct').textContent = pctStr + '%';
 
-            document.getElementById('p-pct').innerHTML = pctStr + '%<span>completed</span>';
+            document.getElementById('p-pct').innerHTML = pctStr + '%<span>' + I18N.completed + '</span>';
             document.getElementById('prog-bar').style.width = pct + '%';
-            document.getElementById('p-mid').textContent = CUR + ' ' + f(total) + ' raised';
+            document.getElementById('p-mid').textContent = CUR + ' ' + f(total) + ' ' + I18N.raised;
             document.getElementById('p-min').textContent = CUR + ' 0';
             document.getElementById('p-max').textContent = CUR + ' ' + f(TARGET);
 
@@ -1152,28 +1182,28 @@
                 return db - da;
             });
 
-            document.getElementById('paid-bdg').textContent = paid.length + ' paid';
+            document.getElementById('paid-bdg').textContent = I18N.paidCount.replace('__COUNT__', String(paid.length));
             document.getElementById('recent-paid').innerHTML = overviewPaid.slice(0, 15).map(c => `
                 <div class="citem">
                     <div style="display:flex;align-items:center">
                         <div class="cavatar">${ini(c.n)}</div>
                         <div><div class="cname">${c.n}</div><div class="cgrp">${fmtDT(c.paid_at || c.created_at)}</div></div>
                     </div>
-                    <div class="cright"><span class="camt">${CUR} ${f(c.a)}</span><span class="bdg paid">paid</span></div>
+                    <div class="cright"><span class="camt">${CUR} ${f(c.a)}</span><span class="bdg paid">${I18N.paid}</span></div>
                 </div>
             `).join('');
 
             // Pledges (Ahadi)
-            document.getElementById('pledge-bdg').textContent = pend.length + ' pledges';
+            document.getElementById('pledge-bdg').textContent = I18N.pledgesCount.replace('__COUNT__', String(pend.length));
             document.getElementById('pledge-list').innerHTML = pend.length ? pend.map(c => `
                 <div class="citem">
                     <div style="display:flex;align-items:center">
                         <div class="cavatar" style="background:rgba(255,165,0,0.1);color:orange">${ini(c.n)}</div>
-                        <div><div class="cname">${c.n}</div><div class="cgrp">Pledged on ${fmtDT(c.created_at)}</div></div>
+                        <div><div class="cname">${c.n}</div><div class="cgrp">${I18N.pledgedOn.replace('__DATE__', fmtDT(c.created_at))}</div></div>
                     </div>
-                    <div class="cright"><span class="bdg" style="background:rgba(255,165,0,0.1);color:orange">ahadi</span></div>
+                    <div class="cright"><span class="bdg" style="background:rgba(255,165,0,0.1);color:orange">${I18N.ahadi}</span></div>
                 </div>
-            `).join('') : '<div style="padding:20px;text-align:center;color:var(--muted);font-size:0.8rem">No pending pledges found.</div>';
+            `).join('') : `<div style="padding:20px;text-align:center;color:var(--muted);font-size:0.8rem">${I18N.noPendingPledgesFound}</div>`;
 
             // Home page should display paid contributions only
             document.getElementById('all-bdg').textContent = paid.length + ' paid';
@@ -1182,7 +1212,7 @@
                     <td style="color:var(--light);font-family:var(--mono);font-size:0.7rem">${i + 1}</td>
                     <td style="font-weight:600">${c.n}</td>
                     <td style="font-family:var(--mono);color:${c.s === 'completed' ? 'var(--forest)' : 'var(--light)'}">${CUR} ${f(c.a)}</td>
-                    <td><span class="bdg ${c.s === 'completed' ? 'paid' : 'pending'}">${c.s === 'completed' ? 'paid' : 'pending'}</span></td>
+                    <td><span class="bdg ${c.s === 'completed' ? 'paid' : 'pending'}">${c.s === 'completed' ? I18N.paid : I18N.pending}</span></td>
                     <td style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)">${c.s === 'completed' ? fmtDT(c.paid_at || c.created_at) : '—'}</td>
                     <td style="font-family:var(--mono);font-size:0.72rem;color:var(--muted)">${c.ref || '—'}</td>
                 </tr>
@@ -1191,7 +1221,7 @@
             document.getElementById('exp-tbl').innerHTML = `
                 <tr>
                     <td style="font-family:var(--mono);font-size:0.7rem;color:var(--muted)">—</td>
-                    <td style="font-weight:500">Total medical expenses to date</td>
+                    <td style="font-weight:500">${I18N.totalMedicalExpensesToDate}</td>
                     <td style="font-family:var(--mono);color:var(--coral)">${CUR} ${f(EXPENSES)}</td>
                 </tr>
             `;
@@ -1262,13 +1292,13 @@
             const amount = document.getElementById('don-amount').value.trim();
 
             if (!amount || parseInt(amount) < 1000) {
-                err.innerText = 'Please enter a valid amount (Min TZS 1,000)';
+                err.innerText = I18N.pleaseEnterValidAmount;
                 err.style.display = 'block';
                 return;
             }
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
+            btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> ' + I18N.processing;
             err.style.display = 'none';
 
             try {
@@ -1288,13 +1318,13 @@
                 if (res.ok && data.checkout_url) {
                     window.location.href = data.checkout_url;
                 } else {
-                    throw new Error(data.message || 'Unable to start donation');
+                    throw new Error(data.message || @json(__('public.unable_to_start_donation')));
                 }
             } catch (e) {
                 err.innerText = e.message;
                 err.style.display = 'block';
                 btn.disabled = false;
-                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.15rem">lock</span> Continue';
+                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.15rem">lock</span> ' + @json(__('public.continue'));
             }
         }
 
@@ -1315,7 +1345,7 @@
             if (!wrap) return;
             wrap.classList.toggle('open');
             const chip = document.getElementById('remain-chip');
-            if (chip) chip.textContent = wrap.classList.contains('open') ? 'Close' : 'Tap';
+            if (chip) chip.textContent = wrap.classList.contains('open') ? I18N.close : I18N.tap;
         }
 
         async function copyPay(text) {
@@ -1330,9 +1360,9 @@
                     document.execCommand('copy');
                     document.body.removeChild(ta);
                 }
-                alert('Copied: ' + text);
+                alert(I18N.copied.replace('__TEXT__', String(text)));
             } catch (e) {
-                alert('Unable to copy. Please copy manually: ' + text);
+                alert(I18N.unableToCopy.replace('__TEXT__', String(text)));
             }
         }
 
